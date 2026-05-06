@@ -1382,96 +1382,64 @@
     <!-- بطاقة الإعدادات -->
     <div class="card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <div style="background:#000;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 4C4 2.89543 4.89543 2 6 2H18C19.1046 2 20 2.89543 20 4V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4Z" fill="white"/><path d="M8 7H12M8 11H14M8 15H11" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+        <div style="background:#24292f;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
         </div>
         <div>
-          <h3 style="font-size:16px;font-weight:700;margin:0">Notion</h3>
-          <div style="font-size:0.78rem;color:var(--muted)">مزامنة الفواتير عبر قاعدة بيانات Notion</div>
+          <h3 style="font-size:16px;font-weight:700;margin:0">GitHub Gist</h3>
+          <div style="font-size:0.78rem;color:var(--muted)">مزامنة الفواتير عبر GitHub Gist — بدون proxy</div>
         </div>
-        <span id="notion-badge" style="margin-right:auto;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--bg);color:var(--muted);border:1px solid var(--line)">غير مرتبط</span>
+        <span id="gist-badge" style="margin-right:auto;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--bg);color:var(--muted);border:1px solid var(--line)">غير مرتبط</span>
       </div>
 
       <div class="form-grid">
         <div class="field full">
-          <label>مفتاح الدمج <span class="req">*</span></label>
-          <input type="password" id="notion-token" placeholder="secret_... أو ntn_..." autocomplete="off"/>
+          <label>GitHub Token <span class="req">*</span></label>
+          <input type="password" id="gist-token" placeholder="github_pat_..." autocomplete="off"/>
+          <div class="hint">من github.com/settings/tokens — أنشئ token بصلاحية gist فقط</div>
         </div>
         <div class="field full">
-          <label>معرّف قاعدة البيانات <span class="req">*</span></label>
-          <input type="text" id="notion-db-id" placeholder="358ee80d5bb280ee89b5edbdddf58b8c" dir="ltr" autocomplete="off"/>
-        </div>
-        <div class="field full">
-          <label>رابط Cloudflare Worker <span class="req">*</span></label>
-          <input type="url" id="notion-proxy" placeholder="https://your-worker.workers.dev" dir="ltr" autocomplete="off"/>
-          <div class="hint">انشئ Worker مجاني على Cloudflare — الكود موجود أدناه</div>
+          <label>Gist ID <span class="req">*</span></label>
+          <input type="text" id="gist-id" placeholder="abc123def456..." dir="ltr" autocomplete="off"/>
+          <div class="hint">من رابط الـ Gist: gist.github.com/username/<strong>هذا_الجزء</strong></div>
         </div>
       </div>
 
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="saveNotionSettings()">حفظ الإعدادات</button>
-        <button class="btn btn-danger btn-sm" onclick="clearNotionSettings()">حذف الربط</button>
+        <button class="btn btn-primary" onclick="saveGistSettings()">حفظ الإعدادات</button>
+        <button class="btn btn-danger btn-sm" onclick="clearGistSettings()">حذف الربط</button>
       </div>
-      <div id="notion-test-result" style="display:none;margin-top:14px;padding:12px 16px;border-radius:8px;font-size:0.85rem;line-height:1.5"></div>
+      <div id="gist-test-result" style="display:none;margin-top:14px;padding:12px 16px;border-radius:8px;font-size:0.85rem;line-height:1.5"></div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:0.78rem;color:var(--muted);line-height:1.8">
+        <strong style="color:var(--ink);display:block;margin-bottom:6px">كيفية الإعداد:</strong>
+        ١. اذهب إلى <strong>github.com/settings/tokens</strong> ← Generate new token (classic)<br>
+        ٢. فعّل صلاحية <strong>gist</strong> فقط ← انسخ الـ Token<br>
+        ٣. اذهب إلى <strong>gist.github.com</strong> ← أنشئ Gist جديد (Secret)<br>
+        ٤. اسم الملف: <strong>isom3h-invoices.json</strong> ، المحتوى: <strong>{}</strong><br>
+        ٥. انسخ الـ Gist ID من الرابط وضعه في الحقل أعلاه
+      </div>
     </div>
 
     <!-- بطاقة المزامنة -->
     <div class="card" id="sync-card" style="display:none">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">المزامنة مع Notion</h3>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">المزامنة</h3>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
         <button class="btn btn-primary" onclick="fullSync()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
           مزامنة الكل
         </button>
-        <button class="btn btn-ghost" onclick="syncFromNotion()">
+        <button class="btn btn-ghost" onclick="syncFromGist()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          استيراد من Notion
+          استيراد من Gist
         </button>
-        <button class="btn btn-ghost" onclick="syncToNotion()">
+        <button class="btn btn-ghost" onclick="syncToGist()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          رفع إلى Notion
+          رفع إلى Gist
         </button>
       </div>
       <div id="sync-result" style="font-size:0.82rem;color:var(--muted)"></div>
       <div id="last-sync-label" style="font-size:0.75rem;color:var(--muted);margin-top:6px"></div>
-    </div>
-
-    <!-- كود الـ Worker -->
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:4px">كود Cloudflare Worker</h3>
-      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">انسخ هذا الكود وضعه في workers.cloudflare.com — مجاني تماماً</div>
-      <div style="position:relative">
-        <pre id="worker-code" style="background:#1a1a1a;color:#e8e8e8;padding:14px;border-radius:8px;font-size:0.72rem;direction:ltr;text-align:left;overflow-x:auto;line-height:1.6;margin:0;white-space:pre">export default {
-  async fetch(request) {
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
-        'Access-Control-Allow-Headers': '*',
-      }});
-    }
-    const url = new URL(request.url);
-    const notionUrl = 'https://api.notion.com' + url.pathname + url.search;
-    const headers = new Headers(request.headers);
-    headers.delete('host');
-    const res = await fetch(notionUrl, {
-      method: request.method, headers, body: request.body
-    });
-    const out = new Headers(res.headers);
-    out.set('Access-Control-Allow-Origin', '*');
-    return new Response(res.body, { status: res.status, headers: out });
-  }
-};</pre>
-        <button class="btn btn-sm btn-ghost" onclick="copyWorkerCode()" style="position:absolute;top:8px;left:8px">نسخ</button>
-      </div>
-      <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);line-height:1.8">
-        <strong style="color:var(--ink);display:block;margin-bottom:6px">خطوات الإعداد:</strong>
-        ١. اذهب إلى <strong>workers.cloudflare.com</strong> وسجّل دخول (مجاني)<br>
-        ٢. اضغط <strong>Create Worker</strong> ← احذف الكود الموجود ← الصق الكود أعلاه<br>
-        ٣. اضغط <strong>Deploy</strong> — انسخ رابط الـ Worker<br>
-        ٤. ضع الرابط في حقل "رابط Cloudflare Worker" أعلاه<br>
-        ٥. اضغط <strong>مزامنة الكل</strong> وبتشوف فواتيرك في Notion
-      </div>
     </div>
   </section>
 
@@ -1517,10 +1485,9 @@ const KEYS = {
   active:    'inv_active_template_v2',
   apiUrl:    'inv_api_url',
   apiKey:    'inv_api_key',
-  notionToken:  'inv_notion_token',
-  notionDbId:   'inv_notion_db_id',
-  notionProxy:  'inv_notion_proxy',
-  notionLastSync: 'inv_notion_last_sync',
+  gistToken: 'inv_gist_token',
+  gistId:    'inv_gist_id',
+  lastSync:  'inv_last_sync',
 };
 
 const FIELDS = [
@@ -1701,32 +1668,30 @@ function goPage(name){
 $$('#nav button').forEach(b => b.addEventListener('click', ()=>goPage(b.dataset.page)));
 
 /* =====================================================================
-   NOTION SETTINGS
+   GIST SETTINGS
    ===================================================================== */
-function renderSettingsPage(){
-  const token = cache.get(KEYS.notionToken) || '';
-  const dbId  = cache.get(KEYS.notionDbId)  || '';
-  const proxy = cache.get(KEYS.notionProxy) || '';
-  const inp_t = document.getElementById('notion-token');
-  const inp_d = document.getElementById('notion-db-id');
-  const inp_p = document.getElementById('notion-proxy');
-  if(inp_t) inp_t.value = token ? '••••••••••••••••' : '';
-  if(inp_d) inp_d.value = dbId;
-  if(inp_p) inp_p.value = proxy;
-  updateNotionBadge();
-  const res = document.getElementById('notion-test-result');
-  if(res){ res.style.display='none'; res.textContent=''; }
-  updateLastSyncLabel();
+function gistReady(){
+  return !!(cache.get(KEYS.gistToken) && cache.get(KEYS.gistId));
 }
 
-function updateNotionBadge(){
-  const badge = document.getElementById('notion-badge');
+function renderSettingsPage(){
+  const token = cache.get(KEYS.gistToken) || '';
+  const gistId = cache.get(KEYS.gistId) || '';
+  const inp_t = document.getElementById('gist-token');
+  const inp_g = document.getElementById('gist-id');
+  if(inp_t) inp_t.value = token ? '••••••••••••••••' : '';
+  if(inp_g) inp_g.value = gistId;
+  updateGistBadge();
+  updateLastSyncLabel();
+  const res = document.getElementById('gist-test-result');
+  if(res){ res.style.display='none'; }
+}
+
+function updateGistBadge(){
+  const badge = document.getElementById('gist-badge');
   const card  = document.getElementById('sync-card');
   if(!badge) return;
-  const token = cache.get(KEYS.notionToken);
-  const dbId  = cache.get(KEYS.notionDbId);
-  const proxy = cache.get(KEYS.notionProxy);
-  const ready = !!(token && dbId && proxy);
+  const ready = gistReady();
   if(ready){
     badge.textContent = 'مرتبط ✓';
     badge.style.background = 'var(--accent-light)';
@@ -1744,1654 +1709,147 @@ function updateNotionBadge(){
 function updateLastSyncLabel(){
   const el = document.getElementById('last-sync-label');
   if(!el) return;
-  const t = cache.get(KEYS.notionLastSync);
+  const t = cache.get(KEYS.lastSync);
   el.textContent = t ? 'آخر مزامنة: ' + new Date(t).toLocaleString('ar-SA') : '';
 }
 
-function saveNotionSettings(){
-  const inp_t = document.getElementById('notion-token');
-  const inp_d = document.getElementById('notion-db-id');
-  const inp_p = document.getElementById('notion-proxy');
+function saveGistSettings(){
+  const inp_t = document.getElementById('gist-token');
+  const inp_g = document.getElementById('gist-id');
   const rawToken = (inp_t.value || '').trim();
-  const dbId     = (inp_d.value || '').trim();
-  const proxy    = (inp_p.value || '').trim().replace(/\/$/, '');
-
-  const currentToken = cache.get(KEYS.notionToken) || '';
+  const gistId   = (inp_g.value || '').trim();
+  const currentToken = cache.get(KEYS.gistToken) || '';
   const tokenToSave = (rawToken === '••••••••••••••••') ? currentToken : rawToken;
-
-  if(!tokenToSave){ toast('الرجاء إدخال مفتاح الدمج', 'error'); return; }
-  if(!dbId){ toast('الرجاء إدخال معرّف قاعدة البيانات', 'error'); return; }
-  if(!proxy){ toast('الرجاء إدخال رابط الـ Worker', 'error'); return; }
-  if(!tokenToSave.startsWith('secret_') && !tokenToSave.startsWith('ntn_')){
-    toast('صيغة مفتاح الدمج غير صحيحة (يجب أن يبدأ بـ secret_ أو ntn_)', 'error'); return;
-  }
-
-  cache.set(KEYS.notionToken, tokenToSave);
-  cache.set(KEYS.notionDbId, dbId);
-  cache.set(KEYS.notionProxy, proxy);
+  if(!tokenToSave){ toast('الرجاء إدخال GitHub Token', 'error'); return; }
+  if(!gistId){ toast('الرجاء إدخال Gist ID', 'error'); return; }
+  cache.set(KEYS.gistToken, tokenToSave);
+  cache.set(KEYS.gistId, gistId);
   if(inp_t) inp_t.value = '••••••••••••••••';
-  updateNotionBadge();
-  toast('تم حفظ إعدادات Notion ✓', 'success');
+  updateGistBadge();
+  toast('تم حفظ إعدادات Gist ✓', 'success');
 }
 
-async function testNotionConnection(){
-  const token = cache.get(KEYS.notionToken);
-  const dbId  = cache.get(KEYS.notionDbId);
-  const resEl = document.getElementById('notion-test-result');
-  const btn   = document.getElementById('notion-test-btn');
-
-  if(!token || !dbId){ toast('احفظ الإعدادات أولاً', 'error'); return; }
-
-  resEl.style.display = 'block';
-  resEl.style.background = 'var(--bg)';
-  resEl.style.color = 'var(--muted)';
-  resEl.style.border = '1px solid var(--line)';
-  resEl.textContent = '⟳ جاري الاتصال بـ Notion...';
-  btn.disabled = true;
-
-  if(apiConfig.ready){
-    try{
-      const r = await apiCall('notion_test', { notionToken: token, notionDbId: dbId });
-      showNotionResult(resEl, true, r.msg || 'الاتصال ناجح ✓');
-      btn.disabled = false;
-      return;
-    } catch(e){ /* fallthrough to direct */ }
-  }
-
-  try{
-    const cleanId = dbId.replace(/-/g,'');
-    const formatted = cleanId.length === 32
-      ? cleanId.slice(0,8)+'-'+cleanId.slice(8,12)+'-'+cleanId.slice(12,16)+'-'+cleanId.slice(16,20)+'-'+cleanId.slice(20)
-      : dbId;
-
-    const res = await fetch('https://api.notion.com/v1/databases/'+formatted, {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer '+token,
-        'Notion-Version': '2022-06-28',
-      }
-    });
-    if(res.ok){
-      const data = await res.json();
-      const title = (data.title && data.title[0] && data.title[0].plain_text) || 'قاعدة البيانات';
-      showNotionResult(resEl, true, 'الاتصال ناجح ✓ — "'+title+'"');
-    } else if(res.status === 401){
-      showNotionResult(resEl, false, 'مفتاح الدمج غير صحيح (401 Unauthorized)');
-    } else if(res.status === 404){
-      showNotionResult(resEl, false, 'قاعدة البيانات غير موجودة أو التكامل لا يملك صلاحية الوصول (404)');
-    } else {
-      showNotionResult(resEl, false, 'خطأ HTTP '+res.status);
-    }
-  } catch(e){
-    if(String(e.message).includes('Failed to fetch') || String(e).includes('NetworkError')){
-      showNotionResult(resEl, null, 'تم حفظ الإعدادات. لا يمكن الاختبار المباشر من المتصفح بسبب قيود CORS — سيعمل الربط عبر الباكند PHP.');
-    } else {
-      showNotionResult(resEl, false, 'خطأ في الاتصال: '+e.message);
-    }
-  }
-  btn.disabled = false;
-}
-
-function showNotionResult(el, ok, msg){
-  el.style.display = 'block';
-  if(ok === true){
-    el.style.background = '#f0faf4';
-    el.style.color = 'var(--success)';
-    el.style.border = '1px solid #b2dfc4';
-  } else if(ok === false){
-    el.style.background = 'var(--danger-light)';
-    el.style.color = 'var(--danger)';
-    el.style.border = '1px solid #f5c6c6';
-  } else {
-    el.style.background = '#fffbe6';
-    el.style.color = '#7a6200';
-    el.style.border = '1px solid #f0d060';
-  }
-  el.textContent = msg;
-}
-
-function clearNotionSettings(){
-  if(!confirm('هل تريد حذف إعدادات Notion؟')) return;
-  [KEYS.notionToken, KEYS.notionDbId, KEYS.notionProxy, KEYS.notionLastSync].forEach(k => cache.set(k, ''));
-  ['notion-token','notion-db-id','notion-proxy'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-  const res = document.getElementById('notion-test-result');
-  if(res) res.style.display = 'none';
-  updateNotionBadge();
+function clearGistSettings(){
+  if(!confirm('هل تريد حذف إعدادات الربط؟')) return;
+  [KEYS.gistToken, KEYS.gistId, KEYS.lastSync].forEach(k => cache.set(k, ''));
+  ['gist-token','gist-id'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  updateGistBadge();
   updateLastSyncLabel();
-  toast('تم حذف إعدادات Notion');
-}
-
-function copyWorkerCode(){
-  const code = document.getElementById('worker-code').textContent;
-  navigator.clipboard.writeText(code).then(()=>toast('تم نسخ الكود ✓','success')).catch(()=>toast('تعذّر النسخ','error'));
-}
-
-
-/* =====================================================================
-   HOME
-   ===================================================================== */
-function renderHome(){
-  // stats
-  const total = state.invoices.length;
-  const sum = state.invoices.reduce((s,i)=>s+(Number(i.price)||0), 0);
-  const tpls = Object.keys(state.templates).length;
-  const clients = new Set(state.invoices.map(i=>(i.client||'').trim()).filter(Boolean)).size;
-  $('#stats').innerHTML = `
-    <div class="stat">
-      <div class="lbl">الفواتير</div>
-      <div class="val">${total}</div>
-    </div>
-    <div class="stat">
-      <div class="lbl">الإجمالي · ر.س</div>
-      <div class="val">${fmtMoney(sum)} <small>ر.س</small></div>
-    </div>
-    <div class="stat">
-      <div class="lbl">النماذج</div>
-      <div class="val">${tpls}</div>
-    </div>
-    <div class="stat">
-      <div class="lbl">العملاء</div>
-      <div class="val">${clients}</div>
-    </div>
-  `;
-
-  const recent = state.invoices.slice(0,5);
-  if(!recent.length){
-    $('#home-list').innerHTML = `<div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
-      <h3>لا توجد فواتير بعد</h3>
-      <p>ابدأ بتصميم نموذج ثم أنشئ فاتورتك الأولى</p>
-    </div>`;
-  } else {
-    $('#home-list').innerHTML = recentTable(recent);
-    bindRowActions('#home-list');
-  }
+  toast('تم حذف الربط');
 }
 
 /* =====================================================================
-   INVOICES LIST
+   GIST SYNC ENGINE
    ===================================================================== */
-function renderInvoices(){
-  if(!state.invoices.length){
-    $('#invoices-list').innerHTML = `<div class="empty" style="padding:80px 20px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/></svg>
-      <h3>لا توجد فواتير</h3>
-      <p>اضغط "فاتورة جديدة" لإنشاء أول فاتورة</p>
-    </div>`;
-    return;
-  }
-  $('#invoices-list').innerHTML = recentTable(state.invoices);
-  bindRowActions('#invoices-list');
-}
-
-function recentTable(list){
-  let html = `<table><thead><tr>
-    <th>العميل</th><th>المشروع</th><th>رقم</th><th>النوع</th><th>التاريخ</th><th>السعر</th><th></th>
-  </tr></thead><tbody>`;
-  for(const inv of list){
-    html += `<tr class="hover-row" data-id="${inv.id}">
-      <td><strong>${escapeHTML(inv.client||'—')}</strong></td>
-      <td>${escapeHTML(inv.project||'')}</td>
-      <td><span class="doc-num">${escapeHTML(inv.docNumber||'')}</span></td>
-      <td><span class="badge ${inv.type==='فاتورة'?'badge-invoice':'badge-quote'}">${escapeHTML(inv.type||'عرض سعر')}</span></td>
-      <td>${escapeHTML(fmtDate(inv.date))}</td>
-      <td class="price">${fmtMoney(inv.price)} <small style="color:var(--muted);font-weight:500">${escapeHTML(currencySymbol(inv.currency))}</small></td>
-      <td><div class="row-actions">
-        <button class="icon-btn" data-act="export" title="تصدير PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-        <button class="icon-btn" data-act="edit" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-        <button class="icon-btn danger" data-act="delete" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
-      </div></td>
-    </tr>`;
-  }
-  return html + `</tbody></table>`;
-}
-
-function bindRowActions(rootSel){
-  $$(rootSel+' tr.hover-row').forEach(tr => {
-    tr.addEventListener('click', e => {
-      const act = e.target.closest('[data-act]')?.dataset.act;
-      const id = tr.dataset.id;
-      if(act === 'edit')   editInvoice(id);
-      else if(act === 'delete') deleteInvoice(id);
-      else if(act === 'export') exportInvoiceById(id);
-      else editInvoice(id);
-    });
-  });
-}
-
-/* =====================================================================
-   FORM (NEW / EDIT)
-   ===================================================================== */
-function prepareForm(){
-  // show warning if no templates
-  $('#no-template-warn').style.display = Object.keys(state.templates).length ? 'none' : 'block';
-  if(!state.form.editingId){
-    $('#form-title').textContent = 'فاتورة جديدة';
-    $('#form-sub').textContent = 'عبّي البيانات ثم اضغط حفظ أو تصدير PDF';
-    $('#f-type').value = 'عرض سعر';
-    $('#f-docNumber').value = '';
-    $('#f-client').value = '';
-    $('#f-firstParty').value = 'إسماعيل الحربي';
-    $('#f-project').value = '';
-    $('#f-projectType').value = '';
-    $('#f-date').value = new Date().toISOString().slice(0,10);
-    $('#f-price').value = '';
-    $('#f-currency').value = 'ريال';
-    $('#f-bankName').value = 'بنك الراجحي';
-    $('#f-account').value = 'SA3580000280608016255698';
-    $('#f-notes').value = '';
-    resetItemsState();
-  }
-}
-
-function readForm(){
-  return {
-    type: $('#f-type').value,
-    docNumber: $('#f-docNumber').value.trim() || genDocNumber(),
-    client: $('#f-client').value.trim(),
-    firstParty: $('#f-firstParty').value.trim(),
-    project: $('#f-project').value.trim(),
-    projectType: $('#f-projectType').value.trim(),
-    date: $('#f-date').value,
-    price: Number($('#f-price').value)||0,
-    currency: $('#f-currency').value,
-    items: $('#f-items').value.trim(),
-    bankName: $('#f-bankName').value.trim(),
-    account: $('#f-account').value.trim(),
-    notes: $('#f-notes').value.trim(),
-  };
-}
-
-function fillForm(inv){
-  $('#f-type').value = inv.type || 'عرض سعر';
-  $('#f-docNumber').value = inv.docNumber || '';
-  $('#f-client').value = inv.client || '';
-  $('#f-firstParty').value = inv.firstParty || '';
-  $('#f-project').value = inv.project || '';
-  $('#f-projectType').value = inv.projectType || '';
-  $('#f-date').value = inv.date || '';
-  $('#f-price').value = inv.price || '';
-  $('#f-currency').value = inv.currency || 'ريال';
-  $('#f-bankName').value = inv.bankName || '';
-  $('#f-account').value = inv.account || '';
-  $('#f-notes').value = inv.notes || '';
-  loadItemsFromText(inv.items || '');
-}
-
-async function saveInvoice(){
-  const data = readForm();
-  if(!data.client || !data.project){
-    toast('اسم العميل والمشروع مطلوبان','error');
-    return null;
-  }
-  let inv;
-  if(state.form.editingId){
-    const idx = state.invoices.findIndex(x=>x.id===state.form.editingId);
-    if(idx>=0){
-      state.invoices[idx] = {...state.invoices[idx], ...data};
-      inv = state.invoices[idx];
-    }
-  } else {
-    inv = { id: uid('inv'), ...data, createdAt: Date.now() };
-    state.invoices.unshift(inv);
-  }
-  await db.saveInvoice(inv);
-  toast('تم الحفظ', 'success');
-  return inv;
-}
-
-async function saveAndExport(){
-  const inv = await saveInvoice();
-  if(!inv) return;
-  const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
-  if(!tplId){
-    toast('يجب تصميم نموذج أولاً','error');
-    goPage('template');
-    return;
-  }
-  await exportInvoice(inv, tplId);
-  // stay on form; user can keep editing
-}
-
-function editInvoice(id){
-  const inv = state.invoices.find(x=>x.id===id);
-  if(!inv) return;
-  state.form.editingId = id;
-  goPage('new');
-  $('#form-title').textContent = 'تعديل فاتورة';
-  $('#form-sub').textContent = inv.client + ' · ' + inv.project;
-  fillForm(inv);
-}
-
-async function deleteInvoice(id){
-  if(!confirm('حذف هذه الفاتورة؟')) return;
-  state.invoices = state.invoices.filter(x=>x.id!==id);
-  await db.deleteInvoice(id);
-  toast('تم الحذف','');
-  if(state.page==='home') renderHome();
-  else if(state.page==='invoices') renderInvoices();
-}
-
-async function exportInvoiceById(id){
-  const inv = state.invoices.find(x=>x.id===id);
-  if(!inv) return;
-  const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
-  if(!tplId){
-    toast('يجب تصميم نموذج أولاً','error');
-    return;
-  }
-  await exportInvoice(inv, tplId);
-}
-
-// reset editingId whenever leaving the form
-const origGoPage = goPage;
-window.goPage = function(name){
-  if(state.page==='new' && name!=='new'){ state.form.editingId = null; }
-  origGoPage(name);
-};
-
-/* =====================================================================
-   TEMPLATE BUILDER
-   ===================================================================== */
-function renderTemplatePage(){
-  // show empty/builder based on builder state
-  if(state.builder.bgDataUrl){
-    showBuilder();
-  } else {
-    showEmpty();
-  }
-}
-
-function showEmpty(){
-  $('#tpl-empty').hidden = false;
-  $('#tpl-builder').hidden = true;
-  $('#tpl-save').hidden = true;
-  $('#tpl-copy-code').hidden = true;
-  $('#tpl-reset').hidden = true;
-  renderSavedTemplates();
-}
-
-function showBuilder(){
-  $('#tpl-empty').hidden = true;
-  $('#tpl-builder').hidden = false;
-  $('#tpl-save').hidden = false;
-  $('#tpl-copy-code').hidden = false;
-  $('#tpl-reset').hidden = false;
-  $('#tpl-name').value = state.builder.name || 'نموذج بدون اسم';
-  $('#tpl-info').textContent = `${state.builder.bgWidth}×${state.builder.bgHeight} px`;
-  buildStage();
-  renderChips();
-  renderProps();
-  // always start on main page tab
-  switchTplPage('main');
-}
-
-function renderSavedTemplates(){
-  const host = $('#saved-tpls');
-  const list = Object.values(state.templates).sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
-  if(!list.length){
-    host.innerHTML = `<div class="empty" style="padding:30px 20px">
-      <p>لا توجد نماذج محفوظة. ارفع صورة الخلفية لتبدأ.</p>
-    </div>`;
-    return;
-  }
-  host.innerHTML = '';
-  for(const t of list){
-    const isActive = t.id === state.activeTemplateId;
-    const div = document.createElement('div');
-    div.className = 'saved-tpl' + (isActive ? ' active' : '');
-    div.innerHTML = `
-      <div class="thumb" style="background-image:url('${t.bgDataUrl}')"></div>
-      <div class="info">
-        <div class="nm">${escapeHTML(t.name)}</div>
-        <div class="meta">${(t.fields||[]).length} حقل · ${t.bgWidth}×${t.bgHeight}</div>
-      </div>
-      <div class="actions">
-        ${isActive ? '' : '<button class="btn btn-sm btn-ghost" data-act="activate">تفعيل</button>'}
-        <button class="btn btn-sm btn-ghost" data-act="edit">تعديل</button>
-        <button class="btn btn-sm btn-danger" data-act="delete">حذف</button>
-      </div>
-    `;
-    div.querySelector('[data-act="activate"]')?.addEventListener('click', async ()=>{
-      state.activeTemplateId = t.id;
-      await db.setActive(t.id);
-      toast('تم تفعيل النموذج','success');
-      renderSavedTemplates();
-    });
-    div.querySelector('[data-act="edit"]').addEventListener('click', ()=>tplLoadForEdit(t.id));
-    div.querySelector('[data-act="delete"]').addEventListener('click', async ()=>{
-      if(!confirm('حذف هذا النموذج؟')) return;
-      delete state.templates[t.id];
-      if(state.activeTemplateId === t.id){
-        state.activeTemplateId = Object.keys(state.templates)[0] || null;
-        await db.setActive(state.activeTemplateId);
-      }
-      await db.deleteTemplate(t.id);
-      toast('تم الحذف','');
-      renderSavedTemplates();
-    });
-    host.appendChild(div);
-  }
-}
-
-function tplUpload(ev){
-  const file = ev.target.files?.[0];
-  if(!file) return;
-  if(!file.type.startsWith('image/')){
-    toast('يجب أن يكون ملف صورة','error');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    const img = new Image();
-    img.onload = () => {
-      // size limit: prevent storage quota issues
-      const MAX = 2400;
-      let w = img.naturalWidth, h = img.naturalHeight;
-      if(w > MAX || h > MAX){
-        const ratio = Math.min(MAX/w, MAX/h);
-        w = Math.round(w*ratio);
-        h = Math.round(h*ratio);
-        const cv = document.createElement('canvas');
-        cv.width = w; cv.height = h;
-        cv.getContext('2d').drawImage(img, 0, 0, w, h);
-        startBuilderWith(cv.toDataURL('image/jpeg', 0.92), w, h, file.name);
-      } else {
-        startBuilderWith(dataUrl, w, h, file.name);
-      }
-    };
-    img.onerror = () => toast('تعذر قراءة الصورة','error');
-    img.src = dataUrl;
-  };
-  reader.readAsDataURL(file);
-  ev.target.value = '';
-}
-
-function startBuilderWith(dataUrl, w, h, fileName){
-  state.builder = {
-    id: uid('tpl'),
-    name: (fileName||'نموذج').replace(/\.[^.]+$/,''),
-    bgDataUrl: dataUrl,
-    bgWidth: w,
-    bgHeight: h,
-    displayWidth: 0,
-    displayHeight: 0,
-    termsBgDataUrl: null,
-    termsWidth: 0,
-    termsHeight: 0,
-    fields: [],
-    armedKey: null,
-    selectedFid: null,
-  };
-  showBuilder();
-}
-
-function tplLoadForEdit(id){
-  const t = state.templates[id];
-  if(!t) return;
-  state.builder = {
-    id: t.id,
-    name: t.name,
-    bgDataUrl: t.bgDataUrl,
-    bgWidth: t.bgWidth,
-    bgHeight: t.bgHeight,
-    displayWidth: 0,
-    displayHeight: 0,
-    termsBgDataUrl: t.termsBgDataUrl || null,
-    termsWidth: t.termsWidth || 0,
-    termsHeight: t.termsHeight || 0,
-    fields: (t.fields||[]).map(f => ({...f, fid: uid('f')})),
-    armedKey: null,
-    selectedFid: null,
-  };
-  showBuilder();
-}
-
-function buildStage(){
-  // Compute display size - keep aspect ratio, fit a max width of ~720px
-  const stageHost = $('#stage-host');
-  stageHost.innerHTML = '';
-  const MAX_W = 720;
-  let dw = state.builder.bgWidth, dh = state.builder.bgHeight;
-  if(dw > MAX_W){
-    const r = MAX_W / dw;
-    dw = MAX_W;
-    dh = Math.round(state.builder.bgHeight * r);
-  }
-  state.builder.displayWidth = dw;
-  state.builder.displayHeight = dh;
-
-  const stage = document.createElement('div');
-  stage.className = 'stage';
-  stage.id = 'builder-stage';
-  stage.style.cssText = `width:${dw}px;height:${dh}px`;
-  const img = document.createElement('img');
-  img.src = state.builder.bgDataUrl;
-  img.style.cssText = `width:${dw}px;height:${dh}px;display:block`;
-  stage.appendChild(img);
-
-  // click on stage = place armed field
-  stage.addEventListener('click', e => {
-    if(!state.builder.armedKey) return;
-    if(e.target.closest('.field-box')) return;
-    const rect = stage.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    placeField(state.builder.armedKey, x, y);
-  });
-
-  stageHost.appendChild(stage);
-  renderFieldBoxes();
-}
-
-function renderChips(){
-  const host = $('#chips');
-  host.innerHTML = '';
-  let placed = 0;
-  for(const f of FIELDS){
-    const isPlaced = state.builder.fields.some(x => x.key === f.key);
-    if(isPlaced) placed++;
-    const btn = document.createElement('button');
-    btn.className = 'chip' + (isPlaced ? ' placed' : '') + (state.builder.armedKey === f.key ? ' armed' : '');
-    btn.textContent = f.label;
-    btn.addEventListener('click', () => {
-      state.builder.armedKey = (state.builder.armedKey === f.key) ? null : f.key;
-      renderChips();
-      $('#builder-stage')?.classList.toggle('placing', !!state.builder.armedKey);
-    });
-    host.appendChild(btn);
-  }
-  $('#fields-count').textContent = `${placed}/${FIELDS.length}`;
-}
-
-function placeField(key, x, y){
-  // remove existing field with same key (one per template per key)
-  state.builder.fields = state.builder.fields.filter(f => f.key !== key);
-  const meta = FIELD_MAP[key];
-  const isQR = meta.kind === 'qr';
-  const w = isQR ? 100 : 200;
-  const h = isQR ? 100 : Math.max(28, (meta.size||14) * 1.5);
-  const fld = {
-    fid: uid('f'),
-    key,
-    x: Math.max(0, x - w/2),
-    y: Math.max(0, y - h/2),
-    w, h,
-    align: meta.dir === 'ltr' ? 'left' : 'right',
-    dir: meta.dir,
-    size: meta.size,
-    weight: meta.weight,
-    color: '#1a1a1a',
-    kind: meta.kind || 'text',
-    preserve: !!meta.preserve,
-  };
-  state.builder.fields.push(fld);
-  state.builder.armedKey = null;
-  state.builder.selectedFid = fld.fid;
-  $('#builder-stage')?.classList.remove('placing');
-  renderChips();
-  renderFieldBoxes();
-  renderProps();
-}
-
-function renderFieldBoxes(){
-  const stage = $('#builder-stage');
-  if(!stage) return;
-  $$('.field-box', stage).forEach(n => n.remove());
-  for(const f of state.builder.fields){
-    const meta = FIELD_MAP[f.key];
-    const valign = f.valign || 'center';
-    const alignItems = valign === 'top' ? 'flex-start' : (valign === 'bottom' ? 'flex-end' : 'center');
-    const div = document.createElement('div');
-    div.className = 'field-box' + 
-                    (f.kind === 'qr' ? ' is-qr' : '') +
-                    (state.builder.selectedFid === f.fid ? ' selected' : '');
-    div.style.cssText = `left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;` +
-                        `direction:${f.dir};text-align:${f.align};` +
-                        `justify-content:${f.align==='center'?'center':(f.align==='left'?'flex-start':'flex-end')};` +
-                        `align-items:${alignItems};`;
-    div.dataset.fid = f.fid;
-    div.innerHTML = `<span class="lbl">${escapeHTML(meta?.label || f.key)}</span>
-                     <span class="resize-handle"></span>
-                     <span class="x-btn">×</span>`;
-    div.addEventListener('mousedown', e => onFieldMouseDown(e, f.fid));
-    div.addEventListener('touchstart', e => onFieldMouseDown(e, f.fid), {passive:false});
-    stage.appendChild(div);
-  }
-}
-
-function onFieldMouseDown(e, fid){
-  const target = e.target;
-  // X button
-  if(target.classList.contains('x-btn')){
-    e.preventDefault(); e.stopPropagation();
-    state.builder.fields = state.builder.fields.filter(f => f.fid !== fid);
-    if(state.builder.selectedFid === fid) state.builder.selectedFid = null;
-    renderChips();
-    renderFieldBoxes();
-    renderProps();
-    return;
-  }
-
-  e.preventDefault(); e.stopPropagation();
-  state.builder.selectedFid = fid;
-  renderFieldBoxes();
-  renderProps();
-
-  const fld = state.builder.fields.find(f => f.fid === fid);
-  if(!fld) return;
-
-  const isResize = target.classList.contains('resize-handle');
-  const stage = $('#builder-stage');
-
-  const point = e.touches ? e.touches[0] : e;
-  const startX = point.clientX, startY = point.clientY;
-  const orig = { x: fld.x, y: fld.y, w: fld.w, h: fld.h };
-
-  const onMove = (ev) => {
-    const p = ev.touches ? ev.touches[0] : ev;
-    const dx = p.clientX - startX;
-    const dy = p.clientY - startY;
-    if(isResize){
-      fld.w = Math.max(30, Math.min(state.builder.displayWidth - fld.x, orig.w + dx));
-      fld.h = Math.max(20, Math.min(state.builder.displayHeight - fld.y, orig.h + dy));
-    } else {
-      fld.x = Math.max(0, Math.min(state.builder.displayWidth - fld.w, orig.x + dx));
-      fld.y = Math.max(0, Math.min(state.builder.displayHeight - fld.h, orig.y + dy));
-    }
-    renderFieldBoxes();
-    renderProps();
-  };
-  const onUp = () => {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend', onUp);
-  };
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
-  document.addEventListener('touchmove', onMove, {passive:false});
-  document.addEventListener('touchend', onUp);
-}
-
-// Common color swatches for invoice design
-const COLOR_SWATCHES = [
-  '#000000','#1a1a1a','#4a4a4a','#8b8680',
-  '#ffffff','#f5f3ef','#e6e2da',
-  '#c9a96e','#d4af37','#b8860b',
-  '#3d6b4a','#2d4a66','#7a3434','#b54545',
-];
-
-function renderColorSwatches(){
-  const host = $('#p-swatches');
-  if(!host) return;
-  host.innerHTML = '';
-  const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
-  const current = (fld?.color || '').toLowerCase();
-  for(const c of COLOR_SWATCHES){
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.style.background = c;
-    if(c.toLowerCase() === current) b.classList.add('on');
-    b.addEventListener('click', ()=>{
-      if(!fld) return;
-      fld.color = c;
-      $('#p-color').value = c;
-      $('#p-color-hex').value = c.toUpperCase();
-      renderColorSwatches();
-      renderFieldBoxes();
-    });
-    host.appendChild(b);
-  }
-}
-
-function setSegValue(segId, val){
-  const seg = $('#'+segId);
-  if(!seg) return;
-  $$('button', seg).forEach(b => b.classList.toggle('on', b.dataset.val === val));
-}
-
-function renderProps(){
-  if(!state.builder.selectedFid){
-    $('#props-empty').hidden = false;
-    $('#props-form').hidden = true;
-    return;
-  }
-  const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
-  if(!fld){
-    $('#props-empty').hidden = false;
-    $('#props-form').hidden = true;
-    return;
-  }
-  $('#props-empty').hidden = true;
-  $('#props-form').hidden = false;
-
-  // defaults for new properties
-  fld.dir = fld.dir || (FIELD_MAP[fld.key]?.dir || 'rtl');
-  fld.valign = fld.valign || 'center';
-  fld.lineHeight = fld.lineHeight ?? 1.4;
-  fld.letterSpacing = fld.letterSpacing ?? 0;
-
-  setSegValue('p-dir-seg', fld.dir);
-  setSegValue('p-align-seg', fld.align);
-  setSegValue('p-valign-seg', fld.valign);
-
-  $('#p-size').value = Math.round(fld.size);
-  $('#p-weight').value = fld.weight;
-  $('#p-color').value = fld.color;
-  $('#p-color-hex').value = (fld.color||'').toUpperCase();
-  $('#p-lineHeight').value = fld.lineHeight;
-  $('#p-letterSpacing').value = fld.letterSpacing;
-  $('#p-x').value = Math.round(fld.x);
-  $('#p-y').value = Math.round(fld.y);
-  $('#p-w').value = Math.round(fld.w);
-  $('#p-h').value = Math.round(fld.h);
-
-  renderColorSwatches();
-}
-
-// Bind segmented controls (event delegation for buttons inside .seg)
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('.seg button');
-  if(!btn) return;
-  const seg = btn.parentElement;
-  if(!state.builder.selectedFid) return;
-  const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
-  if(!fld) return;
-  const val = btn.dataset.val;
-  if(seg.id === 'p-dir-seg'){
-    fld.dir = val;
-    // auto-adjust default align when direction flips
-    if(fld.align !== 'center'){
-      fld.align = val === 'rtl' ? 'right' : 'left';
-      setSegValue('p-align-seg', fld.align);
-    }
-  } else if(seg.id === 'p-align-seg'){
-    fld.align = val;
-  } else if(seg.id === 'p-valign-seg'){
-    fld.valign = val;
-  }
-  $$('button', seg).forEach(b => b.classList.toggle('on', b.dataset.val === val));
-  renderFieldBoxes();
-});
-
-// hex input → sync color
-document.addEventListener('input', e => {
-  if(e.target.id !== 'p-color-hex') return;
-  if(!state.builder.selectedFid) return;
-  let v = e.target.value.trim();
-  if(!v.startsWith('#')) v = '#' + v;
-  if(/^#[0-9a-fA-F]{6}$/.test(v) || /^#[0-9a-fA-F]{3}$/.test(v)){
-    const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
-    if(!fld) return;
-    fld.color = v;
-    $('#p-color').value = v;
-    renderColorSwatches();
-    renderFieldBoxes();
-  }
-});
-
-// Numeric & color picker inputs
-['p-size','p-weight','p-color','p-x','p-y','p-w','p-h','p-lineHeight','p-letterSpacing'].forEach(id => {
-  document.addEventListener('input', e => {
-    if(e.target.id !== id) return;
-    if(!state.builder.selectedFid) return;
-    const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
-    if(!fld) return;
-    fld.size = Math.max(6, Number($('#p-size').value)||fld.size);
-    fld.weight = $('#p-weight').value;
-    fld.color = $('#p-color').value;
-    fld.lineHeight = Math.max(0.8, Number($('#p-lineHeight').value)||fld.lineHeight);
-    fld.letterSpacing = Number($('#p-letterSpacing').value) || 0;
-    if(id === 'p-color'){
-      $('#p-color-hex').value = fld.color.toUpperCase();
-      renderColorSwatches();
-    }
-    const nx = Number($('#p-x').value); if(!isNaN(nx)) fld.x = Math.max(0, Math.min(state.builder.displayWidth - fld.w, nx));
-    const ny = Number($('#p-y').value); if(!isNaN(ny)) fld.y = Math.max(0, Math.min(state.builder.displayHeight - fld.h, ny));
-    const nw = Number($('#p-w').value); if(!isNaN(nw)) fld.w = Math.max(30, Math.min(state.builder.displayWidth - fld.x, nw));
-    const nh = Number($('#p-h').value); if(!isNaN(nh)) fld.h = Math.max(20, Math.min(state.builder.displayHeight - fld.y, nh));
-    renderFieldBoxes();
-  });
-});
-
-function tplResetCurrent(){
-  if(!confirm('إزالة النموذج الحالي والبدء من جديد؟')) return;
-  state.builder = {
-    id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
-    displayWidth: 0, displayHeight: 0,
-    termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
-    fields: [], armedKey: null, selectedFid: null,
-  };
-  showEmpty();
-}
-
-/* ============== Builder page tabs (main / terms) ============== */
-function switchTplPage(which){
-  $$('.page-tab').forEach(b => b.classList.toggle('on', b.dataset.tpage === which));
-  $('#stage-host').hidden = which !== 'main';
-  $('#terms-host').hidden = which !== 'terms';
-  if(which === 'terms') refreshTermsPanel();
-}
-
-function refreshTermsPanel(){
-  const hasTerms = !!state.builder.termsBgDataUrl;
-  $('#terms-empty').hidden = hasTerms;
-  $('#terms-preview').hidden = !hasTerms;
-  if(hasTerms){
-    $('#terms-info').textContent = `${state.builder.termsWidth}×${state.builder.termsHeight} px`;
-    const wrap = $('#terms-img-wrap');
-    wrap.innerHTML = '';
-    const img = new Image();
-    img.src = state.builder.termsBgDataUrl;
-    img.style.cssText = 'max-width:100%;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,0.06)';
-    wrap.appendChild(img);
-  }
-}
-
-function tplUploadTerms(ev){
-  const file = ev.target.files?.[0];
-  if(!file) return;
-  if(!file.type.startsWith('image/')){
-    toast('يجب أن يكون ملف صورة','error');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    const img = new Image();
-    img.onload = () => {
-      const MAX = 2400;
-      let w = img.naturalWidth, h = img.naturalHeight;
-      if(w > MAX || h > MAX){
-        const ratio = Math.min(MAX/w, MAX/h);
-        w = Math.round(w*ratio);
-        h = Math.round(h*ratio);
-        const cv = document.createElement('canvas');
-        cv.width = w; cv.height = h;
-        cv.getContext('2d').drawImage(img, 0, 0, w, h);
-        state.builder.termsBgDataUrl = cv.toDataURL('image/jpeg', 0.92);
-      } else {
-        state.builder.termsBgDataUrl = dataUrl;
-      }
-      state.builder.termsWidth = w;
-      state.builder.termsHeight = h;
-      refreshTermsPanel();
-      toast('تم رفع صفحة الشروط','success');
-    };
-    img.src = dataUrl;
-  };
-  reader.readAsDataURL(file);
-  ev.target.value = '';
-}
-
-function removeTplTerms(){
-  if(!confirm('إزالة صفحة الشروط؟')) return;
-  state.builder.termsBgDataUrl = null;
-  state.builder.termsWidth = 0;
-  state.builder.termsHeight = 0;
-  refreshTermsPanel();
-}
-
-async function tplSaveCurrent(){
-  const name = ($('#tpl-name').value.trim()) || state.builder.name || 'نموذج';
-  if(!state.builder.fields.length && !state.builder.termsBgDataUrl){
-    if(!confirm('لم تضع أي حقل ولم ترفع صفحة الشروط. حفظ على أي حال؟')) return;
-  }
-  const id = state.builder.id || uid('tpl');
-  // store fields in display coordinates - simpler since we render at same display size
-  const tpl = {
-    id,
-    name,
-    bgDataUrl: state.builder.bgDataUrl,
-    bgWidth: state.builder.bgWidth,
-    bgHeight: state.builder.bgHeight,
-    displayWidth: state.builder.displayWidth,
-    displayHeight: state.builder.displayHeight,
-    // optional second page (terms & conditions, used as-is, no fields)
-    termsBgDataUrl: state.builder.termsBgDataUrl || null,
-    termsWidth: state.builder.termsWidth || 0,
-    termsHeight: state.builder.termsHeight || 0,
-    fields: state.builder.fields.map(f => ({
-      key: f.key, x: f.x, y: f.y, w: f.w, h: f.h,
-      align: f.align, dir: f.dir,
-      valign: f.valign || 'center',
-      size: f.size, weight: f.weight, color: f.color,
-      lineHeight: f.lineHeight ?? 1.4,
-      letterSpacing: f.letterSpacing ?? 0,
-      kind: f.kind,
-      preserve: f.preserve,
-    })),
-    createdAt: state.templates[id]?.createdAt || Date.now(),
-  };
-  state.templates[id] = tpl;
-  const saved = await db.saveTemplate(tpl);
-  if(!saved && !cache.get(KEYS.templates)?.[id]){
-    toast('تعذر الحفظ - حجم الصورة كبير. جرب صورة أصغر.','error');
-    delete state.templates[id];
-    return;
-  }
-  if(!state.activeTemplateId){
-    state.activeTemplateId = id;
-    await db.setActive(id);
-  }
-  toast('تم حفظ النموذج','success');
-  // back to empty state to see all templates
-  state.builder = {
-    id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
-    displayWidth: 0, displayHeight: 0,
-    termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
-    fields: [], armedKey: null, selectedFid: null,
-  };
-  showEmpty();
-}
-
-/* =====================================================================
-   FIELD VALUE RESOLUTION
-   ===================================================================== */
-function resolveFieldValue(inv, key){
-  switch(key){
-    case 'docTitleAr':   return inv.type === 'فاتورة' ? 'فاتورة' : 'عرض سعر';
-    case 'docTitleEn':   return inv.type === 'فاتورة' ? 'Invoice' : 'Price offer';
-    case 'client':       return inv.client || '';
-    case 'firstParty':   return inv.firstParty || '';
-    case 'project':      return inv.project || '';
-    case 'projectType':  return inv.projectType || '';
-    case 'date':         return fmtDate(inv.date);
-    case 'docNumber':    return inv.docNumber || '';
-    case 'docNumberEn':  return 'Doc ID ' + (inv.docNumber || '');
-    case 'price':        return fmtMoney(inv.price);
-    case 'currency':     return currencySymbol(inv.currency);
-    case 'items':        return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'• '+l).join('\n');
-    case 'bankName':     return inv.bankName || '';
-    case 'account':      return inv.account || '';
-    case 'notes':        return inv.notes || '';
-    case 'qrcode':       return inv.account || inv.docNumber || '';
-    default:             return '';
-  }
-}
-
-/* =====================================================================
-   PDF EXPORT
-   ===================================================================== */
-async function renderTemplatePageCanvas(tpl, inv, isMain){
-  const renderW = isMain ? tpl.bgWidth : (tpl.termsWidth || tpl.bgWidth);
-  const renderH = isMain ? tpl.bgHeight : (tpl.termsHeight || tpl.bgHeight);
-  const bgUrl = isMain ? tpl.bgDataUrl : tpl.termsBgDataUrl;
-  const scale = renderW / (tpl.displayWidth || renderW);
-
-  const stage = document.createElement('div');
-  stage.style.cssText = `position:relative;width:${renderW}px;height:${renderH}px;background:#fff;font-family:'IBM Plex Sans Arabic',sans-serif`;
-
-  const img = document.createElement('img');
-  img.src = bgUrl;
-  img.style.cssText = `position:absolute;top:0;left:0;width:${renderW}px;height:${renderH}px;display:block`;
-  stage.appendChild(img);
-
-  await new Promise((res, rej) => {
-    if(img.complete && img.naturalHeight){ res(); return; }
-    img.onload = res;
-    img.onerror = rej;
-  });
-
-  // Only main page gets fields - terms page is bare
-  if(isMain){
-    for(const f of (tpl.fields || [])){
-      const value = resolveFieldValue(inv, f.key);
-      const meta = FIELD_MAP[f.key] || {};
-      const x = f.x * scale;
-      const y = f.y * scale;
-      const w = f.w * scale;
-      const h = f.h * scale;
-      const fontSize = (f.size || 14) * scale;
-      const lineHeight = f.lineHeight ?? 1.4;
-      const letterSpacing = (f.letterSpacing ?? 0) * scale;
-      const isQR = f.kind === 'qr';
-      const isPreserve = f.preserve || !!meta.preserve;
-
-      // Vertical alignment via padding-top
-      const valign = f.valign || 'center';
-      let paddingTop = 0;
-      if(!isQR){
-        const textH = fontSize * lineHeight;
-        if(valign === 'center') paddingTop = Math.max(0, (h - textH) / 2);
-        else if(valign === 'bottom') paddingTop = Math.max(0, h - textH);
-        else paddingTop = 0; // top
-      }
-
-      const node = document.createElement('div');
-
-      if(isQR){
-        node.className = 'render-text qr-host';
-        node.style.cssText =
-          `position:absolute;` +
-          `left:${x}px;top:${y}px;width:${w}px;height:${h}px;` +
-          `background:white;display:flex;align-items:center;justify-content:center;`;
-        const qrDiv = document.createElement('div');
-        node.appendChild(qrDiv);
-        try{
-          new QRCode(qrDiv, {
-            text: value || ' ',
-            width: Math.max(60, Math.min(w, h) - 4),
-            height: Math.max(60, Math.min(w, h) - 4),
-            colorDark: f.color || '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M,
-          });
-        }catch(e){}
-      } else if(isPreserve && value.includes('\n')) {
-        // iOS fix: render multi-line as individual divs instead of pre-wrap
-        node.className = 'render-text preserve';
-        node.style.cssText =
-          `position:absolute;` +
-          `left:${x}px;top:${y}px;width:${w}px;height:${h}px;` +
-          `padding-top:${paddingTop}px;` +
-          `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
-          `color:${f.color || '#1a1a1a'};` +
-          `direction:${f.dir || 'rtl'};` +
-          `text-align:${f.align || 'right'};` +
-          `line-height:${lineHeight};` +
-          `letter-spacing:${letterSpacing}px;` +
-          `font-family:'IBM Plex Sans Arabic',sans-serif;` +
-          `overflow:hidden;box-sizing:border-box;` +
-          `display:flex;flex-direction:column;justify-content:flex-start;`;
-        const lines = value.split('\n');
-        for(const line of lines){
-          const lineDiv = document.createElement('div');
-          lineDiv.style.cssText =
-            `display:block;width:100%;` +
-            `direction:${f.dir || 'rtl'};` +
-            `text-align:${f.align || 'right'};` +
-            `white-space:normal;word-break:break-word;` +
-            `line-height:${lineHeight};`;
-          lineDiv.textContent = line;
-          node.appendChild(lineDiv);
-        }
-      } else {
-        node.className = 'render-text' + (isPreserve ? ' preserve' : '');
-        node.style.cssText =
-          `position:absolute;` +
-          `left:${x}px;top:${y}px;width:${w}px;height:${h}px;` +
-          `padding-top:${paddingTop}px;` +
-          `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
-          `color:${f.color || '#1a1a1a'};` +
-          `direction:${f.dir || 'rtl'};` +
-          `text-align:${f.align || 'right'};` +
-          `line-height:${lineHeight};` +
-          `letter-spacing:${letterSpacing}px;` +
-          `font-family:'IBM Plex Sans Arabic',sans-serif;` +
-          `overflow:hidden;box-sizing:border-box;` +
-          (isPreserve ? 'white-space:pre-wrap;' : 'white-space:nowrap;');
-        node.textContent = value;
-      }
-
-      stage.appendChild(node);
-    }
-  }
-
-  return { stage, renderW, renderH };
-}
-
-async function exportInvoice(inv, templateId){
-  const tpl = state.templates[templateId];
-  if(!tpl){ toast('النموذج غير موجود','error'); return; }
-
-  const exportBtn = $('#export-btn');
-  const originalHTML = exportBtn?.innerHTML;
-  if(exportBtn){ exportBtn.disabled = true; exportBtn.innerHTML = '<span class="loader"></span> جاري التصدير...'; }
-
-  const host = $('#render-host');
-  host.innerHTML = '';
-
-  try {
-    // Build pages
-    const pageDefs = [
-      await renderTemplatePageCanvas(tpl, inv, true),
-    ];
-    if(tpl.termsBgDataUrl){
-      pageDefs.push(await renderTemplatePageCanvas(tpl, inv, false));
-    }
-
-    // Append all stages to host so html2canvas can capture
-    for(const p of pageDefs) host.appendChild(p.stage);
-
-    // wait fonts + a tick
-    try{ await document.fonts.ready; }catch{}
-    await new Promise(r => setTimeout(r, 300));
-
-    const { jsPDF } = window.jspdf;
-    // Use orientation of the first page
-    const first = pageDefs[0];
-    const isLandscape = first.renderW > first.renderH;
-    const pdf = new jsPDF({
-      orientation: isLandscape ? 'landscape' : 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
-    const pdfW = isLandscape ? 297 : 210;
-    const pdfH = isLandscape ? 210 : 297;
-
-    for(let i = 0; i < pageDefs.length; i++){
-      const p = pageDefs[i];
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const canvas = await html2canvas(p.stage, {
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        scale: isIOS ? 1 : 2,
-        width: p.renderW,
-        height: p.renderH,
-        imageTimeout: 0,
-        removeContainer: true,
-      });
-      const imgRatio = p.renderW / p.renderH;
-      const pdfRatio = pdfW / pdfH;
-      let drawW, drawH;
-      if(imgRatio > pdfRatio){
-        drawW = pdfW; drawH = pdfW / imgRatio;
-      } else {
-        drawH = pdfH; drawW = pdfH * imgRatio;
-      }
-      const ox = (pdfW - drawW) / 2;
-      const oy = (pdfH - drawH) / 2;
-
-      if(i > 0) pdf.addPage('a4', isLandscape ? 'landscape' : 'portrait');
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', ox, oy, drawW, drawH);
-    }
-
-    const fname = `${inv.type||'invoice'}-${inv.client||''}-${inv.docNumber||''}.pdf`.replace(/[\/\\?%*:|"<>]/g,'-');
-    pdf.save(fname);
-    toast('تم تصدير PDF','success');
-  } catch(err){
-    console.error(err);
-    toast('تعذر التصدير: '+(err.message||'خطأ'),'error');
-  } finally {
-    host.innerHTML = '';
-    if(exportBtn){ exportBtn.disabled = false; exportBtn.innerHTML = originalHTML; }
-  }
-}
-
-/* =====================================================================
-   PROJECT ITEMS — checkboxes + custom
-   ===================================================================== */
-const ALL_ITEMS = [
-  { id:'i1',  text:'تصميم الشعار (مفهومين مختلفين تختار منها واحد).', types:['logo','identity','profile','book'] },
-  { id:'i2',  text:'تحديد الألوان الأساسية والثانوية للعلامة.', types:['logo','identity','profile'] },
-  { id:'i3',  text:'اختيار الخطوط الطباعية (عربي/إنجليزي).', types:['logo','identity','profile'] },
-  { id:'i4',  text:'تصميم بطاقة العمل (Business Card).', types:['identity','profile'] },
-  { id:'i5',  text:'تصميم دليل مختصر من صفحتين (Brand Guidelines).', types:['identity'] },
-  { id:'i6',  text:'كل ما سبق في الباقة الأساسية.', types:['identity'] },
-  { id:'i7',  text:'تصميم المطبوعات الرسمية (ورق المراسلات، أظرف، فولدر).', types:['identity'] },
-  { id:'i8',  text:'تصميم ختم الشركة.', types:['identity'] },
-  { id:'i9',  text:'تصميم 3 قوالب لمنصات التواصل الاجتماعي.', types:['identity','social'] },
-  { id:'i10', text:'تصميم الهوية البصرية الفرعية أو المشتقة.', types:['identity'] },
-  { id:'i11', text:'تصميم دليل استخدام الهوية (Brand Guidelines) لا يتجاوز 20 صفحة.', types:['identity'] },
-  { id:'i12', text:'كل ما سبق في الباقة الأساسية والاحترافية.', types:['identity'] },
-  { id:'i13', text:'تصميم دليل استخدام الهوية (Brand Guidelines) متكامل يشرح طريقة استخدام الشعار، المساحات، الممنوعات، وتطبيقات الهوية.', types:['identity'] },
-  { id:'i14', text:'تصميم بروفايل الشركة (Company Profile) - حتى 10 صفحات.', types:['identity','profile'] },
-  { id:'i15', text:'تصميم 10 منشورات بأبعاد مختلفة (مربع، ستوري، بانر).', types:['social'] },
-  { id:'i16', text:'تصميم قوالب قابلة للتعديل.', types:['social'] },
-  { id:'i17', text:'تطابق الألوان مع هوية العلامة.', types:['social'] },
-  { id:'i18', text:'تصميم غلاف الصفحات (Facebook, LinkedIn, Twitter).', types:['profile'] },
-  { id:'i19', text:'تصميم صورة الملف الشخصي.', types:['profile'] },
-  { id:'i20', text:'تصميم غلاف الكتاب (أمامي وخلفي).', types:['book'] },
-  { id:'i21', text:'تصميم الصفحات الداخلية وتنسيق المحتوى.', types:['book'] },
-  { id:'i22', text:'اختيار الخطوط والألوان المناسبة لمحتوى الكتاب.', types:['book'] },
-  { id:'i23', text:'تصدير بصيغة PDF جاهزة للطباعة.', types:['book'] },
-];
-
-const TYPE_KEY_MAP = {
-  'تصميم شعار Logo':'logo',
-  'تصميم هوية بصرية Visual Identity':'identity',
-  'تصميم منشورات تواصل اجتماعي Social Media Post':'social',
-  'تصميم بروفايل Profile Design':'profile',
-  'تصميم كتب Book Design':'book',
-};
-
-let itemsState = { selected:new Set(), custom:[] };
-
-function getTypeKey(){
-  const el = document.getElementById('f-projectType');
-  return el ? (TYPE_KEY_MAP[el.value] || null) : null;
-}
-
-function onProjectTypeChange(){
-  const typeKey = getTypeKey();
-  if(typeKey){
-    itemsState.selected = new Set([...itemsState.selected].filter(id=>{
-      if(id.startsWith('custom-')) return true;
-      const item = ALL_ITEMS.find(x=>x.id===id);
-      return item && item.types.includes(typeKey);
-    }));
-  }
-  renderItemsCheckboxes();
-}
-
-function renderItemsCheckboxes(){
-  const host = document.getElementById('items-checkboxes');
-  if(!host) return;
-  const typeKey = getTypeKey();
-  const visible = typeKey ? ALL_ITEMS.filter(i=>i.types.includes(typeKey)) : ALL_ITEMS;
-  host.innerHTML='';
-  visible.forEach(item=>{
-    const checked = itemsState.selected.has(item.id);
-    const row = document.createElement('div');
-    row.className = 'item-row'+(checked?' checked':'');
-    row.innerHTML = `<input type="checkbox" id="chk-${item.id}" ${checked?'checked':''}/>
-      <label class="item-text" for="chk-${item.id}">${item.text.replace(/</g,'&lt;')}</label>`;
-    row.querySelector('input').addEventListener('change',e=>{
-      if(e.target.checked) itemsState.selected.add(item.id);
-      else itemsState.selected.delete(item.id);
-      row.classList.toggle('checked',e.target.checked);
-      syncItemsTextarea();
-    });
-    row.addEventListener('click',e=>{
-      if(e.target.tagName==='INPUT'||e.target.tagName==='LABEL') return;
-      const cb=row.querySelector('input'); cb.checked=!cb.checked;
-      cb.dispatchEvent(new Event('change'));
-    });
-    host.appendChild(row);
-  });
-  if(itemsState.custom.length){
-    const hr=document.createElement('div');
-    hr.innerHTML='<hr style="border:none;border-top:1px dashed var(--line);margin:4px 8px"/>';
-    host.appendChild(hr);
-    itemsState.custom.forEach((text,ci)=>{
-      const cid='custom-'+ci;
-      const checked=itemsState.selected.has(cid);
-      const row=document.createElement('div');
-      row.className='item-row'+(checked?' checked':'');
-      row.innerHTML=`<input type="checkbox" id="chk-${cid}" ${checked?'checked':''}/>
-        <label class="item-text" for="chk-${cid}">${text.replace(/</g,'&lt;')}</label>
-        <button type="button" style="color:var(--danger);font-size:16px;line-height:1;padding:0 4px;flex-shrink:0" onclick="removeCustomItem(${ci})">×</button>`;
-      row.querySelector('input').addEventListener('change',e=>{
-        if(e.target.checked) itemsState.selected.add(cid);
-        else itemsState.selected.delete(cid);
-        row.classList.toggle('checked',e.target.checked);
-        syncItemsTextarea();
-      });
-      host.appendChild(row);
-    });
-  }
-  syncItemsTextarea();
-}
-
-function addCustomItem(){
-  const inp=document.getElementById('custom-item-input');
-  const text=inp.value.trim(); if(!text) return;
-  const cid='custom-'+itemsState.custom.length;
-  itemsState.custom.push(text); itemsState.selected.add(cid);
-  inp.value=''; renderItemsCheckboxes();
-}
-document.addEventListener('keydown',e=>{
-  if(e.target.id==='custom-item-input'&&e.key==='Enter'){e.preventDefault();addCustomItem();}
-});
-function removeCustomItem(ci){
-  itemsState.custom.splice(ci,1);
-  const kept=new Set([...itemsState.selected].filter(id=>!id.startsWith('custom-')));
-  itemsState.custom.forEach((_,i)=>{ if(itemsState.selected.has('custom-'+(i+1))) kept.add('custom-'+i); });
-  itemsState.selected=kept; renderItemsCheckboxes();
-}
-function syncItemsTextarea(){
-  const lines=[];
-  ALL_ITEMS.forEach(item=>{ if(itemsState.selected.has(item.id)) lines.push(item.text); });
-  itemsState.custom.forEach((text,ci)=>{ if(itemsState.selected.has('custom-'+ci)) lines.push(text); });
-  const ta=document.getElementById('f-items'); if(ta) ta.value=lines.join('\n');
-  const count=lines.length;
-  const lbl=document.getElementById('items-count-label');
-  if(lbl) lbl.textContent=count>0?count+' بند محدد':'لا يوجد تحديد';
-  const prev=document.getElementById('items-preview-row');
-  if(prev){
-    if(count>0){
-      prev.hidden=false;
-      const short=lines.slice(0,2).map(l=>l.slice(0,32)+(l.length>32?'…':'')).join(' · ');
-      const sp=document.getElementById('items-selected-preview');
-      if(sp) sp.textContent=short+(count>2?' (+'+( count-2)+')':'');
-    } else prev.hidden=true;
-  }
-}
-function resetItemsState(){ itemsState={selected:new Set(),custom:[]}; renderItemsCheckboxes(); }
-function loadItemsFromText(text){
-  itemsState={selected:new Set(),custom:[]};
-  if(!text){ renderItemsCheckboxes(); return; }
-  text.split('\n').map(l=>l.trim()).filter(Boolean).forEach(line=>{
-    const match=ALL_ITEMS.find(i=>i.text===line);
-    if(match) itemsState.selected.add(match.id);
-    else { const ci=itemsState.custom.length; itemsState.custom.push(line); itemsState.selected.add('custom-'+ci); }
-  });
-  renderItemsCheckboxes();
-}
-
-
-
-/* =====================================================================
-   TEMPLATE CODE COPY / PASTE
-   ===================================================================== */
-
-function copyTemplateCode(){
-  const tplId = state.builder.id;
-  if(!tplId){ toast('لا يوجد تصميم محفوظ حالياً','error'); return; }
-  const tpl = state.templates[tplId];
-  if(!tpl){ toast('احفظ التصميم أولاً','error'); return; }
-  
-  // نصدّر كود التصميم (المواضع + الألوان فقط، بدون الصورة)
-  const code = {
-    version: 1,
-    name: tpl.name,
-    bgWidth: tpl.bgWidth,
-    bgHeight: tpl.bgHeight,
-    displayWidth: tpl.displayWidth,
-    displayHeight: tpl.displayHeight,
-    fields: tpl.fields.map(f => ({
-      key: f.key,
-      x: f.x, y: f.y, w: f.w, h: f.h,
-      align: f.align, dir: f.dir,
-      valign: f.valign || 'center',
-      size: f.size, weight: f.weight, color: f.color,
-      lineHeight: f.lineHeight ?? 1.4,
-      letterSpacing: f.letterSpacing ?? 0,
-      kind: f.kind, preserve: f.preserve,
-    })),
-  };
-  
-  const json = JSON.stringify(code);
-  const b64 = btoa(unescape(encodeURIComponent(json)));
-  const copyText = 'TPLCODE:' + b64;
-  
-  navigator.clipboard.writeText(copyText).then(()=>{
-    toast('تم نسخ كود التصميم! الصقه على الجهاز الآخر بنفس نموذج الفاتورة','success');
-  }).catch(()=>{
-    // fallback
-    const ta = document.createElement('textarea');
-    ta.value = copyText;
-    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    toast('تم نسخ كود التصميم!','success');
-  });
-}
-
-async function pasteTemplateCode(){
-  let text = '';
-  try{
-    text = await navigator.clipboard.readText();
-  }catch(e){
-    // fallback: نطلب من المستخدم إدخال الكود
-    text = prompt('الصق كود التصميم هنا:') || '';
-  }
-  
-  text = text.trim();
-  if(!text.startsWith('TPLCODE:')){
-    toast('الكود المنسوخ غير صحيح. انسخه من "نسخ كود التصميم"','error');
-    return;
-  }
-  
-  try{
-    const b64 = text.slice(8);
-    const json = decodeURIComponent(escape(atob(b64)));
-    const code = JSON.parse(json);
-    
-    if(!code.fields || !code.version){
-      toast('الكود تالف أو غير متوافق','error');
-      return;
-    }
-    
-    // نبحث عن النموذج النشط الحالي لنطبق الكود عليه
-    const activeTplId = state.activeTemplateId || Object.keys(state.templates)[0];
-    if(!activeTplId){
-      toast('يجب أن يكون لديك نموذج محفوظ لتطبيق الكود عليه','error');
-      return;
-    }
-    
-    const tpl = state.templates[activeTplId];
-    if(!tpl){
-      toast('لا يوجد نموذج نشط','error');
-      return;
-    }
-    
-    // تطبيق الحقول مع الأبعاد
-    const scaleX = (tpl.displayWidth || tpl.bgWidth) / (code.displayWidth || code.bgWidth);
-    const scaleY = (tpl.displayHeight || tpl.bgHeight) / (code.displayHeight || code.bgHeight);
-    
-    tpl.fields = code.fields.map(f => ({
-      ...f,
-      fid: uid('f'),
-      x: f.x * scaleX,
-      y: f.y * scaleY,
-      w: f.w * scaleX,
-      h: f.h * scaleY,
-    }));
-    
-    await db.saveTemplate(tpl);
-    state.templates[activeTplId] = tpl;
-    
-    // إعادة تحميل البانية
-    tplLoadForEdit(activeTplId);
-    toast('تم تطبيق كود التصميم بنجاح ✓','success');
-    
-  }catch(e){
-    toast('خطأ في تحليل الكود: ' + e.message, 'error');
-  }
-}
-
-
-/* === BOTTOM NAV === */
-$$('#bottom-nav button').forEach(b => b.addEventListener('click', ()=>goPage(b.dataset.page)));
-
-// تحديث الـ bottom nav عند التنقل
-const _origGoPage = window.goPage;
-window.goPage = function(name){
-  _origGoPage(name);
-  $$('#bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.page === name));
-};
-
-
-/* === TOPBAR HEIGHT SYNC === */
-function syncTopbarHeight(){
-  const tb = document.querySelector('.topbar');
-  const sp = document.getElementById('topbar-spacer');
-  if(!tb || !sp) return;
-  const h = tb.getBoundingClientRect().height;
-  if(h > 0) sp.style.height = h + 'px';
-}
-// multiple timings to guarantee correct height
-requestAnimationFrame(()=>{ syncTopbarHeight(); requestAnimationFrame(syncTopbarHeight); });
-window.addEventListener('load', syncTopbarHeight);
-window.addEventListener('resize', syncTopbarHeight);
-new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
-
-
-/* =====================================================================
-   NOTION SYNC ENGINE
-   ===================================================================== */
-function notionReady(){
-  return !!(cache.get(KEYS.notionToken) && cache.get(KEYS.notionDbId) && cache.get(KEYS.notionProxy));
-}
-
-async function notionCall(method, path, body){
-  const token = cache.get(KEYS.notionToken);
-  const proxy = (cache.get(KEYS.notionProxy) || '').replace(/\/$/, '');
-  const url   = proxy + path;
-  const opts  = {
+async function gistCall(method, body){
+  const token  = cache.get(KEYS.gistToken);
+  const gistId = cache.get(KEYS.gistId);
+  const res = await fetch('https://api.github.com/gists/' + gistId, {
     method,
     headers: {
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
-      'Notion-Version': '2022-06-28',
-    }
-  };
-  if(body) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
-  const json = await res.json();
-  if(!res.ok) throw new Error(json.message || ('Notion error ' + res.status));
-  return json;
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.message || 'GitHub error ' + res.status);
+  }
+  return res.json();
 }
 
-function invToRichText(inv){
-  const str = JSON.stringify(inv);
-  const chunks = [];
-  for(let i = 0; i < str.length; i += 1990) chunks.push({ text:{ content: str.slice(i, i+1990) } });
-  return chunks;
+async function readFromGist(){
+  const data = await gistCall('GET');
+  const file = data.files['isom3h-invoices.json'];
+  if(!file) return [];
+  const raw = file.truncated
+    ? await (await fetch(file.raw_url)).text()
+    : file.content;
+  try{ return JSON.parse(raw).invoices || []; }
+  catch{ return []; }
 }
 
-function richTextToInv(rt){
-  try{ return JSON.parse((rt || []).map(r => r.plain_text).join('')); }
-  catch{ return null; }
-}
-
-function invTitle(inv){
-  const parts = [inv.docNumber, inv.client].filter(Boolean);
-  return parts.join(' — ') || 'فاتورة';
-}
-
-async function notionQueryAll(){
-  const dbId = cache.get(KEYS.notionDbId);
-  let results = [], cursor;
-  do {
-    const body = { page_size: 100 };
-    if(cursor) body.start_cursor = cursor;
-    const r = await notionCall('POST', '/v1/databases/' + dbId + '/query', body);
-    results = results.concat(r.results || []);
-    cursor = r.has_more ? r.next_cursor : null;
-  } while(cursor);
-  return results;
-}
-
-async function syncToNotion(){
-  if(!notionReady()){ toast('إعدادات Notion غير مكتملة', 'error'); return; }
-  const el = document.getElementById('sync-result');
-  if(el) el.textContent = '⟳ جاري الرفع إلى Notion...';
-
-  try{
-    const pages = await notionQueryAll();
-    const pageMap = {};
-    pages.forEach(p => {
-      const id = p.properties['ID']?.rich_text?.[0]?.plain_text;
-      if(id) pageMap[id] = p.id;
-    });
-
-    let created = 0, updated = 0;
-    const dbId = cache.get(KEYS.notionDbId);
-
-    for(const inv of state.invoices){
-      const props = {
-        'الاسم': { title: [{ text: { content: invTitle(inv) } }] },
-        'ID':    { rich_text: [{ text: { content: inv.id } }] },
-        'بيانات':{ rich_text: invToRichText(inv) },
-      };
-      if(pageMap[inv.id]){
-        await notionCall('PATCH', '/v1/pages/' + pageMap[inv.id], { properties: props });
-        updated++;
-      } else {
-        await notionCall('POST', '/v1/pages', { parent: { database_id: dbId }, properties: props });
-        created++;
+async function writeToGist(invoices){
+  await gistCall('PATCH', {
+    files: {
+      'isom3h-invoices.json': {
+        content: JSON.stringify({ invoices, lastSync: new Date().toISOString() }, null, 0)
       }
     }
+  });
+}
 
-    cache.set(KEYS.notionLastSync, new Date().toISOString());
+function setSyncEl(msg, color){
+  const el = document.getElementById('sync-result');
+  if(el){ el.textContent = msg; el.style.color = color || 'var(--muted)'; }
+}
+
+async function syncFromGist(){
+  if(!gistReady()){ toast('احفظ الإعدادات أولاً', 'error'); return; }
+  setSyncEl('⟳ جاري الاستيراد...', 'var(--muted)');
+  setSyncStatus('syncing');
+  try{
+    const invoices = await readFromGist();
+    state.invoices = invoices;
+    cache.set(KEYS.invoices, invoices);
+    cache.set(KEYS.lastSync, new Date().toISOString());
     updateLastSyncLabel();
-    const msg = 'تم الرفع ✓ — ' + created + ' جديدة، ' + updated + ' محدّثة';
-    if(el){ el.textContent = msg; el.style.color = 'var(--accent)'; }
-    setSyncStatus('ok', 'Notion');
-    toast(msg, 'success');
+    renderHome();
+    setSyncEl('استيراد ✓ — ' + invoices.length + ' فاتورة', 'var(--accent)');
+    setSyncStatus('ok', 'Gist');
+    toast('تم الاستيراد ✓', 'success');
   } catch(e){
-    const msg = 'خطأ: ' + e.message;
-    if(el){ el.textContent = msg; el.style.color = 'var(--danger)'; }
+    setSyncEl('خطأ: ' + e.message, 'var(--danger)');
     setSyncStatus('error');
-    toast(msg, 'error');
+    toast('خطأ: ' + e.message, 'error');
   }
 }
 
-async function syncFromNotion(){
-  if(!notionReady()){ toast('إعدادات Notion غير مكتملة', 'error'); return; }
-  const el = document.getElementById('sync-result');
-  if(el) el.textContent = '⟳ جاري الاستيراد من Notion...';
-
+async function syncToGist(){
+  if(!gistReady()){ toast('احفظ الإعدادات أولاً', 'error'); return; }
+  setSyncEl('⟳ جاري الرفع...', 'var(--muted)');
+  setSyncStatus('syncing');
   try{
-    const pages = await notionQueryAll();
-    const invoices = pages
-      .filter(p => !p.archived)
-      .map(p => richTextToInv(p.properties['بيانات']?.rich_text))
-      .filter(Boolean);
-
-    state.invoices = invoices;
-    cache.set(KEYS.invoices, invoices);
-    cache.set(KEYS.notionLastSync, new Date().toISOString());
+    await writeToGist(state.invoices);
+    cache.set(KEYS.lastSync, new Date().toISOString());
     updateLastSyncLabel();
-    renderHome();
-    const msg = 'تم الاستيراد ✓ — ' + invoices.length + ' فاتورة';
-    if(el){ el.textContent = msg; el.style.color = 'var(--accent)'; }
-    setSyncStatus('ok', 'Notion');
-    toast(msg, 'success');
+    setSyncEl('رفع ✓ — ' + state.invoices.length + ' فاتورة', 'var(--accent)');
+    setSyncStatus('ok', 'Gist');
+    toast('تم الرفع ✓', 'success');
   } catch(e){
-    const msg = 'خطأ: ' + e.message;
-    if(el){ el.textContent = msg; el.style.color = 'var(--danger)'; }
+    setSyncEl('خطأ: ' + e.message, 'var(--danger)');
     setSyncStatus('error');
-    toast(msg, 'error');
+    toast('خطأ: ' + e.message, 'error');
   }
 }
 
 async function fullSync(){
-  if(!notionReady()){ toast('إعدادات Notion غير مكتملة', 'error'); return; }
-  const el = document.getElementById('sync-result');
+  if(!gistReady()){ toast('احفظ الإعدادات أولاً', 'error'); return; }
+  setSyncEl('⟳ مزامنة...', 'var(--muted)');
   setSyncStatus('syncing');
-  if(el) el.textContent = '⟳ مزامنة...';
   try{
-    // Pull first, then push merged result
-    const pages = await notionQueryAll();
-    const pageMap = {};
-    const notionInvs = [];
-    pages.filter(p => !p.archived).forEach(p => {
-      const id = p.properties['ID']?.rich_text?.[0]?.plain_text;
-      if(id) pageMap[id] = p.id;
-      const inv = richTextToInv(p.properties['بيانات']?.rich_text);
-      if(inv) notionInvs.push(inv);
-    });
-
-    // Merge: local wins for same ID (local is newer)
+    const remote = await readFromGist();
     const localIds = new Set(state.invoices.map(i => i.id));
-    const notionOnly = notionInvs.filter(i => !localIds.has(i.id));
-    const merged = [...state.invoices, ...notionOnly];
+    const merged = [...state.invoices, ...remote.filter(i => !localIds.has(i.id))];
     state.invoices = merged;
     cache.set(KEYS.invoices, merged);
-
-    // Push all to Notion
-    const dbId = cache.get(KEYS.notionDbId);
-    let created = 0, updated = 0;
-    for(const inv of merged){
-      const props = {
-        'الاسم': { title: [{ text: { content: invTitle(inv) } }] },
-        'ID':    { rich_text: [{ text: { content: inv.id } }] },
-        'بيانات':{ rich_text: invToRichText(inv) },
-      };
-      if(pageMap[inv.id]){
-        await notionCall('PATCH', '/v1/pages/' + pageMap[inv.id], { properties: props });
-        updated++;
-      } else {
-        await notionCall('POST', '/v1/pages', { parent: { database_id: dbId }, properties: props });
-        created++;
-      }
-    }
-
-    cache.set(KEYS.notionLastSync, new Date().toISOString());
+    await writeToGist(merged);
+    cache.set(KEYS.lastSync, new Date().toISOString());
     updateLastSyncLabel();
     renderHome();
-    const msg = 'مزامنة كاملة ✓ — ' + merged.length + ' فاتورة';
-    if(el){ el.textContent = msg; el.style.color = 'var(--accent)'; }
-    setSyncStatus('ok', 'Notion');
-    toast(msg, 'success');
+    setSyncEl('مزامنة كاملة ✓ — ' + merged.length + ' فاتورة', 'var(--accent)');
+    setSyncStatus('ok', 'Gist');
+    toast('مزامنة كاملة ✓', 'success');
   } catch(e){
-    const msg = 'خطأ: ' + e.message;
-    if(el){ el.textContent = msg; el.style.color = 'var(--danger)'; }
+    setSyncEl('خطأ: ' + e.message, 'var(--danger)');
     setSyncStatus('error');
-    toast(msg, 'error');
+    toast('خطأ: ' + e.message, 'error');
   }
 }
+
 
 /* =====================================================================
    BOOT
@@ -3400,12 +1858,10 @@ async function fullSync(){
   await loadStateFromServer();
   renderHome();
   renderItemsCheckboxes();
-  // auto-sync from Notion on load if configured
-  if(notionReady()){
+  if(gistReady()){
     setSyncStatus('syncing');
-    try{
-      await syncFromNotion();
-    } catch(e){ setSyncStatus('error'); }
+    try{ await syncFromGist(); }
+    catch(e){ setSyncStatus('error'); }
   }
 })();
 </script>
