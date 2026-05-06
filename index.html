@@ -2484,9 +2484,36 @@ async function renderTemplatePageCanvas(tpl, inv, isMain){
             correctLevel: QRCode.CorrectLevel.M,
           });
         }catch(e){}
+      } else if(isPreserve && value.includes('\n')) {
+        // iOS fix: render multi-line as individual divs instead of pre-wrap
+        node.className = 'render-text preserve';
+        node.style.cssText =
+          `position:absolute;` +
+          `left:${x}px;top:${y}px;width:${w}px;height:${h}px;` +
+          `padding-top:${paddingTop}px;` +
+          `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
+          `color:${f.color || '#1a1a1a'};` +
+          `direction:${f.dir || 'rtl'};` +
+          `text-align:${f.align || 'right'};` +
+          `line-height:${lineHeight};` +
+          `letter-spacing:${letterSpacing}px;` +
+          `font-family:'IBM Plex Sans Arabic',sans-serif;` +
+          `overflow:hidden;box-sizing:border-box;` +
+          `display:flex;flex-direction:column;justify-content:flex-start;`;
+        const lines = value.split('\n');
+        for(const line of lines){
+          const lineDiv = document.createElement('div');
+          lineDiv.style.cssText =
+            `display:block;width:100%;` +
+            `direction:${f.dir || 'rtl'};` +
+            `text-align:${f.align || 'right'};` +
+            `white-space:normal;word-break:break-word;` +
+            `line-height:${lineHeight};`;
+          lineDiv.textContent = line;
+          node.appendChild(lineDiv);
+        }
       } else {
         node.className = 'render-text' + (isPreserve ? ' preserve' : '');
-        // text-align controls horizontal — no flex needed
         node.style.cssText =
           `position:absolute;` +
           `left:${x}px;top:${y}px;width:${w}px;height:${h}px;` +
@@ -2552,13 +2579,17 @@ async function exportInvoice(inv, templateId){
 
     for(let i = 0; i < pageDefs.length; i++){
       const p = pageDefs[i];
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const canvas = await html2canvas(p.stage, {
         backgroundColor: '#ffffff',
         useCORS: true,
+        allowTaint: true,
         logging: false,
-        scale: 2,
+        scale: isIOS ? 1 : 2,
         width: p.renderW,
         height: p.renderH,
+        imageTimeout: 0,
+        removeContainer: true,
       });
       const imgRatio = p.renderW / p.renderH;
       const pdfRatio = pdfW / pdfH;
