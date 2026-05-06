@@ -975,6 +975,7 @@
     <button data-page="invoices">الفواتير</button>
     <button data-page="new">إنشاء فاتورة</button>
     <button data-page="template">تصميم النموذج</button>
+    <button data-page="settings">الإعدادات</button>
     
   </nav>
   <span id="sync-status" style="font-size:0.75rem;color:var(--muted);white-space:nowrap"></span>
@@ -1361,6 +1362,69 @@
     </div>
   </section>
 
+  <!-- ============ SETTINGS ============ -->
+  <section class="page" data-pg="settings">
+    <div class="page-head">
+      <div>
+        <h2>الإعدادات</h2>
+        <div class="sub">ربط التطبيق بخدمات خارجية</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div style="background:#000;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4C4 2.89543 4.89543 2 6 2H18C19.1046 2 20 2.89543 20 4V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4Z" fill="white"/>
+            <path d="M8 7H12M8 11H14M8 15H11" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h3 style="font-size:16px;font-weight:700;margin:0">Notion</h3>
+          <div style="font-size:0.78rem;color:var(--muted)">ربط قاعدة بيانات Notion لمزامنة الفواتير</div>
+        </div>
+        <span id="notion-badge" style="margin-right:auto;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--bg);color:var(--muted);border:1px solid var(--line)">غير مرتبط</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label>مفتاح الدمج <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">(Integration Token)</span></label>
+          <input type="password" id="notion-token" placeholder="secret_... أو ntn_..." autocomplete="off"/>
+          <div class="hint">احصل عليه من notion.so/my-integrations — أنشئ تكاملاً داخلياً ثم انسخ المفتاح</div>
+        </div>
+        <div class="field full">
+          <label>معرّف قاعدة البيانات <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">(Database ID)</span></label>
+          <input type="text" id="notion-db-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" dir="ltr" autocomplete="off"/>
+          <div class="hint">من رابط قاعدة البيانات في Notion — الجزء بعد آخر شرطة مائلة وقبل علامة ؟</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveNotionSettings()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          حفظ الإعدادات
+        </button>
+        <button class="btn btn-ghost" id="notion-test-btn" onclick="testNotionConnection()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          اختبار الاتصال
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="clearNotionSettings()">حذف الربط</button>
+      </div>
+
+      <div id="notion-test-result" style="display:none;margin-top:14px;padding:12px 16px;border-radius:8px;font-size:0.85rem;line-height:1.5"></div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:0.78rem;line-height:1.8">
+        <strong style="color:var(--ink);display:block;margin-bottom:6px">كيفية الإعداد:</strong>
+        ١. اذهب إلى <strong>notion.so/my-integrations</strong> وأنشئ تكاملاً جديداً<br>
+        ٢. انسخ مفتاح الدمج (يبدأ بـ secret_ أو ntn_)<br>
+        ٣. افتح قاعدة البيانات في Notion، ثم اضغط ··· ← Connections ← أضف تكاملك<br>
+        ٤. انسخ معرّف قاعدة البيانات من الرابط وضعه في الحقل أعلاه<br>
+        ٥. احفظ واختبر الاتصال
+      </div>
+    </div>
+  </section>
+
+
 </main>
 
 
@@ -1381,6 +1445,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
     التصميم
   </button>
+  <button data-page="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    الإعدادات
+  </button>
 </nav>
 <div id="render-host" style="position:fixed;left:-99999px;top:0;background:white"></div>
 
@@ -1398,6 +1466,8 @@ const KEYS = {
   active:    'inv_active_template_v2',
   apiUrl:    'inv_api_url',
   apiKey:    'inv_api_key',
+  notionToken: 'inv_notion_token',
+  notionDbId:  'inv_notion_db_id',
 };
 
 const FIELDS = [
@@ -1570,11 +1640,158 @@ function goPage(name){
   if(name === 'invoices') renderInvoices();
   if(name === 'new') prepareForm();
   if(name === 'template') renderTemplatePage();
+  if(name === 'settings') renderSettingsPage();
 
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
 $$('#nav button').forEach(b => b.addEventListener('click', ()=>goPage(b.dataset.page)));
+
+/* =====================================================================
+   NOTION SETTINGS
+   ===================================================================== */
+function renderSettingsPage(){
+  const token = cache.get(KEYS.notionToken) || '';
+  const dbId  = cache.get(KEYS.notionDbId)  || '';
+  const inp_t = document.getElementById('notion-token');
+  const inp_d = document.getElementById('notion-db-id');
+  if(inp_t) inp_t.value = token ? '••••••••••••••••' : '';
+  if(inp_d) inp_d.value = dbId;
+  updateNotionBadge();
+  const res = document.getElementById('notion-test-result');
+  if(res){ res.style.display='none'; res.textContent=''; }
+}
+
+function updateNotionBadge(){
+  const badge = document.getElementById('notion-badge');
+  if(!badge) return;
+  const token = cache.get(KEYS.notionToken);
+  const dbId  = cache.get(KEYS.notionDbId);
+  if(token && dbId){
+    badge.textContent = 'مرتبط ✓';
+    badge.style.background = 'var(--accent-light)';
+    badge.style.color = 'var(--accent)';
+    badge.style.borderColor = 'var(--accent-mid)';
+  } else {
+    badge.textContent = 'غير مرتبط';
+    badge.style.background = 'var(--bg)';
+    badge.style.color = 'var(--muted)';
+    badge.style.borderColor = 'var(--line)';
+  }
+}
+
+function saveNotionSettings(){
+  const inp_t = document.getElementById('notion-token');
+  const inp_d = document.getElementById('notion-db-id');
+  const rawToken = (inp_t.value || '').trim();
+  const dbId     = (inp_d.value || '').trim();
+
+  const currentToken = cache.get(KEYS.notionToken) || '';
+  const tokenToSave = (rawToken === '••••••••••••••••') ? currentToken : rawToken;
+
+  if(!tokenToSave){ toast('الرجاء إدخال مفتاح الدمج', 'error'); return; }
+  if(!dbId){ toast('الرجاء إدخال معرّف قاعدة البيانات', 'error'); return; }
+  if(!tokenToSave.startsWith('secret_') && !tokenToSave.startsWith('ntn_')){
+    toast('صيغة مفتاح الدمج غير صحيحة (يجب أن يبدأ بـ secret_ أو ntn_)', 'error'); return;
+  }
+
+  cache.set(KEYS.notionToken, tokenToSave);
+  cache.set(KEYS.notionDbId, dbId);
+  if(inp_t) inp_t.value = '••••••••••••••••';
+  updateNotionBadge();
+  toast('تم حفظ إعدادات Notion ✓', 'success');
+}
+
+async function testNotionConnection(){
+  const token = cache.get(KEYS.notionToken);
+  const dbId  = cache.get(KEYS.notionDbId);
+  const resEl = document.getElementById('notion-test-result');
+  const btn   = document.getElementById('notion-test-btn');
+
+  if(!token || !dbId){ toast('احفظ الإعدادات أولاً', 'error'); return; }
+
+  resEl.style.display = 'block';
+  resEl.style.background = 'var(--bg)';
+  resEl.style.color = 'var(--muted)';
+  resEl.style.border = '1px solid var(--line)';
+  resEl.textContent = '⟳ جاري الاتصال بـ Notion...';
+  btn.disabled = true;
+
+  if(apiConfig.ready){
+    try{
+      const r = await apiCall('notion_test', { notionToken: token, notionDbId: dbId });
+      showNotionResult(resEl, true, r.msg || 'الاتصال ناجح ✓');
+      btn.disabled = false;
+      return;
+    } catch(e){ /* fallthrough to direct */ }
+  }
+
+  try{
+    const cleanId = dbId.replace(/-/g,'');
+    const formatted = cleanId.length === 32
+      ? cleanId.slice(0,8)+'-'+cleanId.slice(8,12)+'-'+cleanId.slice(12,16)+'-'+cleanId.slice(16,20)+'-'+cleanId.slice(20)
+      : dbId;
+
+    const res = await fetch('https://api.notion.com/v1/databases/'+formatted, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer '+token,
+        'Notion-Version': '2022-06-28',
+      }
+    });
+    if(res.ok){
+      const data = await res.json();
+      const title = (data.title && data.title[0] && data.title[0].plain_text) || 'قاعدة البيانات';
+      showNotionResult(resEl, true, 'الاتصال ناجح ✓ — "'+title+'"');
+    } else if(res.status === 401){
+      showNotionResult(resEl, false, 'مفتاح الدمج غير صحيح (401 Unauthorized)');
+    } else if(res.status === 404){
+      showNotionResult(resEl, false, 'قاعدة البيانات غير موجودة أو التكامل لا يملك صلاحية الوصول (404)');
+    } else {
+      showNotionResult(resEl, false, 'خطأ HTTP '+res.status);
+    }
+  } catch(e){
+    if(String(e.message).includes('Failed to fetch') || String(e).includes('NetworkError')){
+      showNotionResult(resEl, null, 'تم حفظ الإعدادات. لا يمكن الاختبار المباشر من المتصفح بسبب قيود CORS — سيعمل الربط عبر الباكند PHP.');
+    } else {
+      showNotionResult(resEl, false, 'خطأ في الاتصال: '+e.message);
+    }
+  }
+  btn.disabled = false;
+}
+
+function showNotionResult(el, ok, msg){
+  el.style.display = 'block';
+  if(ok === true){
+    el.style.background = '#f0faf4';
+    el.style.color = 'var(--success)';
+    el.style.border = '1px solid #b2dfc4';
+  } else if(ok === false){
+    el.style.background = 'var(--danger-light)';
+    el.style.color = 'var(--danger)';
+    el.style.border = '1px solid #f5c6c6';
+  } else {
+    el.style.background = '#fffbe6';
+    el.style.color = '#7a6200';
+    el.style.border = '1px solid #f0d060';
+  }
+  el.textContent = msg;
+}
+
+function clearNotionSettings(){
+  if(!confirm('هل تريد حذف إعدادات Notion؟')) return;
+  cache.set(KEYS.notionToken, '');
+  cache.set(KEYS.notionDbId, '');
+  const t = document.getElementById('notion-token');
+  const d = document.getElementById('notion-db-id');
+  if(t) t.value = '';
+  if(d) d.value = '';
+  const res = document.getElementById('notion-test-result');
+  if(res) res.style.display = 'none';
+  updateNotionBadge();
+  toast('تم حذف إعدادات Notion');
+}
+
 
 /* =====================================================================
    HOME
