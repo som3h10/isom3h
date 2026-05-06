@@ -97,7 +97,7 @@
     max-width:1100px;
     margin:0 auto;
     padding:24px 28px 60px;
-    padding-top:calc(24px + 56px + env(safe-area-inset-top, 0px));
+    padding-top:calc(24px + 90px + env(safe-area-inset-top, 0px));
   }
 
   /* ===== BUTTONS ===== */
@@ -913,7 +913,7 @@
     .topbar h1{font-size:0.82rem}
     .nav{gap:2px;flex-wrap:wrap;width:100%}
     .nav button{padding:6px 10px;font-size:0.75rem;flex:1;text-align:center;min-width:70px}
-    .container{padding:12px 12px 60px;padding-top:calc(12px + 52px + env(safe-area-inset-top, 0px))}
+    .container{padding:12px 12px 60px;padding-top:calc(12px + 90px + env(safe-area-inset-top, 0px))}
     .page-head{flex-direction:column;align-items:flex-start;gap:10px}
     .page-actions{flex-wrap:wrap;gap:6px;width:100%}
     .page-actions .btn{flex:1;min-width:100px;justify-content:center}
@@ -1809,18 +1809,23 @@ function renderHome(){
   const total = state.invoices.length;
   const sum = state.invoices.reduce((s,i)=>s+(Number(i.price)||0), 0);
   const tpls = Object.keys(state.templates).length;
+  const clients = new Set(state.invoices.map(i=>(i.client||'').trim()).filter(Boolean)).size;
   $('#stats').innerHTML = `
     <div class="stat">
-      <div class="lbl">Invoices</div>
+      <div class="lbl">الفواتير</div>
       <div class="val">${total}</div>
     </div>
     <div class="stat">
-      <div class="lbl">Total · SAR</div>
+      <div class="lbl">الإجمالي · ر.س</div>
       <div class="val">${fmtMoney(sum)} <small>ر.س</small></div>
     </div>
     <div class="stat">
-      <div class="lbl">Templates</div>
+      <div class="lbl">النماذج</div>
       <div class="val">${tpls}</div>
+    </div>
+    <div class="stat">
+      <div class="lbl">العملاء</div>
+      <div class="val">${clients}</div>
     </div>
   `;
 
