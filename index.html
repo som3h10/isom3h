@@ -1379,55 +1379,98 @@
       </div>
     </div>
 
+    <!-- بطاقة الإعدادات -->
     <div class="card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
         <div style="background:#000;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 4C4 2.89543 4.89543 2 6 2H18C19.1046 2 20 2.89543 20 4V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4Z" fill="white"/>
-            <path d="M8 7H12M8 11H14M8 15H11" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 4C4 2.89543 4.89543 2 6 2H18C19.1046 2 20 2.89543 20 4V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4Z" fill="white"/><path d="M8 7H12M8 11H14M8 15H11" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
         <div>
           <h3 style="font-size:16px;font-weight:700;margin:0">Notion</h3>
-          <div style="font-size:0.78rem;color:var(--muted)">ربط قاعدة بيانات Notion لمزامنة الفواتير</div>
+          <div style="font-size:0.78rem;color:var(--muted)">مزامنة الفواتير عبر قاعدة بيانات Notion</div>
         </div>
         <span id="notion-badge" style="margin-right:auto;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--bg);color:var(--muted);border:1px solid var(--line)">غير مرتبط</span>
       </div>
 
       <div class="form-grid">
         <div class="field full">
-          <label>مفتاح الدمج <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">(Integration Token)</span></label>
+          <label>مفتاح الدمج <span class="req">*</span></label>
           <input type="password" id="notion-token" placeholder="secret_... أو ntn_..." autocomplete="off"/>
-          <div class="hint">احصل عليه من notion.so/my-integrations — أنشئ تكاملاً داخلياً ثم انسخ المفتاح</div>
         </div>
         <div class="field full">
-          <label>معرّف قاعدة البيانات <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">(Database ID)</span></label>
-          <input type="text" id="notion-db-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" dir="ltr" autocomplete="off"/>
-          <div class="hint">من رابط قاعدة البيانات في Notion — الجزء بعد آخر شرطة مائلة وقبل علامة ؟</div>
+          <label>معرّف قاعدة البيانات <span class="req">*</span></label>
+          <input type="text" id="notion-db-id" placeholder="358ee80d5bb280ee89b5edbdddf58b8c" dir="ltr" autocomplete="off"/>
+        </div>
+        <div class="field full">
+          <label>رابط Cloudflare Worker <span class="req">*</span></label>
+          <input type="url" id="notion-proxy" placeholder="https://your-worker.workers.dev" dir="ltr" autocomplete="off"/>
+          <div class="hint">انشئ Worker مجاني على Cloudflare — الكود موجود أدناه</div>
         </div>
       </div>
 
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="saveNotionSettings()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          حفظ الإعدادات
-        </button>
-        <button class="btn btn-ghost" id="notion-test-btn" onclick="testNotionConnection()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          اختبار الاتصال
-        </button>
+        <button class="btn btn-primary" onclick="saveNotionSettings()">حفظ الإعدادات</button>
         <button class="btn btn-danger btn-sm" onclick="clearNotionSettings()">حذف الربط</button>
       </div>
-
       <div id="notion-test-result" style="display:none;margin-top:14px;padding:12px 16px;border-radius:8px;font-size:0.85rem;line-height:1.5"></div>
+    </div>
 
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:0.78rem;line-height:1.8">
-        <strong style="color:var(--ink);display:block;margin-bottom:6px">كيفية الإعداد:</strong>
-        ١. اذهب إلى <strong>notion.so/my-integrations</strong> وأنشئ تكاملاً جديداً<br>
-        ٢. انسخ مفتاح الدمج (يبدأ بـ secret_ أو ntn_)<br>
-        ٣. افتح قاعدة البيانات في Notion، ثم اضغط ··· ← Connections ← أضف تكاملك<br>
-        ٤. انسخ معرّف قاعدة البيانات من الرابط وضعه في الحقل أعلاه<br>
-        ٥. احفظ واختبر الاتصال
+    <!-- بطاقة المزامنة -->
+    <div class="card" id="sync-card" style="display:none">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">المزامنة مع Notion</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="btn btn-primary" onclick="fullSync()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          مزامنة الكل
+        </button>
+        <button class="btn btn-ghost" onclick="syncFromNotion()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          استيراد من Notion
+        </button>
+        <button class="btn btn-ghost" onclick="syncToNotion()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          رفع إلى Notion
+        </button>
+      </div>
+      <div id="sync-result" style="font-size:0.82rem;color:var(--muted)"></div>
+      <div id="last-sync-label" style="font-size:0.75rem;color:var(--muted);margin-top:6px"></div>
+    </div>
+
+    <!-- كود الـ Worker -->
+    <div class="card">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:4px">كود Cloudflare Worker</h3>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">انسخ هذا الكود وضعه في workers.cloudflare.com — مجاني تماماً</div>
+      <div style="position:relative">
+        <pre id="worker-code" style="background:#1a1a1a;color:#e8e8e8;padding:14px;border-radius:8px;font-size:0.72rem;direction:ltr;text-align:left;overflow-x:auto;line-height:1.6;margin:0;white-space:pre">export default {
+  async fetch(request) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
+        'Access-Control-Allow-Headers': '*',
+      }});
+    }
+    const url = new URL(request.url);
+    const notionUrl = 'https://api.notion.com' + url.pathname + url.search;
+    const headers = new Headers(request.headers);
+    headers.delete('host');
+    const res = await fetch(notionUrl, {
+      method: request.method, headers, body: request.body
+    });
+    const out = new Headers(res.headers);
+    out.set('Access-Control-Allow-Origin', '*');
+    return new Response(res.body, { status: res.status, headers: out });
+  }
+};</pre>
+        <button class="btn btn-sm btn-ghost" onclick="copyWorkerCode()" style="position:absolute;top:8px;left:8px">نسخ</button>
+      </div>
+      <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);line-height:1.8">
+        <strong style="color:var(--ink);display:block;margin-bottom:6px">خطوات الإعداد:</strong>
+        ١. اذهب إلى <strong>workers.cloudflare.com</strong> وسجّل دخول (مجاني)<br>
+        ٢. اضغط <strong>Create Worker</strong> ← احذف الكود الموجود ← الصق الكود أعلاه<br>
+        ٣. اضغط <strong>Deploy</strong> — انسخ رابط الـ Worker<br>
+        ٤. ضع الرابط في حقل "رابط Cloudflare Worker" أعلاه<br>
+        ٥. اضغط <strong>مزامنة الكل</strong> وبتشوف فواتيرك في Notion
       </div>
     </div>
   </section>
@@ -1474,8 +1517,10 @@ const KEYS = {
   active:    'inv_active_template_v2',
   apiUrl:    'inv_api_url',
   apiKey:    'inv_api_key',
-  notionToken: 'inv_notion_token',
-  notionDbId:  'inv_notion_db_id',
+  notionToken:  'inv_notion_token',
+  notionDbId:   'inv_notion_db_id',
+  notionProxy:  'inv_notion_proxy',
+  notionLastSync: 'inv_notion_last_sync',
 };
 
 const FIELDS = [
@@ -1661,21 +1706,28 @@ $$('#nav button').forEach(b => b.addEventListener('click', ()=>goPage(b.dataset.
 function renderSettingsPage(){
   const token = cache.get(KEYS.notionToken) || '';
   const dbId  = cache.get(KEYS.notionDbId)  || '';
+  const proxy = cache.get(KEYS.notionProxy) || '';
   const inp_t = document.getElementById('notion-token');
   const inp_d = document.getElementById('notion-db-id');
+  const inp_p = document.getElementById('notion-proxy');
   if(inp_t) inp_t.value = token ? '••••••••••••••••' : '';
   if(inp_d) inp_d.value = dbId;
+  if(inp_p) inp_p.value = proxy;
   updateNotionBadge();
   const res = document.getElementById('notion-test-result');
   if(res){ res.style.display='none'; res.textContent=''; }
+  updateLastSyncLabel();
 }
 
 function updateNotionBadge(){
   const badge = document.getElementById('notion-badge');
+  const card  = document.getElementById('sync-card');
   if(!badge) return;
   const token = cache.get(KEYS.notionToken);
   const dbId  = cache.get(KEYS.notionDbId);
-  if(token && dbId){
+  const proxy = cache.get(KEYS.notionProxy);
+  const ready = !!(token && dbId && proxy);
+  if(ready){
     badge.textContent = 'مرتبط ✓';
     badge.style.background = 'var(--accent-light)';
     badge.style.color = 'var(--accent)';
@@ -1686,25 +1738,37 @@ function updateNotionBadge(){
     badge.style.color = 'var(--muted)';
     badge.style.borderColor = 'var(--line)';
   }
+  if(card) card.style.display = ready ? 'block' : 'none';
+}
+
+function updateLastSyncLabel(){
+  const el = document.getElementById('last-sync-label');
+  if(!el) return;
+  const t = cache.get(KEYS.notionLastSync);
+  el.textContent = t ? 'آخر مزامنة: ' + new Date(t).toLocaleString('ar-SA') : '';
 }
 
 function saveNotionSettings(){
   const inp_t = document.getElementById('notion-token');
   const inp_d = document.getElementById('notion-db-id');
+  const inp_p = document.getElementById('notion-proxy');
   const rawToken = (inp_t.value || '').trim();
   const dbId     = (inp_d.value || '').trim();
+  const proxy    = (inp_p.value || '').trim().replace(/\/$/, '');
 
   const currentToken = cache.get(KEYS.notionToken) || '';
   const tokenToSave = (rawToken === '••••••••••••••••') ? currentToken : rawToken;
 
   if(!tokenToSave){ toast('الرجاء إدخال مفتاح الدمج', 'error'); return; }
   if(!dbId){ toast('الرجاء إدخال معرّف قاعدة البيانات', 'error'); return; }
+  if(!proxy){ toast('الرجاء إدخال رابط الـ Worker', 'error'); return; }
   if(!tokenToSave.startsWith('secret_') && !tokenToSave.startsWith('ntn_')){
     toast('صيغة مفتاح الدمج غير صحيحة (يجب أن يبدأ بـ secret_ أو ntn_)', 'error'); return;
   }
 
   cache.set(KEYS.notionToken, tokenToSave);
   cache.set(KEYS.notionDbId, dbId);
+  cache.set(KEYS.notionProxy, proxy);
   if(inp_t) inp_t.value = '••••••••••••••••';
   updateNotionBadge();
   toast('تم حفظ إعدادات Notion ✓', 'success');
@@ -1788,16 +1852,18 @@ function showNotionResult(el, ok, msg){
 
 function clearNotionSettings(){
   if(!confirm('هل تريد حذف إعدادات Notion؟')) return;
-  cache.set(KEYS.notionToken, '');
-  cache.set(KEYS.notionDbId, '');
-  const t = document.getElementById('notion-token');
-  const d = document.getElementById('notion-db-id');
-  if(t) t.value = '';
-  if(d) d.value = '';
+  [KEYS.notionToken, KEYS.notionDbId, KEYS.notionProxy, KEYS.notionLastSync].forEach(k => cache.set(k, ''));
+  ['notion-token','notion-db-id','notion-proxy'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   const res = document.getElementById('notion-test-result');
   if(res) res.style.display = 'none';
   updateNotionBadge();
+  updateLastSyncLabel();
   toast('تم حذف إعدادات Notion');
+}
+
+function copyWorkerCode(){
+  const code = document.getElementById('worker-code').textContent;
+  navigator.clipboard.writeText(code).then(()=>toast('تم نسخ الكود ✓','success')).catch(()=>toast('تعذّر النسخ','error'));
 }
 
 
@@ -3139,6 +3205,194 @@ window.addEventListener('load', syncTopbarHeight);
 window.addEventListener('resize', syncTopbarHeight);
 new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
 
+
+/* =====================================================================
+   NOTION SYNC ENGINE
+   ===================================================================== */
+function notionReady(){
+  return !!(cache.get(KEYS.notionToken) && cache.get(KEYS.notionDbId) && cache.get(KEYS.notionProxy));
+}
+
+async function notionCall(method, path, body){
+  const token = cache.get(KEYS.notionToken);
+  const proxy = (cache.get(KEYS.notionProxy) || '').replace(/\/$/, '');
+  const url   = proxy + path;
+  const opts  = {
+    method,
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2022-06-28',
+    }
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  const json = await res.json();
+  if(!res.ok) throw new Error(json.message || ('Notion error ' + res.status));
+  return json;
+}
+
+function invToRichText(inv){
+  const str = JSON.stringify(inv);
+  const chunks = [];
+  for(let i = 0; i < str.length; i += 1990) chunks.push({ text:{ content: str.slice(i, i+1990) } });
+  return chunks;
+}
+
+function richTextToInv(rt){
+  try{ return JSON.parse((rt || []).map(r => r.plain_text).join('')); }
+  catch{ return null; }
+}
+
+function invTitle(inv){
+  const parts = [inv.docNumber, inv.client].filter(Boolean);
+  return parts.join(' — ') || 'فاتورة';
+}
+
+async function notionQueryAll(){
+  const dbId = cache.get(KEYS.notionDbId);
+  let results = [], cursor;
+  do {
+    const body = { page_size: 100 };
+    if(cursor) body.start_cursor = cursor;
+    const r = await notionCall('POST', '/v1/databases/' + dbId + '/query', body);
+    results = results.concat(r.results || []);
+    cursor = r.has_more ? r.next_cursor : null;
+  } while(cursor);
+  return results;
+}
+
+async function syncToNotion(){
+  if(!notionReady()){ toast('إعدادات Notion غير مكتملة', 'error'); return; }
+  const el = document.getElementById('sync-result');
+  if(el) el.textContent = '⟳ جاري الرفع إلى Notion...';
+
+  try{
+    const pages = await notionQueryAll();
+    const pageMap = {};
+    pages.forEach(p => {
+      const id = p.properties['ID']?.rich_text?.[0]?.plain_text;
+      if(id) pageMap[id] = p.id;
+    });
+
+    let created = 0, updated = 0;
+    const dbId = cache.get(KEYS.notionDbId);
+
+    for(const inv of state.invoices){
+      const props = {
+        'الاسم': { title: [{ text: { content: invTitle(inv) } }] },
+        'ID':    { rich_text: [{ text: { content: inv.id } }] },
+        'بيانات':{ rich_text: invToRichText(inv) },
+      };
+      if(pageMap[inv.id]){
+        await notionCall('PATCH', '/v1/pages/' + pageMap[inv.id], { properties: props });
+        updated++;
+      } else {
+        await notionCall('POST', '/v1/pages', { parent: { database_id: dbId }, properties: props });
+        created++;
+      }
+    }
+
+    cache.set(KEYS.notionLastSync, new Date().toISOString());
+    updateLastSyncLabel();
+    const msg = 'تم الرفع ✓ — ' + created + ' جديدة، ' + updated + ' محدّثة';
+    if(el){ el.textContent = msg; el.style.color = 'var(--accent)'; }
+    setSyncStatus('ok', 'Notion');
+    toast(msg, 'success');
+  } catch(e){
+    const msg = 'خطأ: ' + e.message;
+    if(el){ el.textContent = msg; el.style.color = 'var(--danger)'; }
+    setSyncStatus('error');
+    toast(msg, 'error');
+  }
+}
+
+async function syncFromNotion(){
+  if(!notionReady()){ toast('إعدادات Notion غير مكتملة', 'error'); return; }
+  const el = document.getElementById('sync-result');
+  if(el) el.textContent = '⟳ جاري الاستيراد من Notion...';
+
+  try{
+    const pages = await notionQueryAll();
+    const invoices = pages
+      .filter(p => !p.archived)
+      .map(p => richTextToInv(p.properties['بيانات']?.rich_text))
+      .filter(Boolean);
+
+    state.invoices = invoices;
+    cache.set(KEYS.invoices, invoices);
+    cache.set(KEYS.notionLastSync, new Date().toISOString());
+    updateLastSyncLabel();
+    renderHome();
+    const msg = 'تم الاستيراد ✓ — ' + invoices.length + ' فاتورة';
+    if(el){ el.textContent = msg; el.style.color = 'var(--accent)'; }
+    setSyncStatus('ok', 'Notion');
+    toast(msg, 'success');
+  } catch(e){
+    const msg = 'خطأ: ' + e.message;
+    if(el){ el.textContent = msg; el.style.color = 'var(--danger)'; }
+    setSyncStatus('error');
+    toast(msg, 'error');
+  }
+}
+
+async function fullSync(){
+  if(!notionReady()){ toast('إعدادات Notion غير مكتملة', 'error'); return; }
+  const el = document.getElementById('sync-result');
+  setSyncStatus('syncing');
+  if(el) el.textContent = '⟳ مزامنة...';
+  try{
+    // Pull first, then push merged result
+    const pages = await notionQueryAll();
+    const pageMap = {};
+    const notionInvs = [];
+    pages.filter(p => !p.archived).forEach(p => {
+      const id = p.properties['ID']?.rich_text?.[0]?.plain_text;
+      if(id) pageMap[id] = p.id;
+      const inv = richTextToInv(p.properties['بيانات']?.rich_text);
+      if(inv) notionInvs.push(inv);
+    });
+
+    // Merge: local wins for same ID (local is newer)
+    const localIds = new Set(state.invoices.map(i => i.id));
+    const notionOnly = notionInvs.filter(i => !localIds.has(i.id));
+    const merged = [...state.invoices, ...notionOnly];
+    state.invoices = merged;
+    cache.set(KEYS.invoices, merged);
+
+    // Push all to Notion
+    const dbId = cache.get(KEYS.notionDbId);
+    let created = 0, updated = 0;
+    for(const inv of merged){
+      const props = {
+        'الاسم': { title: [{ text: { content: invTitle(inv) } }] },
+        'ID':    { rich_text: [{ text: { content: inv.id } }] },
+        'بيانات':{ rich_text: invToRichText(inv) },
+      };
+      if(pageMap[inv.id]){
+        await notionCall('PATCH', '/v1/pages/' + pageMap[inv.id], { properties: props });
+        updated++;
+      } else {
+        await notionCall('POST', '/v1/pages', { parent: { database_id: dbId }, properties: props });
+        created++;
+      }
+    }
+
+    cache.set(KEYS.notionLastSync, new Date().toISOString());
+    updateLastSyncLabel();
+    renderHome();
+    const msg = 'مزامنة كاملة ✓ — ' + merged.length + ' فاتورة';
+    if(el){ el.textContent = msg; el.style.color = 'var(--accent)'; }
+    setSyncStatus('ok', 'Notion');
+    toast(msg, 'success');
+  } catch(e){
+    const msg = 'خطأ: ' + e.message;
+    if(el){ el.textContent = msg; el.style.color = 'var(--danger)'; }
+    setSyncStatus('error');
+    toast(msg, 'error');
+  }
+}
+
 /* =====================================================================
    BOOT
    ===================================================================== */
@@ -3146,6 +3400,13 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
   await loadStateFromServer();
   renderHome();
   renderItemsCheckboxes();
+  // auto-sync from Notion on load if configured
+  if(notionReady()){
+    setSyncStatus('syncing');
+    try{
+      await syncFromNotion();
+    } catch(e){ setSyncStatus('error'); }
+  }
 })();
 </script>
 
