@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -58,13 +58,14 @@
     background:var(--card);
     border-bottom:1px solid var(--line);
     padding:13px 28px;
+    padding-top:calc(13px + env(safe-area-inset-top, 0px));
     display:flex;
     align-items:center;
     justify-content:space-between;
     flex-wrap:wrap;
     gap:12px;
-    position:sticky;
-    top:0;
+    position:fixed;
+    top:0;left:0;right:0;
     z-index:50;
   }
   .topbar h1{
@@ -96,6 +97,7 @@
     max-width:1100px;
     margin:0 auto;
     padding:24px 28px 60px;
+    padding-top:calc(24px + 56px + env(safe-area-inset-top, 0px));
   }
 
   /* ===== BUTTONS ===== */
@@ -907,11 +909,11 @@
 
   /* ===== MOBILE RESPONSIVE ===== */
   @media (max-width:480px){
-    .topbar{padding:10px 14px;flex-wrap:wrap;gap:8px}
+    .topbar{padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top, 0px));flex-wrap:wrap;gap:8px}
     .topbar h1{font-size:0.82rem}
     .nav{gap:2px;flex-wrap:wrap;width:100%}
     .nav button{padding:6px 10px;font-size:0.75rem;flex:1;text-align:center;min-width:70px}
-    .container{padding:12px 12px 60px}
+    .container{padding:12px 12px 60px;padding-top:calc(12px + 52px + env(safe-area-inset-top, 0px))}
     .page-head{flex-direction:column;align-items:flex-start;gap:10px}
     .page-actions{flex-wrap:wrap;gap:6px;width:100%}
     .page-actions .btn{flex:1;min-width:100px;justify-content:center}
@@ -938,7 +940,7 @@
   /* Bottom Nav for Mobile */
   @media (max-width:600px){
     .topbar .nav{display:none}
-    body{padding-bottom:70px}
+    body{padding-bottom:calc(70px + env(safe-area-inset-bottom, 0px))}
     .bottom-nav{
       display:flex;
       position:fixed;
@@ -946,7 +948,7 @@
       background:var(--card);
       border-top:1px solid var(--line);
       z-index:100;
-      padding:6px 0 env(safe-area-inset-bottom, 6px);
+      padding:6px 0;padding-bottom:max(env(safe-area-inset-bottom, 8px), 8px);
     }
     .bottom-nav button{
       flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
