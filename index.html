@@ -1053,8 +1053,7 @@
         </div>
         <div class="field">
           <label>رقم الوثيقة</label>
-          <input type="text" id="f-docNumber" placeholder="FL-46140955" />
-          <div class="hint">يُولّد تلقائياً إذا تركته فارغاً</div>
+          <input type="text" id="f-docNumber" value="FL-46140955" readonly style="background:var(--bg);color:var(--muted);cursor:default"/>
         </div>
 
         <div class="field">
@@ -1626,7 +1625,7 @@ function currencySymbol(c){
 }
 
 function genDocNumber(){
-  return 'FL-' + Math.floor(10000000 + Math.random()*90000000);
+  return 'FL-46140955';
 }
 
 /* =====================================================================
