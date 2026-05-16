@@ -1632,7 +1632,10 @@ function currencySymbol(c){
 }
 
 function genDocNumber(){
-  return 'FL-' + Math.floor(10000000 + Math.random()*90000000);
+  const last = parseInt(cache.get('inv_doc_counter') || '0', 10);
+  const next = last + 1;
+  cache.set('inv_doc_counter', String(next));
+  return 'FL-' + String(next).padStart(5, '0');
 }
 
 /* =====================================================================
