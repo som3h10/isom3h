@@ -1067,6 +1067,7 @@
         <div class="field">
           <label>اسم العميل (الطرف الثاني) <span class="req">*</span></label>
           <input type="text" id="f-client" placeholder="KAD - كاد" />
+          <input type="text" id="f-client2" placeholder="سطر ثانٍ — اختياري" style="margin-top:6px"/>
         </div>
         <div class="field">
           <label>الطرف الأول</label>
@@ -1076,6 +1077,7 @@
         <div class="field full">
           <label>اسم المشروع <span class="req">*</span></label>
           <input type="text" id="f-project" placeholder="تصميم هوية بصرية" />
+          <input type="text" id="f-project2" placeholder="سطر ثانٍ — اختياري" style="margin-top:6px"/>
         </div>
 
         <div class="field">
@@ -1128,12 +1130,12 @@
         </div>
 
         <div class="field">
-          <label>اسم البنك</label>
-          <input type="text" id="f-bankName" placeholder="بنك الراجحي" />
-        </div>
-        <div class="field">
-          <label>رقم الحساب / IBAN</label>
-          <input type="text" id="f-account" placeholder="SA3580000280608016255698" />
+          <label>مدة التنفيذ</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:var(--ink-soft);white-space:nowrap">مدة التنفيذ</span>
+            <input type="number" id="f-deliveryDays" value="15" min="1" style="width:80px;text-align:center"/>
+            <span style="color:var(--ink-soft);white-space:nowrap">يوم</span>
+          </div>
         </div>
 
         <div class="field full">
@@ -1885,14 +1887,15 @@ function prepareForm(){
     $('#f-type').value = 'عرض سعر';
     $('#f-docNumber').value = '';
     $('#f-client').value = '';
+    $('#f-client2').value = '';
     $('#f-firstParty').value = 'إسماعيل الحربي';
     $('#f-project').value = '';
+    $('#f-project2').value = '';
     $('#f-projectType').value = '';
     $('#f-date').value = new Date().toISOString().slice(0,10);
     $('#f-price').value = '';
     $('#f-currency').value = 'ريال';
-    $('#f-bankName').value = 'بنك الراجحي';
-    $('#f-account').value = 'SA3580000280608016255698';
+    $('#f-deliveryDays').value = '15';
     $('#f-notes').value = '';
     resetItemsState();
   }
@@ -1903,15 +1906,16 @@ function readForm(){
     type: $('#f-type').value,
     docNumber: $('#f-docNumber').value.trim() || genDocNumber(),
     client: $('#f-client').value.trim(),
+    client2: $('#f-client2').value.trim(),
     firstParty: $('#f-firstParty').value.trim(),
     project: $('#f-project').value.trim(),
+    project2: $('#f-project2').value.trim(),
     projectType: $('#f-projectType').value.trim(),
     date: $('#f-date').value,
     price: Number($('#f-price').value)||0,
     currency: $('#f-currency').value,
     items: $('#f-items').value.trim(),
-    bankName: $('#f-bankName').value.trim(),
-    account: $('#f-account').value.trim(),
+    deliveryDays: Number($('#f-deliveryDays').value)||15,
     notes: $('#f-notes').value.trim(),
   };
 }
@@ -1920,14 +1924,15 @@ function fillForm(inv){
   $('#f-type').value = inv.type || 'عرض سعر';
   $('#f-docNumber').value = inv.docNumber || '';
   $('#f-client').value = inv.client || '';
+  $('#f-client2').value = inv.client2 || '';
   $('#f-firstParty').value = inv.firstParty || '';
   $('#f-project').value = inv.project || '';
+  $('#f-project2').value = inv.project2 || '';
   $('#f-projectType').value = inv.projectType || '';
   $('#f-date').value = inv.date || '';
   $('#f-price').value = inv.price || '';
   $('#f-currency').value = inv.currency || 'ريال';
-  $('#f-bankName').value = inv.bankName || '';
-  $('#f-account').value = inv.account || '';
+  $('#f-deliveryDays').value = inv.deliveryDays || 15;
   $('#f-notes').value = inv.notes || '';
   loadItemsFromText(inv.items || '');
 }
