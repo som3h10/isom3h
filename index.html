@@ -1797,7 +1797,7 @@ async function autoSync(){
   if(!gistReady()) return;
   setSyncStatus('syncing');
   try{
-    await writeToGist();
+    await writeToGist(state.invoices);
     cache.set(KEYS.lastSync, new Date().toISOString());
     updateLastSyncLabel();
     setSyncStatus('ok','Gist');
