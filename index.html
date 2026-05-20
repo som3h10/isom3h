@@ -1935,15 +1935,12 @@ function renderInvoices(){
 
 function recentTable(list){
   let html = `<table><thead><tr>
-    <th>العميل</th><th>المشروع</th><th>رقم</th><th>النوع</th><th>التاريخ</th><th>السعر</th><th></th>
+    <th>العميل</th><th>المشروع</th><th>المبلغ</th><th></th>
   </tr></thead><tbody>`;
   for(const inv of list){
     html += `<tr class="hover-row" data-id="${inv.id}">
       <td><strong>${escapeHTML(inv.client||'—')}</strong></td>
       <td>${escapeHTML(inv.project||'')}</td>
-      <td><span class="doc-num">${escapeHTML(inv.docNumber||'')}</span></td>
-      <td><span class="badge ${inv.type==='فاتورة'?'badge-invoice':'badge-quote'}">${escapeHTML(inv.type||'عرض سعر')}</span></td>
-      <td>${escapeHTML(fmtDate(inv.date))}</td>
       <td class="price">${fmtMoney(inv.price)} <small style="color:var(--muted);font-weight:500">${escapeHTML(currencySymbol(inv.currency))}</small></td>
       <td><div class="row-actions">
         <button class="icon-btn" data-act="export" title="تصدير PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
