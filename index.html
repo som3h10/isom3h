@@ -1977,7 +1977,6 @@ function prepareForm(){
     $('#form-title').textContent = 'فاتورة جديدة';
     $('#form-sub').textContent = 'عبّي البيانات ثم اضغط حفظ أو تصدير PDF';
     $('#f-type').value = 'عرض سعر';
-    $('#f-docNumber').value = '';
     $('#f-client').value = '';
     $('#f-client2').value = '';
     $('#f-firstParty').value = 'إسماعيل الحربي';
@@ -1996,7 +1995,7 @@ function prepareForm(){
 function readForm(){
   return {
     type: $('#f-type').value,
-    docNumber: $('#f-docNumber').value.trim() || genDocNumber(),
+    docNumber: genDocNumber(),
     client: $('#f-client').value.trim(),
     client2: $('#f-client2').value.trim(),
     firstParty: $('#f-firstParty').value.trim(),
@@ -2014,7 +2013,6 @@ function readForm(){
 
 function fillForm(inv){
   $('#f-type').value = inv.type || 'عرض سعر';
-  $('#f-docNumber').value = inv.docNumber || '';
   $('#f-client').value = inv.client || '';
   $('#f-client2').value = inv.client2 || '';
   $('#f-firstParty').value = inv.firstParty || '';
