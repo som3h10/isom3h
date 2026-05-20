@@ -1080,7 +1080,7 @@
 
         <div class="field">
           <label>اسم العميل (الطرف الثاني) <span class="req">*</span></label>
-          <input type="text" id="f-client" placeholder="KAD - كاد" />
+          <input type="text" id="f-client" placeholder="اسم العميل أو الشركة" />
           <input type="text" id="f-client2" placeholder="سطر ثانٍ — اختياري" style="margin-top:6px"/>
         </div>
         <div class="field">
@@ -1450,7 +1450,15 @@
         <div id="sync-result" style="font-size:0.82rem;color:var(--muted)"></div>
         <div id="last-sync-label" style="font-size:0.75rem;color:var(--muted);margin-top:6px"></div>
       </div>
+
+    <div style="padding-top:18px;border-top:1px solid var(--line);margin-top:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h4 style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0">بنود المشروع</h4>
+        <button class="btn btn-sm btn-ghost" onclick="addSettingsItem()">+ إضافة بند</button>
+      </div>
+      <div id="settings-items-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
     </div>
+  </div>
 
     <!-- كارد مخفي للتوافق مع الكود القديم -->
     <div id="sync-card" style="display:none"></div>
@@ -1501,6 +1509,7 @@ const KEYS = {
   gistToken: 'inv_gist_token',
   gistId:    'inv_gist_id',
   lastSync:  'inv_last_sync',
+  customItems: 'inv_items_v1',
 };
 
 const FIELDS = [
@@ -1693,6 +1702,7 @@ function renderSettingsPage(){
   const lbl = document.getElementById('account-id-label');
   if(lbl) lbl.textContent = cache.get(KEYS.gistId) || '—';
   updateLastSyncLabel();
+  renderSettingsItems();
 }
 
 function updateGistBadge(){ /* kept for compatibility */ }
@@ -1777,13 +1787,20 @@ async function gistCall(method, body){
 async function readFromGist(){
   const data = await gistCall('GET');
   const file = data.files['isom3h-invoices.json'];
-  if(!file) return [];
+  if(!file) return {};
   const raw = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
-  try{ return JSON.parse(raw).invoices||[]; } catch{ return []; }
+  try{ return JSON.parse(raw); } catch{ return {}; }
 }
 
-async function writeToGist(invoices){
-  await gistCall('PATCH',{ files:{ 'isom3h-invoices.json':{ content: JSON.stringify({invoices, lastSync:new Date().toISOString()}) } } });
+async function writeToGist(){
+  const payload = {
+    invoices: state.invoices,
+    templates: state.templates,
+    activeTemplateId: state.activeTemplateId,
+    customItems: ALL_ITEMS,
+    lastSync: new Date().toISOString()
+  };
+  await gistCall('PATCH',{ files:{ 'isom3h-invoices.json':{ content: JSON.stringify(payload) } } });
 }
 
 function setSyncEl(msg, color){
@@ -1795,8 +1812,12 @@ async function syncFromGist(){
   if(!gistReady()){ toast('احفظ الإعدادات أولاً','error'); return; }
   setSyncEl('⟳ جاري الاستيراد...','var(--muted)'); setSyncStatus('syncing');
   try{
-    const invoices = await readFromGist();
-    state.invoices=invoices; cache.set(KEYS.invoices,invoices);
+    const d = await readFromGist();
+    const invoices = Array.isArray(d) ? d : (d.invoices||[]);
+    state.invoices = invoices; cache.set(KEYS.invoices, invoices);
+    if(d.templates && typeof d.templates==='object'){ state.templates=d.templates; cache.set(KEYS.templates,d.templates); }
+    if(d.activeTemplateId){ state.activeTemplateId=d.activeTemplateId; cache.set(KEYS.active,d.activeTemplateId); }
+    if(d.customItems && Array.isArray(d.customItems) && d.customItems.length){ ALL_ITEMS=d.customItems; cache.set(KEYS.customItems,d.customItems); renderItemsCheckboxes(); renderSettingsItems(); }
     cache.set(KEYS.lastSync,new Date().toISOString()); updateLastSyncLabel(); renderHome();
     setSyncEl('استيراد ✓ — '+invoices.length+' فاتورة','var(--accent)');
     setSyncStatus('ok','Gist'); toast('تم الاستيراد ✓','success');
@@ -1807,7 +1828,7 @@ async function syncToGist(){
   if(!gistReady()){ toast('احفظ الإعدادات أولاً','error'); return; }
   setSyncEl('⟳ جاري الرفع...','var(--muted)'); setSyncStatus('syncing');
   try{
-    await writeToGist(state.invoices);
+    await writeToGist();
     cache.set(KEYS.lastSync,new Date().toISOString()); updateLastSyncLabel();
     setSyncEl('رفع ✓ — '+state.invoices.length+' فاتورة','var(--accent)');
     setSyncStatus('ok','Gist'); toast('تم الرفع ✓','success');
@@ -1818,11 +1839,15 @@ async function fullSync(){
   if(!gistReady()){ toast('احفظ الإعدادات أولاً','error'); return; }
   setSyncEl('⟳ مزامنة...','var(--muted)'); setSyncStatus('syncing');
   try{
-    const remote  = await readFromGist();
+    const d = await readFromGist();
+    const remote = Array.isArray(d) ? d : (d.invoices||[]);
     const localIds = new Set(state.invoices.map(i=>i.id));
-    const merged   = [...state.invoices, ...remote.filter(i=>!localIds.has(i.id))];
+    const merged = [...state.invoices, ...remote.filter(i=>!localIds.has(i.id))];
     state.invoices=merged; cache.set(KEYS.invoices,merged);
-    await writeToGist(merged);
+    if(d.templates && typeof d.templates==='object' && !Object.keys(state.templates).length){ state.templates=d.templates; cache.set(KEYS.templates,d.templates); }
+    if(d.activeTemplateId && !state.activeTemplateId){ state.activeTemplateId=d.activeTemplateId; cache.set(KEYS.active,d.activeTemplateId); }
+    if(d.customItems && Array.isArray(d.customItems) && d.customItems.length){ ALL_ITEMS=d.customItems; cache.set(KEYS.customItems,d.customItems); renderItemsCheckboxes(); renderSettingsItems(); }
+    await writeToGist();
     cache.set(KEYS.lastSync,new Date().toISOString()); updateLastSyncLabel(); renderHome();
     setSyncEl('مزامنة كاملة ✓ — '+merged.length+' فاتورة','var(--accent)');
     setSyncStatus('ok','Gist'); toast('مزامنة كاملة ✓','success');
@@ -1833,7 +1858,7 @@ async function autoSync(){
   if(!gistReady()) return;
   setSyncStatus('syncing');
   try{
-    await writeToGist(state.invoices);
+    await writeToGist();
     cache.set(KEYS.lastSync, new Date().toISOString());
     updateLastSyncLabel();
     setSyncStatus('ok','Gist');
@@ -2892,7 +2917,7 @@ async function exportInvoice(inv, templateId){
 /* =====================================================================
    PROJECT ITEMS — checkboxes + custom
    ===================================================================== */
-const ALL_ITEMS = [
+let ALL_ITEMS = [
   // أولاً: تصميم الشعار والهوية البصرية الأساسية
   { id:'i1',  text:'تحديد الألوان الأساسية والثانوية للعلامة.', types:['logo','identity'] },
   { id:'i2',  text:'اختيار الخطوط الطباعية (عربي/إنجليزي).', types:['logo','identity'] },
@@ -2938,6 +2963,68 @@ const TYPE_KEY_MAP = {
   'تصميم بروفايل Profile Design':'profile',
   'تصميم كتب Book Design':'book',
 };
+
+function loadAllItems(){
+  const saved = cache.get(KEYS.customItems);
+  if(saved && Array.isArray(saved) && saved.length) ALL_ITEMS = saved;
+}
+function saveAllItems(){
+  cache.set(KEYS.customItems, ALL_ITEMS);
+  autoSync();
+}
+
+const TYPE_LABELS = { logo:'شعار', identity:'هوية', social:'منشورات', profile:'بروفايل', book:'كتب' };
+
+function renderSettingsItems(){
+  const host = document.getElementById('settings-items-list');
+  if(!host) return;
+  host.innerHTML='';
+  ALL_ITEMS.forEach((item,idx)=>{
+    const row = document.createElement('div');
+    row.style.cssText='background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px';
+    const typeChecks = Object.entries(TYPE_LABELS).map(([k,l])=>
+      `<label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" ${item.types.includes(k)?'checked':''} onchange="toggleItemType(${idx},'${k}',this.checked)" style="width:13px;height:13px;accent-color:var(--accent);margin:0"/>
+        ${l}</label>`
+    ).join('');
+    row.innerHTML=`
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <textarea rows="2" style="flex:1;font-size:0.82rem;resize:vertical;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);line-height:1.4" onchange="updateSettingsItemText(${idx},this.value)">${item.text.replace(/</g,'&lt;')}</textarea>
+        <button type="button" onclick="deleteSettingsItem(${idx})" style="color:var(--danger);font-size:18px;line-height:1;padding:4px;background:none;border:none;cursor:pointer;flex-shrink:0">×</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${typeChecks}</div>`;
+    host.appendChild(row);
+  });
+}
+
+function addSettingsItem(){
+  ALL_ITEMS.push({ id:'c'+Date.now(), text:'بند جديد', types:['identity'] });
+  renderSettingsItems();
+  renderItemsCheckboxes();
+  saveAllItems();
+}
+
+function deleteSettingsItem(idx){
+  ALL_ITEMS.splice(idx,1);
+  renderSettingsItems();
+  renderItemsCheckboxes();
+  saveAllItems();
+}
+
+function updateSettingsItemText(idx, text){
+  if(ALL_ITEMS[idx]) ALL_ITEMS[idx].text = text.trim();
+  renderItemsCheckboxes();
+  saveAllItems();
+}
+
+function toggleItemType(idx, type, checked){
+  if(!ALL_ITEMS[idx]) return;
+  const t = ALL_ITEMS[idx].types;
+  if(checked && !t.includes(type)) t.push(type);
+  if(!checked) ALL_ITEMS[idx].types = t.filter(x=>x!==type);
+  renderItemsCheckboxes();
+  saveAllItems();
+}
 
 let itemsState = { selected:new Set(), custom:[], order:[] };
 
@@ -3255,6 +3342,7 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
    ===================================================================== */
 (async()=>{
   await loadStateFromServer();
+  loadAllItems();
   renderHome();
   renderItemsCheckboxes();
   initItemsDragSort();
