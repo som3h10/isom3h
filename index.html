@@ -1440,7 +1440,8 @@
             مزامنة الكل
           </button>
           <button class="btn btn-ghost" onclick="syncFromGist()">استيراد</button>
-          <button class="btn btn-ghost" onclick="syncToGist()">رفع</button>
+          <button class="btn btn-ghost" onclick="syncToGist()">رفع البيانات</button>
+          <button class="btn btn-ghost" onclick="syncTemplates()">رفع النماذج</button>
         </div>
         <div id="sync-result" style="font-size:0.82rem;color:var(--muted)"></div>
         <div id="last-sync-label" style="font-size:0.75rem;color:var(--muted);margin-top:6px"></div>
@@ -1787,14 +1788,14 @@ async function readFromGist(){
   try{ return JSON.parse(raw); } catch{ return {}; }
 }
 
-async function writeToGist(){
+async function writeToGist({ withTemplates=true }={}){
   const payload = {
     invoices: state.invoices,
-    templates: state.templates,
-    activeTemplateId: state.activeTemplateId,
     customItems: ALL_ITEMS,
+    activeTemplateId: state.activeTemplateId,
     lastSync: new Date().toISOString()
   };
+  if(withTemplates) payload.templates = state.templates;
   await gistCall('PATCH',{ files:{ 'isom3h-invoices.json':{ content: JSON.stringify(payload) } } });
 }
 
@@ -1810,7 +1811,10 @@ async function syncFromGist(){
     const d = await readFromGist();
     const invoices = Array.isArray(d) ? d : (d.invoices||[]);
     state.invoices = invoices; cache.set(KEYS.invoices, invoices);
-    if(d.templates && typeof d.templates==='object'){ state.templates=d.templates; cache.set(KEYS.templates,d.templates); }
+    if(d.templates && typeof d.templates==='object' && Object.keys(d.templates).length){
+      state.templates=d.templates; cache.set(KEYS.templates,d.templates);
+      renderSavedTemplates(); renderTemplatePage();
+    }
     if(d.activeTemplateId){ state.activeTemplateId=d.activeTemplateId; cache.set(KEYS.active,d.activeTemplateId); }
     if(d.customItems && Array.isArray(d.customItems) && d.customItems.length){ ALL_ITEMS=d.customItems; cache.set(KEYS.customItems,d.customItems); renderItemsCheckboxes(); renderSettingsItems(); }
     cache.set(KEYS.lastSync,new Date().toISOString()); updateLastSyncLabel(); renderHome();
@@ -1853,7 +1857,18 @@ async function autoSync(){
   if(!gistReady()) return;
   setSyncStatus('syncing');
   try{
-    await writeToGist();
+    await writeToGist({ withTemplates: false });
+    cache.set(KEYS.lastSync, new Date().toISOString());
+    updateLastSyncLabel();
+    setSyncStatus('ok','Gist');
+  } catch(e){ setSyncStatus('error'); }
+}
+
+async function syncTemplates(){
+  if(!gistReady()) return;
+  setSyncStatus('syncing');
+  try{
+    await writeToGist({ withTemplates: true });
     cache.set(KEYS.lastSync, new Date().toISOString());
     updateLastSyncLabel();
     setSyncStatus('ok','Gist');
@@ -2673,6 +2688,7 @@ async function tplSaveCurrent(){
     await db.setActive(id);
   }
   toast('تم حفظ النموذج','success');
+  syncTemplates();
   // back to empty state to see all templates
   state.builder = {
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
