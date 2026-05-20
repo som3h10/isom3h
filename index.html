@@ -1493,22 +1493,23 @@ const KEYS = {
 
 const FIELDS = [
   // key, label, default font size, default direction, sample value getter
-  { key:'docTitleAr',    label:'عنوان (عربي)',     size:48, dir:'rtl', weight:'800' },
-  { key:'docTitleEn',    label:'عنوان (إنجليزي)',  size:30, dir:'ltr', weight:'500' },
-  { key:'client',        label:'اسم العميل',        size:14, dir:'rtl', weight:'700' },
-  { key:'firstParty',    label:'الطرف الأول',       size:14, dir:'rtl', weight:'700' },
-  { key:'project',       label:'اسم المشروع',       size:14, dir:'rtl', weight:'700' },
-  { key:'projectType',   label:'نوع المشروع',       size:13, dir:'rtl', weight:'500' },
-  { key:'date',          label:'التاريخ',           size:14, dir:'ltr', weight:'500' },
-  { key:'docNumber',     label:'رقم الوثيقة',      size:12, dir:'ltr', weight:'500' },
-  { key:'docNumberEn',   label:'رقم (إنجليزي)',    size:11, dir:'ltr', weight:'500' },
-  { key:'price',         label:'السعر',             size:24, dir:'ltr', weight:'800' },
-  { key:'currency',      label:'العملة',            size:18, dir:'rtl', weight:'500' },
-  { key:'items',         label:'بنود المشروع',     size:13, dir:'rtl', weight:'400', preserve:true },
-  { key:'bankName',      label:'اسم البنك',         size:13, dir:'rtl', weight:'500' },
-  { key:'account',       label:'رقم الحساب',        size:12, dir:'ltr', weight:'500' },
-  { key:'notes',         label:'ملاحظات',           size:12, dir:'rtl', weight:'400', preserve:true },
-  { key:'qrcode',        label:'باركود QR',         size:14, dir:'ltr', weight:'400', kind:'qr' },
+  { key:'docTitleAr',    label:'عنوان (عربي)',          size:48, dir:'rtl', weight:'800' },
+  { key:'docTitleEn',    label:'عنوان (إنجليزي)',       size:30, dir:'ltr', weight:'500' },
+  { key:'client',        label:'اسم العميل',             size:14, dir:'rtl', weight:'700' },
+  { key:'client2',       label:'العميل - سطر 2',        size:13, dir:'rtl', weight:'500' },
+  { key:'firstParty',    label:'الطرف الأول',            size:14, dir:'rtl', weight:'700' },
+  { key:'project',       label:'اسم المشروع',            size:14, dir:'rtl', weight:'700' },
+  { key:'project2',      label:'المشروع - سطر 2',       size:13, dir:'rtl', weight:'500' },
+  { key:'projectType',   label:'نوع المشروع',            size:13, dir:'rtl', weight:'500' },
+  { key:'date',          label:'التاريخ',                size:14, dir:'ltr', weight:'500' },
+  { key:'docNumber',     label:'رقم الوثيقة',           size:12, dir:'ltr', weight:'500' },
+  { key:'docNumberEn',   label:'رقم (إنجليزي)',         size:11, dir:'ltr', weight:'500' },
+  { key:'price',         label:'السعر',                  size:24, dir:'ltr', weight:'800' },
+  { key:'currency',      label:'العملة',                 size:18, dir:'rtl', weight:'500' },
+  { key:'deliveryDays',  label:'مدة التنفيذ',           size:13, dir:'rtl', weight:'500' },
+  { key:'items',         label:'بنود المشروع',          size:13, dir:'rtl', weight:'400', preserve:true },
+  { key:'notes',         label:'ملاحظات',                size:12, dir:'rtl', weight:'400', preserve:true },
+  { key:'qrcode',        label:'باركود QR',              size:14, dir:'ltr', weight:'400', kind:'qr' },
 ];
 
 const FIELD_MAP = Object.fromEntries(FIELDS.map(f => [f.key, f]));
@@ -2625,20 +2626,21 @@ function resolveFieldValue(inv, key){
   switch(key){
     case 'docTitleAr':   return inv.type === 'فاتورة' ? 'فاتورة' : 'عرض سعر';
     case 'docTitleEn':   return inv.type === 'فاتورة' ? 'Invoice' : 'Price offer';
-    case 'client':       return inv.client || '';
-    case 'firstParty':   return inv.firstParty || '';
-    case 'project':      return inv.project || '';
-    case 'projectType':  return inv.projectType || '';
-    case 'date':         return fmtDate(inv.date);
-    case 'docNumber':    return inv.docNumber || '';
-    case 'docNumberEn':  return 'Doc ID ' + (inv.docNumber || '');
-    case 'price':        return fmtMoney(inv.price);
-    case 'currency':     return currencySymbol(inv.currency);
-    case 'items':        return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'• '+l).join('\n');
-    case 'bankName':     return inv.bankName || '';
-    case 'account':      return inv.account || '';
-    case 'notes':        return inv.notes || '';
-    case 'qrcode':       return inv.account || inv.docNumber || '';
+    case 'client':        return inv.client || '';
+    case 'client2':       return inv.client2 || '';
+    case 'firstParty':    return inv.firstParty || '';
+    case 'project':       return inv.project || '';
+    case 'project2':      return inv.project2 || '';
+    case 'projectType':   return inv.projectType || '';
+    case 'date':          return fmtDate(inv.date);
+    case 'docNumber':     return inv.docNumber || '';
+    case 'docNumberEn':   return 'Doc ID ' + (inv.docNumber || '');
+    case 'price':         return fmtMoney(inv.price);
+    case 'currency':      return currencySymbol(inv.currency);
+    case 'deliveryDays':  return (inv.deliveryDays || 15) + ' يوم';
+    case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'• '+l).join('\n');
+    case 'notes':         return inv.notes || '';
+    case 'qrcode':        return inv.docNumber || '';
     default:             return '';
   }
 }
