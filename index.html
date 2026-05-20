@@ -1734,7 +1734,7 @@ async function doLogin(){
     try{ await syncFromGist(); } catch(e){ setSyncStatus('error'); }
   } catch(e){
     cache.set(KEYS.gistToken,''); cache.set(KEYS.gistId,'');
-    errEl.textContent = 'بيانات غير صحيحة، تحقق من المعرّف والرمز';
+    errEl.textContent = 'خطأ: ' + (e.message||'فشل الاتصال');
     errEl.style.display = 'block';
   } finally{
     btn.disabled = false; btn.textContent = 'دخول';
