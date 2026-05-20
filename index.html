@@ -1948,6 +1948,7 @@ async function saveInvoice(){
   } else {
     inv = { id: uid('inv'), ...data, createdAt: Date.now() };
     state.invoices.unshift(inv);
+    state.form.editingId = inv.id;
   }
   await db.saveInvoice(inv);
   toast('تم الحفظ', 'success');
@@ -2832,39 +2833,43 @@ async function exportInvoice(inv, templateId){
    PROJECT ITEMS — checkboxes + custom
    ===================================================================== */
 const ALL_ITEMS = [
-  // شعار + هوية
-  { id:'i1',  text:'تصميم الشعار بمفهومين مختلفين للاختيار من بينهما.', types:['logo','identity'] },
-  { id:'i2',  text:'تنفيذ التعديلات على المفهوم المختار (حتى 3 مراجعات).', types:['logo','identity'] },
-  { id:'i3',  text:'تحديد الألوان الأساسية والثانوية للعلامة.', types:['logo','identity'] },
-  { id:'i4',  text:'اختيار الخطوط الطباعية (عربي/إنجليزي).', types:['logo','identity'] },
-  { id:'i5',  text:'تسليم الشعار بصيغ متعددة جاهزة للاستخدام (AI, PDF, PNG, SVG).', types:['logo','identity'] },
-  { id:'i6',  text:'تسليم نسخ الشعار (ملوّن، أبيض، أسود، أحادي اللون).', types:['logo','identity'] },
-  // هوية فقط
-  { id:'i7',  text:'تصميم بطاقة العمل (Business Card) — وجهين.', types:['identity','profile'] },
-  { id:'i8',  text:'تصميم دليل هوية مختصر (Mini Brand Guidelines) — صفحتان.', types:['identity'] },
-  { id:'i9',  text:'تصميم المطبوعات الرسمية (ورق مراسلات، أظرف، فولدر).', types:['identity'] },
+  // أولاً: تصميم الشعار والهوية البصرية الأساسية
+  { id:'i1',  text:'تحديد الألوان الأساسية والثانوية للعلامة.', types:['logo','identity'] },
+  { id:'i2',  text:'اختيار الخطوط الطباعية (عربي/إنجليزي).', types:['logo','identity'] },
+  { id:'i3',  text:'تصميم الشعار بمفهومين مختلفين للاختيار من بينهما.', types:['logo','identity'] },
+  { id:'i4',  text:'تنفيذ التعديلات على المفهوم المختار (حتى 3 مراجعات).', types:['logo','identity'] },
+  { id:'i5',  text:'تسليم نسخ الشعار (ملوّن، أبيض، أسود، أحادي اللون).', types:['logo','identity'] },
+  { id:'i6',  text:'تسليم الشعار بصيغ متعددة جاهزة للاستخدام (AI, PDF, PNG, SVG).', types:['logo','identity'] },
+  // ثانياً: تطبيقات الهوية البصرية
+  { id:'i7',  text:'تصميم الهوية البصرية الفرعية أو المشتقة.', types:['identity'] },
+  { id:'i8',  text:'تصميم المطبوعات الرسمية (ورق مراسلات، أظرف، فولدر).', types:['identity'] },
+  { id:'i9',  text:'تصميم بطاقة العمل (Business Card) — وجهين.', types:['identity','profile'] },
   { id:'i10', text:'تصميم ختم الشركة.', types:['identity'] },
-  { id:'i11', text:'تصميم 3 قوالب لمنصات التواصل الاجتماعي.', types:['identity','social'] },
-  { id:'i12', text:'تصميم توقيع البريد الإلكتروني (Email Signature).', types:['identity'] },
-  { id:'i13', text:'تصميم الهوية البصرية الفرعية أو المشتقة.', types:['identity'] },
+  { id:'i11', text:'تصميم توقيع البريد الإلكتروني (Email Signature).', types:['identity'] },
+  { id:'i12', text:'تصميم 3 قوالب لمنصات التواصل الاجتماعي.', types:['identity','social'] },
+  // ثالثاً: دليل الهوية البصرية
+  { id:'i13', text:'تصميم دليل هوية مختصر (Mini Brand Guidelines) — صفحتان.', types:['identity'] },
   { id:'i14', text:'تصميم دليل استخدام الهوية (Brand Guidelines) حتى 20 صفحة.', types:['identity'] },
-  { id:'i15', text:'تصميم دليل استخدام الهوية المتكامل (يشمل: استخدامات الشعار، المساحات الآمنة، الممنوعات، تطبيقات الهوية، نبرة الصوت البصرية).', types:['identity'] },
+  { id:'i15', text:'تصميم دليل هوية متكامل (شعار، تطبيقات، ممنوعات، نبرة بصرية).', types:['identity'] },
+  // رابعاً: المواد التسويقية والتقديمية
   { id:'i16', text:'تصميم بروفايل الشركة (Company Profile) حتى 10 صفحات.', types:['identity','profile'] },
   { id:'i17', text:'تصميم قالب عرض تقديمي (PowerPoint Template) متوافق مع الهوية.', types:['identity'] },
-  // منشورات تواصل
-  { id:'i18', text:'تصميم 10 منشورات بأبعاد مختلفة (مربع، ستوري، بانر).', types:['social'] },
-  { id:'i19', text:'تصميم قوالب قابلة للتعديل (Editable Templates).', types:['social'] },
-  { id:'i20', text:'تطابق التصاميم مع ألوان وهوية العلامة.', types:['social'] },
-  { id:'i21', text:'كتابة نصوص قصيرة (Captions) لكل منشور — اختياري.', types:['social'] },
-  { id:'i22', text:'تسليم الملفات بصيغ جاهزة للنشر (JPG, PNG) + ملفات المصدر.', types:['social'] },
-  // بروفايل
-  { id:'i23', text:'تصميم أغلفة الصفحات الرسمية (Facebook, LinkedIn, X/Twitter, YouTube).', types:['profile'] },
-  { id:'i24', text:'تصميم صورة الملف الشخصي (Profile Picture) متوافقة مع كل منصة.', types:['profile'] },
-  // كتب
-  { id:'i25', text:'تصميم غلاف الكتاب (أمامي وخلفي وكعب الكتاب).', types:['book'] },
-  { id:'i26', text:'تصميم وتنسيق الصفحات الداخلية (Layout).', types:['book'] },
-  { id:'i27', text:'اختيار الخطوط والألوان المناسبة لمحتوى الكتاب.', types:['book'] },
+  // خامساً: إدارة وتصميم منصات التواصل الاجتماعي
+  { id:'i18', text:'تصميم صورة الملف الشخصي (Profile Picture) متوافقة مع كل منصة.', types:['social','profile'] },
+  { id:'i19', text:'تصميم أغلفة الصفحات الرسمية (Facebook, LinkedIn, X/Twitter, YouTube).', types:['social','profile'] },
+  { id:'i20', text:'تصميم 10 منشورات بأبعاد مختلفة (مربع، ستوري، بانر).', types:['social'] },
+  { id:'i21', text:'تطابق التصاميم مع ألوان وهوية العلامة.', types:['social'] },
+  { id:'i22', text:'تصميم قوالب قابلة للتعديل (Editable Templates).', types:['social'] },
+  { id:'i23', text:'كتابة نصوص قصيرة (Captions) لكل منشور — اختياري.', types:['social'] },
+  { id:'i24', text:'تسليم الملفات بصيغ جاهزة للنشر (JPG, PNG) + ملفات المصدر.', types:['social'] },
+  // سادساً: تصميم وتنسيق الكتب
+  { id:'i25', text:'اختيار الخطوط والألوان المناسبة لمحتوى الكتاب.', types:['book'] },
+  { id:'i26', text:'تصميم غلاف الكتاب (أمامي وخلفي وكعب الكتاب).', types:['book'] },
+  { id:'i27', text:'تصميم وتنسيق الصفحات الداخلية (Layout).', types:['book'] },
   { id:'i28', text:'تصميم فهرس المحتويات وأرقام الصفحات.', types:['book'] },
+  { id:'i29', text:'مراجعة التنسيق النهائي قبل الطباعة.', types:['book'] },
+  { id:'i30', text:'تسليم ملف PDF جاهز للطباعة (Print-Ready) بمواصفات المطبعة.', types:['book'] },
+];
   { id:'i29', text:'مراجعة التنسيق النهائي قبل الطباعة.', types:['book'] },
   { id:'i30', text:'تسليم ملف PDF جاهز للطباعة (Print-Ready) بمواصفات المطبعة.', types:['book'] },
 ];
