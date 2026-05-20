@@ -312,6 +312,20 @@
     line-height:1.4;
     user-select:none;
   }
+  .drag-handle{
+    cursor:grab;
+    color:var(--muted);
+    font-size:16px;
+    padding:0 4px 0 0;
+    flex-shrink:0;
+    user-select:none;
+    touch-action:none;
+    opacity:0.5;
+    line-height:1;
+  }
+  .drag-handle:active{cursor:grabbing;opacity:1}
+  .item-row.dragging{opacity:0.35;background:var(--bg)!important}
+  .item-row.drag-over{border-color:var(--accent)!important;background:var(--accent-light)!important}
   .item-row .item-sep{
     width:100%;
     border:none;
@@ -1957,20 +1971,17 @@ async function saveInvoice(){
   }
   await db.saveInvoice(inv);
   toast('تم الحفظ', 'success');
+  const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
+  if(tplId){
+    try{ await exportInvoice(inv, tplId); } catch(e){ console.error('export error',e); }
+  } else {
+    toast('لا يوجد نموذج — لم يتم التصدير','');
+  }
   return inv;
 }
 
 async function saveAndExport(){
-  const inv = await saveInvoice();
-  if(!inv) return;
-  const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
-  if(!tplId){
-    toast('يجب تصميم نموذج أولاً','error');
-    goPage('template');
-    return;
-  }
-  await exportInvoice(inv, tplId);
-  // stay on form; user can keep editing
+  await saveInvoice();
 }
 
 function editInvoice(id){
@@ -2884,7 +2895,7 @@ const TYPE_KEY_MAP = {
   'تصميم كتب Book Design':'book',
 };
 
-let itemsState = { selected:new Set(), custom:[] };
+let itemsState = { selected:new Set(), custom:[], order:[] };
 
 function getTypeKey(){
   const el = document.getElementById('f-projectType');
@@ -2907,48 +2918,48 @@ function renderItemsCheckboxes(){
   const host = document.getElementById('items-checkboxes');
   if(!host) return;
   const typeKey = getTypeKey();
-  const visible = typeKey ? ALL_ITEMS.filter(i=>i.types.includes(typeKey)) : ALL_ITEMS;
+  const preset = typeKey ? ALL_ITEMS.filter(i=>i.types.includes(typeKey)) : ALL_ITEMS;
+  const allIds = [...preset.map(i=>i.id), ...itemsState.custom.map((_,ci)=>'custom-'+ci)];
+  // maintain existing order, drop removed ids, append new ids
+  itemsState.order = itemsState.order.filter(id=>allIds.includes(id));
+  allIds.forEach(id=>{ if(!itemsState.order.includes(id)) itemsState.order.push(id); });
+
   host.innerHTML='';
-  visible.forEach(item=>{
-    const checked = itemsState.selected.has(item.id);
+  itemsState.order.forEach(id=>{
+    let text, isCustom, ci;
+    if(id.startsWith('custom-')){
+      ci = parseInt(id.split('-')[1]);
+      text = itemsState.custom[ci];
+      if(text===undefined) return;
+      isCustom = true;
+    } else {
+      const item = ALL_ITEMS.find(x=>x.id===id);
+      if(!item) return;
+      text = item.text;
+      isCustom = false;
+    }
+    const checked = itemsState.selected.has(id);
     const row = document.createElement('div');
     row.className = 'item-row'+(checked?' checked':'');
-    row.innerHTML = `<input type="checkbox" id="chk-${item.id}" ${checked?'checked':''}/>
-      <label class="item-text" for="chk-${item.id}">${item.text.replace(/</g,'&lt;')}</label>`;
+    row.draggable = true;
+    row.dataset.id = id;
+    row.innerHTML = `<span class="drag-handle" title="اسحب للترتيب">⠿</span>
+      <input type="checkbox" id="chk-${id}" ${checked?'checked':''}/>
+      <label class="item-text" for="chk-${id}">${text.replace(/</g,'&lt;')}</label>
+      ${isCustom?`<button type="button" style="color:var(--danger);font-size:16px;line-height:1;padding:0 4px;flex-shrink:0" onclick="removeCustomItem(${ci})">×</button>`:''}`;
     row.querySelector('input').addEventListener('change',e=>{
-      if(e.target.checked) itemsState.selected.add(item.id);
-      else itemsState.selected.delete(item.id);
+      if(e.target.checked) itemsState.selected.add(id);
+      else itemsState.selected.delete(id);
       row.classList.toggle('checked',e.target.checked);
       syncItemsTextarea();
     });
     row.addEventListener('click',e=>{
-      if(e.target.tagName==='INPUT'||e.target.tagName==='LABEL') return;
+      if(e.target.tagName==='INPUT'||e.target.tagName==='LABEL'||e.target.classList.contains('drag-handle')) return;
       const cb=row.querySelector('input'); cb.checked=!cb.checked;
       cb.dispatchEvent(new Event('change'));
     });
     host.appendChild(row);
   });
-  if(itemsState.custom.length){
-    const hr=document.createElement('div');
-    hr.innerHTML='<hr style="border:none;border-top:1px dashed var(--line);margin:4px 8px"/>';
-    host.appendChild(hr);
-    itemsState.custom.forEach((text,ci)=>{
-      const cid='custom-'+ci;
-      const checked=itemsState.selected.has(cid);
-      const row=document.createElement('div');
-      row.className='item-row'+(checked?' checked':'');
-      row.innerHTML=`<input type="checkbox" id="chk-${cid}" ${checked?'checked':''}/>
-        <label class="item-text" for="chk-${cid}">${text.replace(/</g,'&lt;')}</label>
-        <button type="button" style="color:var(--danger);font-size:16px;line-height:1;padding:0 4px;flex-shrink:0" onclick="removeCustomItem(${ci})">×</button>`;
-      row.querySelector('input').addEventListener('change',e=>{
-        if(e.target.checked) itemsState.selected.add(cid);
-        else itemsState.selected.delete(cid);
-        row.classList.toggle('checked',e.target.checked);
-        syncItemsTextarea();
-      });
-      host.appendChild(row);
-    });
-  }
   syncItemsTextarea();
 }
 
@@ -2970,8 +2981,16 @@ function removeCustomItem(ci){
 }
 function syncItemsTextarea(){
   const lines=[];
-  ALL_ITEMS.forEach(item=>{ if(itemsState.selected.has(item.id)) lines.push(item.text); });
-  itemsState.custom.forEach((text,ci)=>{ if(itemsState.selected.has('custom-'+ci)) lines.push(text); });
+  itemsState.order.forEach(id=>{
+    if(!itemsState.selected.has(id)) return;
+    if(id.startsWith('custom-')){
+      const ci=parseInt(id.split('-')[1]);
+      if(itemsState.custom[ci]!==undefined) lines.push(itemsState.custom[ci]);
+    } else {
+      const item=ALL_ITEMS.find(x=>x.id===id);
+      if(item) lines.push(item.text);
+    }
+  });
   const ta=document.getElementById('f-items'); if(ta) ta.value=lines.join('\n');
   const count=lines.length;
   const lbl=document.getElementById('items-count-label');
@@ -2986,14 +3005,63 @@ function syncItemsTextarea(){
     } else prev.hidden=true;
   }
 }
-function resetItemsState(){ itemsState={selected:new Set(),custom:[]}; renderItemsCheckboxes(); }
+function resetItemsState(){ itemsState={selected:new Set(),custom:[],order:[]}; renderItemsCheckboxes(); }
+
+function initItemsDragSort(){
+  const host = document.getElementById('items-checkboxes');
+  if(!host) return;
+  let dragging = null;
+
+  function finalizeOrder(){
+    itemsState.order = [...host.querySelectorAll('.item-row[draggable]')].map(r=>r.dataset.id);
+    syncItemsTextarea();
+  }
+  function rowAt(y){
+    return [...host.querySelectorAll('.item-row[draggable]')].find(r=>{
+      const b=r.getBoundingClientRect(); return y>=b.top && y<=b.bottom;
+    });
+  }
+  function moveNear(over){
+    if(!over||over===dragging||!dragging) return;
+    const rows=[...host.querySelectorAll('.item-row[draggable]')];
+    if(rows.indexOf(dragging)<rows.indexOf(over)) over.after(dragging);
+    else over.before(dragging);
+  }
+
+  // touch
+  host.addEventListener('touchstart',e=>{
+    const h=e.target.closest('.drag-handle'); if(!h) return;
+    dragging=h.closest('.item-row[draggable]'); if(!dragging) return;
+    dragging.classList.add('dragging');
+    e.preventDefault();
+  },{passive:false});
+  host.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    e.preventDefault();
+    moveNear(rowAt(e.touches[0].clientY));
+  },{passive:false});
+  host.addEventListener('touchend',()=>{
+    if(!dragging) return;
+    dragging.classList.remove('dragging'); dragging=null; finalizeOrder();
+  });
+
+  // mouse
+  host.addEventListener('dragstart',e=>{
+    dragging=e.target.closest('.item-row[draggable]'); if(!dragging){e.preventDefault();return;}
+    dragging.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain','');
+  });
+  host.addEventListener('dragend',()=>{ if(dragging){dragging.classList.remove('dragging');dragging=null;} });
+  host.addEventListener('dragover',e=>{ e.preventDefault(); moveNear(e.target.closest('.item-row[draggable]')); });
+  host.addEventListener('drop',e=>{ e.preventDefault(); finalizeOrder(); });
+}
 function loadItemsFromText(text){
-  itemsState={selected:new Set(),custom:[]};
+  itemsState={selected:new Set(),custom:[],order:[]};
   if(!text){ renderItemsCheckboxes(); return; }
   text.split('\n').map(l=>l.trim()).filter(Boolean).forEach(line=>{
     const match=ALL_ITEMS.find(i=>i.text===line);
-    if(match) itemsState.selected.add(match.id);
-    else { const ci=itemsState.custom.length; itemsState.custom.push(line); itemsState.selected.add('custom-'+ci); }
+    if(match){ itemsState.selected.add(match.id); itemsState.order.push(match.id); }
+    else { const ci=itemsState.custom.length; itemsState.custom.push(line); const cid='custom-'+ci; itemsState.selected.add(cid); itemsState.order.push(cid); }
   });
   renderItemsCheckboxes();
 }
@@ -3145,6 +3213,7 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
   await loadStateFromServer();
   renderHome();
   renderItemsCheckboxes();
+  initItemsDragSort();
   if(gistReady()){
     setSyncStatus('syncing');
     try{ await syncFromGist(); } catch(e){ setSyncStatus('error'); }
