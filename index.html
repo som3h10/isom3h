@@ -1716,16 +1716,19 @@ async function doLogin(){
   if(!user) { errEl.textContent='أدخل معرّف الحساب'; errEl.style.display='block'; return; }
   if(!pass) { errEl.textContent='أدخل رمز الدخول';   errEl.style.display='block'; return; }
   btn.disabled = true; btn.textContent = 'جاري التحقق...';
-  let token, gistId;
+  let token, gistId, isBuiltIn = false;
   try {
     const dec = _xd(_EC[0], user+pass);
-    if(dec.startsWith('ghp_')||dec.startsWith('github_pat_')){ token=dec; gistId=_xd(_EC[1],user+pass); }
-    else { token=pass; gistId=user; }
-  } catch(e){ token=pass; gistId=user; }
+    if(dec.startsWith('ghp_')||dec.startsWith('github_pat_')){
+      token = dec; gistId = _xd(_EC[1], user+pass); isBuiltIn = true;
+    } else { token = pass; gistId = user; }
+  } catch(e){ token = pass; gistId = user; }
+
   try{
     cache.set(KEYS.gistToken, token);
     cache.set(KEYS.gistId, gistId);
-    await readFromGist(); // validates credentials
+    // للبيانات المضمنة: لا نحتاج التحقق من الشبكة
+    if(!isBuiltIn) await readFromGist();
     document.getElementById('gist-token').value = '';
     document.getElementById('gist-id').value    = '';
     renderSettingsPage();
@@ -1734,7 +1737,7 @@ async function doLogin(){
     try{ await syncFromGist(); } catch(e){ setSyncStatus('error'); }
   } catch(e){
     cache.set(KEYS.gistToken,''); cache.set(KEYS.gistId,'');
-    errEl.textContent = 'خطأ: ' + (e.message||'فشل الاتصال');
+    errEl.textContent = 'بيانات غير صحيحة';
     errEl.style.display = 'block';
   } finally{
     btn.disabled = false; btn.textContent = 'دخول';
@@ -1760,12 +1763,11 @@ function clearGistSettings(){ doLogout(); }
 async function gistCall(method, body){
   const token  = cache.get(KEYS.gistToken);
   const gistId = cache.get(KEYS.gistId);
+  const headers = { 'Authorization':'token '+token };
+  if(body) headers['Content-Type'] = 'application/json';
   const res = await fetch('https://api.github.com/gists/'+gistId, {
     method,
-    headers: Object.assign(
-      { 'Authorization':'token '+token, 'Accept':'application/vnd.github+json' },
-      body ? { 'Content-Type':'application/json' } : {}
-    ),
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.message||'GitHub error '+res.status); }
