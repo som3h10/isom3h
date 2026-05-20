@@ -1501,7 +1501,7 @@ const FIELDS = [
   { key:'projectType',   label:'نوع المشروع',            size:13, dir:'rtl', weight:'500' },
   { key:'date',          label:'التاريخ',                size:14, dir:'ltr', weight:'500' },
   { key:'docNumber',     label:'رقم الوثيقة',           size:12, dir:'ltr', weight:'500' },
-  { key:'docNumberEn',   label:'رقم (إنجليزي)',         size:11, dir:'ltr', weight:'500' },
+
   { key:'price',         label:'السعر',                  size:24, dir:'ltr', weight:'800' },
   { key:'deliveryDays',  label:'مدة التنفيذ',           size:13, dir:'rtl', weight:'500' },
   { key:'items',         label:'بنود المشروع',          size:13, dir:'rtl', weight:'400', preserve:true },
@@ -2630,7 +2630,7 @@ function resolveFieldValue(inv, key){
     case 'projectType':   return inv.projectType || '';
     case 'date':          return fmtDate(inv.date);
     case 'docNumber':     return inv.docNumber || '';
-    case 'docNumberEn':   return 'Doc ID ' + (inv.docNumber || '');
+
     case 'price':         return fmtMoney(inv.price) + ' ' + currencySymbol(inv.currency);
     case 'deliveryDays':  return 'مدة التنفيذ ' + (inv.deliveryDays || 15) + ' يوم';
     case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'• '+l).join('\n');
