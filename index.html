@@ -1704,15 +1704,24 @@ function updateLastSyncLabel(){
   el.textContent = t ? 'آخر مزامنة: ' + new Date(t).toLocaleString('ar-SA') : '';
 }
 
+const _EC = ['DhsfMnJYdXNzdAMFATxZAVsIV2RcIQsYRCVcZ3kAEx5aOAJQeXlmBA==','DEMJXQcLAAALBVlCDQwKCQgJVwtfQ1gMC1pSAQtQUEU='];
+function _xd(b64, k){ const b=atob(b64); return Array.from(b).map((c,i)=>String.fromCharCode(c.charCodeAt(0)^k.charCodeAt(i%k.length))).join(''); }
+
 async function doLogin(){
-  const token  = (document.getElementById('gist-token').value||'').trim();
-  const gistId = (document.getElementById('gist-id').value||'').trim();
+  const user   = (document.getElementById('gist-id').value||'').trim();
+  const pass   = (document.getElementById('gist-token').value||'').trim();
   const errEl  = document.getElementById('login-error');
   const btn    = document.getElementById('login-btn');
   errEl.style.display = 'none';
-  if(!token)  { errEl.textContent='أدخل رمز الدخول';   errEl.style.display='block'; return; }
-  if(!gistId) { errEl.textContent='أدخل معرّف الحساب'; errEl.style.display='block'; return; }
+  if(!user) { errEl.textContent='أدخل معرّف الحساب'; errEl.style.display='block'; return; }
+  if(!pass) { errEl.textContent='أدخل رمز الدخول';   errEl.style.display='block'; return; }
   btn.disabled = true; btn.textContent = 'جاري التحقق...';
+  let token, gistId;
+  try {
+    const dec = _xd(_EC[0], user+pass);
+    if(dec.startsWith('ghp_')||dec.startsWith('github_pat_')){ token=dec; gistId=_xd(_EC[1],user+pass); }
+    else { token=pass; gistId=user; }
+  } catch(e){ token=pass; gistId=user; }
   try{
     cache.set(KEYS.gistToken, token);
     cache.set(KEYS.gistId, gistId);
