@@ -2631,7 +2631,7 @@ function resolveFieldValue(inv, key){
     case 'date':          return fmtDate(inv.date);
     case 'docNumber':     return inv.docNumber || '';
 
-    case 'price':         return fmtMoney(inv.price) + ' ' + currencySymbol(inv.currency);
+    case 'price':         return fmtMoney(inv.price);
     case 'deliveryDays':  return 'مدة التنفيذ ' + (inv.deliveryDays || 15) + ' يوم';
     case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'• '+l).join('\n');
     case 'notes':         return inv.notes || '';
