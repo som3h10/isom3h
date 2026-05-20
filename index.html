@@ -1793,6 +1793,16 @@ async function fullSync(){
   } catch(e){ setSyncEl('خطأ: '+e.message,'var(--danger)'); setSyncStatus('error'); toast(e.message,'error'); }
 }
 
+async function autoSync(){
+  if(!gistReady()) return;
+  setSyncStatus('syncing');
+  try{
+    await writeToGist();
+    cache.set(KEYS.lastSync, new Date().toISOString());
+    updateLastSyncLabel();
+    setSyncStatus('ok','Gist');
+  } catch(e){ setSyncStatus('error'); }
+}
 
 /* =====================================================================
    HOME
@@ -1968,6 +1978,7 @@ async function saveInvoice(){
   }
   await db.saveInvoice(inv);
   toast('تم الحفظ', 'success');
+  autoSync();
   const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
   if(tplId){
     try{ await exportInvoice(inv, tplId); } catch(e){ console.error('export error',e); }
@@ -1996,6 +2007,7 @@ async function deleteInvoice(id){
   state.invoices = state.invoices.filter(x=>x.id!==id);
   await db.deleteInvoice(id);
   toast('تم الحذف','');
+  autoSync();
   if(state.page==='home') renderHome();
   else if(state.page==='invoices') renderInvoices();
 }
