@@ -1515,6 +1515,7 @@ const FIELDS = [
   { key:'docTitleAr',    label:'عنوان (عربي)',          size:48, dir:'rtl', weight:'800' },
   { key:'firstParty',    label:'الطرف الأول',            size:14, dir:'rtl', weight:'700' },
   { key:'client',        label:'الطرف الثاني',           size:14, dir:'rtl', weight:'700' },
+  { key:'client2',       label:'الطرف الثاني (مكرر)',     size:14, dir:'rtl', weight:'700' },
   { key:'project',       label:'اسم المشروع',            size:14, dir:'rtl', weight:'700' },
   { key:'projectType',   label:'نوع المشروع',            size:13, dir:'rtl', weight:'500' },
   { key:'date',          label:'التاريخ',                size:14, dir:'ltr', weight:'500' },
@@ -2706,6 +2707,7 @@ function resolveFieldValue(inv, key){
     case 'docTitleAr':   return inv.type === 'إنجاز عمل' ? 'إنجاز عمل' : 'عرض سعر';
     case 'docTitleEn':   return inv.type === 'إنجاز عمل' ? 'Work Completion' : 'Price offer';
     case 'client':        return inv.client || '';
+    case 'client2':       return inv.client || '';
     case 'firstParty':    return inv.firstParty || '';
     case 'project':       return inv.project || '';
     case 'projectType':   return inv.projectType || '';
