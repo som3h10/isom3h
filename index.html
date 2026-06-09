@@ -1070,7 +1070,7 @@
           <label>نوع الوثيقة</label>
           <select id="f-type">
             <option value="عرض سعر">عرض سعر</option>
-            <option value="فاتورة">فاتورة</option>
+            <option value="إنجاز عمل">إنجاز عمل</option>
           </select>
         </div>
         <div class="field">
@@ -1081,13 +1081,11 @@
         <div class="field">
           <label>اسم العميل (الطرف الثاني) <span class="req">*</span></label>
           <input type="text" id="f-client" placeholder="اسم العميل أو الشركة" />
-          <input type="text" id="f-client2" placeholder="سطر ثانٍ — اختياري" style="margin-top:6px"/>
         </div>
 
         <div class="field">
           <label>اسم المشروع <span class="req">*</span></label>
           <input type="text" id="f-project" placeholder="تصميم هوية بصرية" />
-          <input type="text" id="f-project2" placeholder="سطر ثانٍ — اختياري" style="margin-top:6px"/>
         </div>
 
         <div class="field">
@@ -1217,8 +1215,12 @@
       <div class="tpl-layout">
         <div class="stage-wrap">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-            <input type="text" id="tpl-name" placeholder="اسم النموذج..." 
+            <input type="text" id="tpl-name" placeholder="اسم النموذج..."
               style="flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--line-strong);border-radius:8px;font-size:14px" />
+            <select id="tpl-doctype" style="padding:9px 14px;border:1px solid var(--line-strong);border-radius:8px;font-size:14px;background:var(--surface)">
+              <option value="عرض سعر">عرض سعر</option>
+              <option value="إنجاز عمل">إنجاز عمل</option>
+            </select>
             <div style="font-size:13px;color:var(--muted)" id="tpl-info">—</div>
           </div>
 
@@ -1511,11 +1513,9 @@ const KEYS = {
 
 const FIELDS = [
   { key:'docTitleAr',    label:'عنوان (عربي)',          size:48, dir:'rtl', weight:'800' },
-  { key:'client',        label:'اسم العميل',             size:14, dir:'rtl', weight:'700' },
-  { key:'client2',       label:'العميل - سطر 2',        size:13, dir:'rtl', weight:'500' },
   { key:'firstParty',    label:'الطرف الأول',            size:14, dir:'rtl', weight:'700' },
+  { key:'client',        label:'الطرف الثاني',           size:14, dir:'rtl', weight:'700' },
   { key:'project',       label:'اسم المشروع',            size:14, dir:'rtl', weight:'700' },
-  { key:'project2',      label:'المشروع - سطر 2',       size:13, dir:'rtl', weight:'500' },
   { key:'projectType',   label:'نوع المشروع',            size:13, dir:'rtl', weight:'500' },
   { key:'date',          label:'التاريخ',                size:14, dir:'ltr', weight:'500' },
   { key:'docNumber',     label:'رقم الوثيقة',           size:12, dir:'ltr', weight:'500' },
@@ -1976,10 +1976,8 @@ function prepareForm(){
     $('#form-sub').textContent = 'عبّي البيانات ثم اضغط حفظ أو تصدير PDF';
     $('#f-type').value = 'عرض سعر';
     $('#f-client').value = '';
-    $('#f-client2').value = '';
     $('#f-firstParty').value = 'إسماعيل الحربي';
     $('#f-project').value = '';
-    $('#f-project2').value = '';
     $('#f-projectType').value = '';
     $('#f-date').value = new Date().toISOString().slice(0,10);
     $('#f-price').value = '';
@@ -1995,10 +1993,8 @@ function readForm(){
     type: $('#f-type').value,
     docNumber: genDocNumber(),
     client: $('#f-client').value.trim(),
-    client2: $('#f-client2').value.trim(),
     firstParty: $('#f-firstParty').value.trim(),
     project: $('#f-project').value.trim(),
-    project2: $('#f-project2').value.trim(),
     projectType: $('#f-projectType').value.trim(),
     date: $('#f-date').value,
     price: Number($('#f-price').value)||0,
@@ -2012,10 +2008,8 @@ function readForm(){
 function fillForm(inv){
   $('#f-type').value = inv.type || 'عرض سعر';
   $('#f-client').value = inv.client || '';
-  $('#f-client2').value = inv.client2 || '';
   $('#f-firstParty').value = inv.firstParty || '';
   $('#f-project').value = inv.project || '';
-  $('#f-project2').value = inv.project2 || '';
   $('#f-projectType').value = inv.projectType || '';
   $('#f-date').value = inv.date || '';
   $('#f-price').value = inv.price || '';
@@ -2046,7 +2040,9 @@ async function saveInvoice(){
   await db.saveInvoice(inv);
   toast('تم الحفظ', 'success');
   autoSync();
-  const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
+  const tplId = Object.values(state.templates).find(t => t.docType === inv.type)?.id
+               || state.activeTemplateId
+               || Object.keys(state.templates)[0];
   if(tplId){
     try{ await exportInvoice(inv, tplId); } catch(e){ console.error('export error',e); }
   } else {
@@ -2125,6 +2121,7 @@ function showBuilder(){
   $('#tpl-copy-code').hidden = false;
   $('#tpl-reset').hidden = false;
   $('#tpl-name').value = state.builder.name || 'نموذج بدون اسم';
+  $('#tpl-doctype').value = state.builder.docType || 'عرض سعر';
   $('#tpl-info').textContent = `${state.builder.bgWidth}×${state.builder.bgHeight} px`;
   buildStage();
   renderChips();
@@ -2151,7 +2148,10 @@ function renderSavedTemplates(){
       <div class="thumb" style="background-image:url('${t.bgDataUrl}')"></div>
       <div class="info">
         <div class="nm">${escapeHTML(t.name)}</div>
-        <div class="meta">${(t.fields||[]).length} حقل · ${t.bgWidth}×${t.bgHeight}</div>
+        <div class="meta">
+          <span class="badge ${t.docType==='إنجاز عمل'?'badge-invoice':'badge-quote'}" style="font-size:0.7rem;padding:1px 7px">${escapeHTML(t.docType||'عرض سعر')}</span>
+          · ${(t.fields||[]).length} حقل · ${t.bgWidth}×${t.bgHeight}
+        </div>
       </div>
       <div class="actions">
         ${isActive ? '' : '<button class="btn btn-sm btn-ghost" data-act="activate">تفعيل</button>'}
@@ -2219,6 +2219,7 @@ function startBuilderWith(dataUrl, w, h, fileName){
   state.builder = {
     id: uid('tpl'),
     name: (fileName||'نموذج').replace(/\.[^.]+$/,''),
+    docType: 'عرض سعر',
     bgDataUrl: dataUrl,
     bgWidth: w,
     bgHeight: h,
@@ -2240,6 +2241,7 @@ function tplLoadForEdit(id){
   state.builder = {
     id: t.id,
     name: t.name,
+    docType: t.docType || 'عرض سعر',
     bgDataUrl: t.bgDataUrl,
     bgWidth: t.bgWidth,
     bgHeight: t.bgHeight,
@@ -2651,6 +2653,7 @@ async function tplSaveCurrent(){
   const tpl = {
     id,
     name,
+    docType: $('#tpl-doctype').value || 'عرض سعر',
     bgDataUrl: state.builder.bgDataUrl,
     bgWidth: state.builder.bgWidth,
     bgHeight: state.builder.bgHeight,
@@ -2700,13 +2703,11 @@ async function tplSaveCurrent(){
    ===================================================================== */
 function resolveFieldValue(inv, key){
   switch(key){
-    case 'docTitleAr':   return inv.type === 'فاتورة' ? 'فاتورة' : 'عرض سعر';
-    case 'docTitleEn':   return inv.type === 'فاتورة' ? 'Invoice' : 'Price offer';
+    case 'docTitleAr':   return inv.type === 'إنجاز عمل' ? 'إنجاز عمل' : 'عرض سعر';
+    case 'docTitleEn':   return inv.type === 'إنجاز عمل' ? 'Work Completion' : 'Price offer';
     case 'client':        return inv.client || '';
-    case 'client2':       return inv.client2 || '';
     case 'firstParty':    return inv.firstParty || '';
     case 'project':       return inv.project || '';
-    case 'project2':      return inv.project2 || '';
     case 'projectType':   return inv.projectType || '';
     case 'date':          return fmtDate(inv.date);
     case 'docNumber':     return inv.docNumber || '';
