@@ -3891,10 +3891,25 @@ const DEFAULT_CLAUSE_GROUPS = {
   ],
 };
 
-const CLAUSE_DEFAULTS_VERSION = 2;
+const CLAUSE_DEFAULTS_VERSION = 3;
 let CLAUSE_GROUPS = {};
 let clauseSelections = {};
 let clauseCustom = {};
+
+function mergeClauseDefaults(key, defaults, savedItems){
+  const merged = defaults.map(item=>({...item}));
+  if(!Array.isArray(savedItems)) return merged;
+  const defaultIdPrefix = key === 'quoteTerms' ? 'qt-v' : 'ct-v';
+  for(const item of savedItems){
+    const text = String(item?.text || '').trim();
+    if(!text || merged.some(existing=>existing.text === text)) continue;
+    // Keep genuinely custom clauses while replacing stale bundled defaults.
+    if(!String(item?.id || '').startsWith(defaultIdPrefix)){
+      merged.push({...item, text});
+    }
+  }
+  return merged;
+}
 
 function loadClauseSettings(sourceClauses=null, sourceVersion=null){
   const saved = sourceClauses || cache.get(KEYS.clauses);
@@ -3905,9 +3920,9 @@ function loadClauseSettings(sourceClauses=null, sourceVersion=null){
   }
   CLAUSE_GROUPS = {};
   for(const [key, defaults] of Object.entries(DEFAULT_CLAUSE_GROUPS)){
-    CLAUSE_GROUPS[key] = !useNewDefaults && Array.isArray(saved?.[key])
-      ? saved[key]
-      : defaults.map(x=>({...x}));
+    CLAUSE_GROUPS[key] = useNewDefaults
+      ? mergeClauseDefaults(key, defaults, saved?.[key])
+      : (Array.isArray(saved?.[key]) ? saved[key] : defaults.map(x=>({...x})));
   }
   cache.set(KEYS.clauses, CLAUSE_GROUPS);
   cache.set(KEYS.clausesVersion, CLAUSE_DEFAULTS_VERSION);
