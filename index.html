@@ -1369,7 +1369,10 @@ html[data-theme="dark"] .prop-grid input,html[data-theme="dark"] .prop-grid sele
   white-space:nowrap;unicode-bidi:isolate;font-variant-numeric:tabular-nums;
 }
 .money-amount{direction:ltr}
-.money-symbol{direction:rtl;font-family:var(--font);line-height:1}
+.money-symbol{
+  direction:rtl;font-family:var(--font);line-height:1;
+  font-size:.5em;align-self:center;
+}
 .price{text-align:right!important;font-variant-numeric:tabular-nums}
 
 .items-header{direction:rtl}
@@ -2766,13 +2769,13 @@ function formatPriceWithCurrency(price, currency){
   const amount = fmtMoney(price);
   const symbol = currencySymbol(currency);
   if(!symbol) return amount;
-  return amount + ' ' + symbol;
+  return symbol + ' ' + amount;
 }
 
 function formatPriceHTML(price, currency){
   const amount = escapeHTML(fmtMoney(price));
   const symbol = escapeHTML(currencySymbol(currency));
-  return `<span class="money" dir="ltr"><span class="money-amount">${amount}</span>${symbol?`<span class="money-symbol">${symbol}</span>`:''}</span>`;
+  return `<span class="money" dir="ltr">${symbol?`<span class="money-symbol">${symbol}</span>`:''}<span class="money-amount">${amount}</span></span>`;
 }
 
 function genDocNumber(){
@@ -3385,6 +3388,47 @@ async function pdfFileToImage(file){
     height: canvas.height,
     pageCount: doc.numPages,
   };
+}
+
+const BUNDLED_CONTRACT_VERSION = 'artboard-contract-2026-07-27-v1';
+
+async function loadBundledPdfPage(path){
+  const res = await fetch(path, {cache:'force-cache'});
+  if(!res.ok) throw new Error('تعذر تحميل قالب العقد: '+res.status);
+  const blob = await res.blob();
+  const file = new File([blob], path.split('/').pop() || 'contract.pdf', {
+    type:'application/pdf',
+  });
+  return pdfFileToImage(file);
+}
+
+async function installBundledContractTemplate(){
+  const templates = Object.values(state.templates || {});
+  const target = templates.find(t => /عقد/.test(String(t.name || '')))
+    || templates.find(t => (t.docType || 'عرض سعر') === 'عرض سعر');
+  if(!target || target.bundledContractVersion === BUNDLED_CONTRACT_VERSION) return false;
+
+  const [mainPage, termsPage] = await Promise.all([
+    loadBundledPdfPage('assets/templates/contract-page-1.pdf'),
+    loadBundledPdfPage('assets/templates/contract-page-2.pdf'),
+  ]);
+  const updated = {
+    ...target,
+    bgDataUrl: mainPage.dataUrl,
+    bgWidth: mainPage.width,
+    bgHeight: mainPage.height,
+    sourceType: 'pdf',
+    sourcePageCount: 1,
+    sourcePdfDataUrl: mainPage.pdfDataUrl,
+    termsBgDataUrl: termsPage.dataUrl,
+    termsPdfDataUrl: termsPage.pdfDataUrl,
+    termsWidth: termsPage.width,
+    termsHeight: termsPage.height,
+    bundledContractVersion: BUNDLED_CONTRACT_VERSION,
+  };
+  state.templates[target.id] = updated;
+  await db.saveTemplate(updated);
+  return true;
 }
 
 function uint8ToBase64(bytes){
@@ -4204,7 +4248,24 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `font-family:'IBM Plex Sans Arabic',sans-serif;` +
           `overflow:hidden;box-sizing:border-box;` +
           (isPreserve ? 'white-space:pre-wrap;' : 'white-space:nowrap;');
-        node.textContent = value;
+        if(f.key === 'price' && inv.currency === 'ريال'){
+          node.style.display = 'flex';
+          node.style.direction = 'ltr';
+          node.style.alignItems = 'center';
+          node.style.gap = `${Math.max(3, fontSize * .16)}px`;
+          node.style.justifyContent =
+            (f.align || 'right') === 'center' ? 'center'
+            : (f.align || 'right') === 'left' ? 'flex-start' : 'flex-end';
+          const symbol = document.createElement('span');
+          symbol.textContent = currencySymbol(inv.currency);
+          symbol.style.fontSize = '.5em';
+          symbol.style.lineHeight = '1';
+          const amount = document.createElement('span');
+          amount.textContent = fmtMoney(inv.price);
+          node.append(symbol, amount);
+        }else{
+          node.textContent = value;
+        }
       }
 
     stage.appendChild(node);
@@ -4345,16 +4406,16 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     if(f.key === 'price' && inv.currency === 'ريال'){
       const amount = fmtMoney(inv.price);
       const amountWidth = pdf.getTextWidth(amount);
-      const iconH = fontMm * 1.05;
+      const iconH = fontMm * .52;
       const iconW = iconH * (1124.14 / 1256.39);
       const gap = Math.max(.5, fontMm * .15);
       const totalW = amountWidth + gap + iconW;
       let startX = x;
       if(align === 'right') startX = x - totalW;
       else if(align === 'center') startX = x - totalW / 2;
-      pdf.text(amount, startX, y - fontMm * lineHeight, {align:'left', baseline:'alphabetic'});
       const symbolPng = await getRiyalPng(f.color || '#1a1a1a');
-      pdf.addImage(symbolPng, 'PNG', startX + amountWidth + gap, y - fontMm * lineHeight - iconH * .8, iconW, iconH);
+      pdf.addImage(symbolPng, 'PNG', startX, y - fontMm * lineHeight - iconH * .8, iconW, iconH);
+      pdf.text(amount, startX + iconW + gap, y - fontMm * lineHeight, {align:'left', baseline:'alphabetic'});
     }
   }
 }
@@ -5458,14 +5519,23 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
   loadAllItems();
   loadClauseSettings();
   resetClauseSelections();
-  renderHome();
-  renderItemsCheckboxes();
   if(gistReady()){
     setSyncStatus('syncing');
     try{ await syncFromGist(); } catch(e){ setSyncStatus('error'); }
   } else {
     setSyncStatus('offline');
   }
+  try{
+    if(await installBundledContractTemplate()){
+      renderSavedTemplates();
+      toast('تم تحديث قالب العقود الجديد','success');
+    }
+  }catch(err){
+    console.error('تعذر تثبيت قالب العقود الجديد', err);
+    toast('تعذر تحديث قالب العقود','error');
+  }
+  renderHome();
+  renderItemsCheckboxes();
 })();
 </script>
 
