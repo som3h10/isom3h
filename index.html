@@ -1098,7 +1098,7 @@
       <div class="form-grid">
         <div class="field">
           <label>نوع الوثيقة</label>
-          <select id="f-type">
+          <select id="f-type" onchange="onDocumentTypeChange()">
             <option value="عرض سعر">عرض سعر</option>
             <option value="إنجاز عمل">إنجاز عمل</option>
           </select>
@@ -1174,6 +1174,29 @@
           </div>
           <!-- hidden textarea يحمل القيمة الفعلية -->
           <textarea id="f-items" style="display:none"></textarea>
+        </div>
+
+        <div class="field full" id="quote-terms-field">
+          <label>الشروط والأحكام لعرض السعر</label>
+          <div class="items-section">
+            <div class="items-header"><span>اختر الشروط التي ستظهر</span><span id="quoteTerms-count-label">0 بند محدد</span></div>
+            <div class="items-list" id="quoteTerms-checkboxes"></div>
+          </div>
+          <textarea id="f-quoteTerms" style="display:none"></textarea>
+        </div>
+
+        <div class="field full" id="completion-terms-field" hidden>
+          <label>أحكام إنجاز العمل</label>
+          <div class="items-section" style="margin-bottom:10px">
+            <div class="items-header"><span>أحكام التسليم</span><span id="deliveryTerms-count-label">0 بند محدد</span></div>
+            <div class="items-list" id="deliveryTerms-checkboxes"></div>
+          </div>
+          <div class="items-section">
+            <div class="items-header"><span>أحكام التنازل</span><span id="assignmentTerms-count-label">0 بند محدد</span></div>
+            <div class="items-list" id="assignmentTerms-checkboxes"></div>
+          </div>
+          <textarea id="f-deliveryTerms" style="display:none"></textarea>
+          <textarea id="f-assignmentTerms" style="display:none"></textarea>
         </div>
 
         <div class="field full">
@@ -1422,11 +1445,12 @@
   <section class="page" data-pg="settings">
     <div class="page-head">
       <div>
-        <h2>الحساب</h2>
-        <div class="sub">تسجيل الدخول لمزامنة بياناتك عبر أجهزتك</div>
+        <h2>الإعدادات</h2>
+        <div class="sub">إدارة الحساب والبنود والشروط وبيانات الدفع</div>
       </div>
     </div>
 
+    <h3 style="font-size:15px;margin:0 0 10px">تسجيل الدخول</h3>
     <!-- حالة: غير مسجّل -->
     <div class="card" id="login-form-card">
       <div style="text-align:center;padding:8px 0 20px">
@@ -1485,14 +1509,37 @@
         <div id="last-sync-label" style="font-size:0.75rem;color:var(--muted);margin-top:6px"></div>
       </div>
 
-    <div style="padding-top:18px;border-top:1px solid var(--line);margin-top:18px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <h4 style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0">بنود المشروع</h4>
+  </div>
+
+    <details class="card" open style="margin-top:16px">
+      <summary style="cursor:pointer;font-weight:700;font-size:16px">بنود المشروع</summary>
+      <p style="color:var(--muted);font-size:13px;margin:8px 0 16px">أضف البنود وعدّلها وحدد أنواع المشاريع المناسبة لها.</p>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
         <button class="btn btn-sm btn-ghost" onclick="addSettingsItem()">+ إضافة بند</button>
       </div>
-      <div id="settings-items-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto"></div>
+      <div id="settings-items-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto"></div>
+    </details>
+
+    <details class="card" style="margin-top:16px">
+      <summary style="cursor:pointer;font-weight:700;font-size:16px">الشروط والأحكام</summary>
+      <p style="color:var(--muted);font-size:13px;margin:8px 0 16px">تظهر شروط عرض السعر عند اختيار «عرض سعر»، وتظهر أحكام التسليم والتنازل عند اختيار «إنجاز عمل».</p>
+      <div id="settings-clauses-host"></div>
+    </details>
+
+    <div class="card" style="margin-top:16px">
+      <h3 style="font-size:16px;margin:0 0 6px">إعدادات عامة</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 16px">بيانات الحساب البنكي التي يمكن إضافتها إلى تصميم الفاتورة.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>اسم صاحب الحساب</label>
+          <input id="settings-account-holder" type="text" placeholder="اسم صاحب الحساب" oninput="saveGeneralSettings()">
+        </div>
+        <div class="field">
+          <label>الحساب البنكي / الآيبان</label>
+          <input id="settings-bank-account" type="text" dir="ltr" placeholder="SA00 0000 0000 0000 0000 0000" oninput="saveGeneralSettings()">
+        </div>
+      </div>
     </div>
-  </div>
 
     <!-- كارد مخفي للتوافق مع الكود القديم -->
     <div id="sync-card" style="display:none"></div>
@@ -1544,6 +1591,8 @@ const KEYS = {
   gistId:    'inv_gist_id',
   lastSync:  'inv_last_sync',
   customItems: 'inv_items_v1',
+  clauses: 'inv_clauses_v1',
+  generalSettings: 'inv_general_settings_v1',
 };
 
 const FIELDS = [
@@ -1559,6 +1608,11 @@ const FIELDS = [
   { key:'price',         label:'السعر',                  size:24, dir:'ltr', weight:'800' },
   { key:'deliveryDays',  label:'مدة التنفيذ',           size:13, dir:'rtl', weight:'500' },
   { key:'items',         label:'بنود المشروع',          size:13, dir:'rtl', weight:'400', preserve:true },
+  { key:'quoteTerms',    label:'شروط وأحكام عرض السعر', size:12, dir:'rtl', weight:'400', preserve:true },
+  { key:'deliveryTerms', label:'أحكام التسليم',         size:12, dir:'rtl', weight:'400', preserve:true },
+  { key:'assignmentTerms',label:'أحكام التنازل',        size:12, dir:'rtl', weight:'400', preserve:true },
+  { key:'accountHolder', label:'اسم صاحب الحساب',       size:12, dir:'rtl', weight:'600' },
+  { key:'bankAccount',   label:'الحساب البنكي / الآيبان',size:12, dir:'ltr', weight:'500' },
   { key:'notes',         label:'ملاحظات',                size:12, dir:'rtl', weight:'400', preserve:true },
 ];
 
@@ -1738,6 +1792,8 @@ function renderSettingsPage(){
   if(lbl) lbl.textContent = cache.get(KEYS.gistId) || '—';
   updateLastSyncLabel();
   renderSettingsItems();
+  renderSettingsClauses();
+  loadGeneralSettingsForm();
 }
 
 function updateGistBadge(){ /* kept for compatibility */ }
@@ -1831,6 +1887,8 @@ async function writeToGist({ withTemplates=true }={}){
   const payload = {
     invoices: state.invoices,
     customItems: ALL_ITEMS,
+    clauses: CLAUSE_GROUPS,
+    generalSettings: getGeneralSettings(),
     activeTemplateId: state.activeTemplateId,
     lastSync: new Date().toISOString()
   };
@@ -1856,6 +1914,7 @@ async function syncFromGist(){
     }
     if(d.activeTemplateId){ state.activeTemplateId=d.activeTemplateId; cache.set(KEYS.active,d.activeTemplateId); }
     if(d.customItems && Array.isArray(d.customItems) && d.customItems.length){ ALL_ITEMS=d.customItems; cache.set(KEYS.customItems,d.customItems); renderItemsCheckboxes(); renderSettingsItems(); }
+    importSyncedSettings(d);
     cache.set(KEYS.lastSync,new Date().toISOString()); updateLastSyncLabel(); renderHome();
     setSyncEl('استيراد ✓ — '+invoices.length+' فاتورة','var(--accent)');
     setSyncStatus('ok','Gist'); toast('تم الاستيراد ✓','success');
@@ -1885,6 +1944,7 @@ async function fullSync(){
     if(d.templates && typeof d.templates==='object' && !Object.keys(state.templates).length){ state.templates=d.templates; cache.set(KEYS.templates,d.templates); }
     if(d.activeTemplateId && !state.activeTemplateId){ state.activeTemplateId=d.activeTemplateId; cache.set(KEYS.active,d.activeTemplateId); }
     if(d.customItems && Array.isArray(d.customItems) && d.customItems.length){ ALL_ITEMS=d.customItems; cache.set(KEYS.customItems,d.customItems); renderItemsCheckboxes(); renderSettingsItems(); }
+    importSyncedSettings(d);
     await writeToGist();
     cache.set(KEYS.lastSync,new Date().toISOString()); updateLastSyncLabel(); renderHome();
     setSyncEl('مزامنة كاملة ✓ — '+merged.length+' فاتورة','var(--accent)');
@@ -2023,7 +2083,9 @@ function prepareForm(){
     $('#f-deliveryDays').value = '15';
     $('#f-notes').value = '';
     resetItemsState();
+    resetClauseSelections();
   }
+  onDocumentTypeChange();
 }
 
 function readForm(){
@@ -2038,6 +2100,9 @@ function readForm(){
     price: Number($('#f-price').value)||0,
     currency: $('#f-currency').value,
     items: $('#f-items').value.trim(),
+    quoteTerms: $('#f-quoteTerms').value.trim(),
+    deliveryTerms: $('#f-deliveryTerms').value.trim(),
+    assignmentTerms: $('#f-assignmentTerms').value.trim(),
     deliveryDays: Number($('#f-deliveryDays').value)||15,
     notes: $('#f-notes').value.trim(),
   };
@@ -2055,6 +2120,8 @@ function fillForm(inv){
   $('#f-deliveryDays').value = inv.deliveryDays || 15;
   $('#f-notes').value = inv.notes || '';
   loadItemsFromText(inv.items || '');
+  loadClauseSelections(inv);
+  onDocumentTypeChange();
 }
 
 async function saveInvoice(){
@@ -2907,6 +2974,11 @@ function resolveFieldValue(inv, key){
     case 'price':         return fmtMoney(inv.price);
     case 'deliveryDays':  return 'مدة التنفيذ ' + (inv.deliveryDays || 15) + ' يوم';
     case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).join('\n');
+    case 'quoteTerms':    return inv.type === 'عرض سعر' ? (inv.quoteTerms || '') : '';
+    case 'deliveryTerms': return inv.type === 'إنجاز عمل' ? (inv.deliveryTerms || '') : '';
+    case 'assignmentTerms': return inv.type === 'إنجاز عمل' ? (inv.assignmentTerms || '') : '';
+    case 'accountHolder': return getGeneralSettings().accountHolder || '';
+    case 'bankAccount':   return getGeneralSettings().bankAccount || '';
     case 'notes':         return inv.notes || '';
     default:             return '';
   }
@@ -3005,7 +3077,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
             `text-align:${f.align || 'right'};` +
             `white-space:normal;word-break:break-word;` +
             `line-height:${lineHeight};`;
-          if(f.key === 'items'){
+          if(isListField(f.key)){
             lineDiv.style.display = 'flex';
             lineDiv.style.flexDirection = 'row';
             lineDiv.style.gap = `${Math.max(5, fontSize * .45)}px`;
@@ -3109,7 +3181,7 @@ function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     for(const line of lines){
       // jsPDF's Arabic plug-in shapes RTL text during its pre-process step.
       // Supplying the original Unicode text keeps copy/search extraction useful.
-      if(f.key === 'items'){
+      if(isListField(f.key)){
         const cleanLine = line.replace(/^[•\-]\s*/, '');
         const bulletGap = fontMm * .8;
         pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
@@ -3311,6 +3383,176 @@ function loadAllItems(){
 function saveAllItems(){
   cache.set(KEYS.customItems, ALL_ITEMS);
   autoSync();
+}
+
+const DEFAULT_CLAUSE_GROUPS = {
+  quoteTerms: [
+    {id:'qt1', text:'مدة صلاحية عرض السعر 15 يوماً من تاريخ الإصدار.'},
+    {id:'qt2', text:'يبدأ التنفيذ بعد اعتماد العرض واستلام الدفعة المتفق عليها.'},
+  ],
+  deliveryTerms: [
+    {id:'dt1', text:'يتم تسليم الأعمال بصيغ الملفات المتفق عليها بعد اكتمال الدفعات.'},
+    {id:'dt2', text:'يُعد العمل منجزاً بعد اعتماد النسخة النهائية من الطرف الثاني.'},
+  ],
+  assignmentTerms: [
+    {id:'at1', text:'تنتقل حقوق استخدام العمل النهائي للطرف الثاني بعد سداد كامل المبلغ.'},
+    {id:'at2', text:'لا يشمل التنازل المقترحات غير المعتمدة أو ملفات العمل الأولية.'},
+  ],
+};
+
+let CLAUSE_GROUPS = {};
+let clauseSelections = {};
+
+function loadClauseSettings(){
+  const saved = cache.get(KEYS.clauses);
+  CLAUSE_GROUPS = {};
+  for(const [key, defaults] of Object.entries(DEFAULT_CLAUSE_GROUPS)){
+    CLAUSE_GROUPS[key] = Array.isArray(saved?.[key]) ? saved[key] : defaults.map(x=>({...x}));
+  }
+}
+
+function saveClauseSettings(){
+  cache.set(KEYS.clauses, CLAUSE_GROUPS);
+  autoSync();
+}
+
+function getGeneralSettings(){
+  const saved = cache.get(KEYS.generalSettings) || {};
+  return {accountHolder:saved.accountHolder || '', bankAccount:saved.bankAccount || ''};
+}
+
+function loadGeneralSettingsForm(){
+  const settings = getGeneralSettings();
+  const holder = document.getElementById('settings-account-holder');
+  const account = document.getElementById('settings-bank-account');
+  if(holder) holder.value = settings.accountHolder;
+  if(account) account.value = settings.bankAccount;
+}
+
+function saveGeneralSettings(){
+  cache.set(KEYS.generalSettings, {
+    accountHolder:(document.getElementById('settings-account-holder')?.value || '').trim(),
+    bankAccount:(document.getElementById('settings-bank-account')?.value || '').trim(),
+  });
+  clearTimeout(saveGeneralSettings._timer);
+  saveGeneralSettings._timer = setTimeout(autoSync, 500);
+}
+
+function importSyncedSettings(data){
+  if(data.clauses && typeof data.clauses === 'object'){
+    cache.set(KEYS.clauses, data.clauses);
+    loadClauseSettings();
+    renderSettingsClauses();
+  }
+  if(data.generalSettings && typeof data.generalSettings === 'object'){
+    cache.set(KEYS.generalSettings, data.generalSettings);
+    loadGeneralSettingsForm();
+  }
+}
+
+const CLAUSE_LABELS = {
+  quoteTerms:'شروط وأحكام عرض السعر',
+  deliveryTerms:'أحكام التسليم — إنجاز عمل',
+  assignmentTerms:'أحكام التنازل — إنجاز عمل',
+};
+
+function renderSettingsClauses(){
+  const host = document.getElementById('settings-clauses-host');
+  if(!host) return;
+  host.innerHTML = '';
+  for(const key of Object.keys(CLAUSE_LABELS)){
+    const section = document.createElement('section');
+    section.style.cssText = 'padding:14px 0;border-top:1px solid var(--line)';
+    const rows = (CLAUSE_GROUPS[key] || []).map((item, index)=>`
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-top:8px">
+        <textarea rows="2" style="flex:1;font-size:.82rem;resize:vertical" onchange="updateClause('${key}',${index},this.value)">${escapeHTML(item.text)}</textarea>
+        <button type="button" onclick="deleteClause('${key}',${index})" style="color:var(--danger);font-size:18px;background:none;border:0;cursor:pointer">×</button>
+      </div>`).join('');
+    section.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <strong style="font-size:14px">${CLAUSE_LABELS[key]}</strong>
+        <button class="btn btn-sm btn-ghost" onclick="addClause('${key}')">+ إضافة بند</button>
+      </div>${rows || '<p style="color:var(--muted);font-size:13px">لا توجد بنود حالياً.</p>'}`;
+    host.appendChild(section);
+  }
+}
+
+function addClause(key){
+  CLAUSE_GROUPS[key].push({id:key+'-'+Date.now(), text:'بند جديد'});
+  saveClauseSettings();
+  renderSettingsClauses();
+}
+
+function updateClause(key, index, text){
+  if(CLAUSE_GROUPS[key]?.[index]) CLAUSE_GROUPS[key][index].text = text.trim();
+  saveClauseSettings();
+}
+
+function deleteClause(key, index){
+  CLAUSE_GROUPS[key].splice(index,1);
+  saveClauseSettings();
+  renderSettingsClauses();
+}
+
+function resetClauseSelections(){
+  clauseSelections = {};
+  for(const key of Object.keys(CLAUSE_LABELS)){
+    clauseSelections[key] = new Set((CLAUSE_GROUPS[key] || []).map(x=>x.id));
+  }
+  renderClauseSelectors();
+}
+
+function loadClauseSelections(inv){
+  clauseSelections = {};
+  for(const key of Object.keys(CLAUSE_LABELS)){
+    const savedLines = String(inv[key] || '').split('\n').map(x=>x.trim()).filter(Boolean);
+    clauseSelections[key] = new Set((CLAUSE_GROUPS[key] || []).filter(x=>savedLines.includes(x.text)).map(x=>x.id));
+  }
+  renderClauseSelectors();
+}
+
+function renderClauseSelectors(){
+  for(const key of Object.keys(CLAUSE_LABELS)){
+    const host = document.getElementById(key+'-checkboxes');
+    if(!host) continue;
+    host.innerHTML = '';
+    for(const item of (CLAUSE_GROUPS[key] || [])){
+      const checked = clauseSelections[key]?.has(item.id);
+      const row = document.createElement('label');
+      row.className = 'item-row'+(checked?' checked':'');
+      row.style.cursor = 'pointer';
+      row.innerHTML = `<input type="checkbox" ${checked?'checked':''}><span class="item-text">${escapeHTML(item.text)}</span>`;
+      row.querySelector('input').addEventListener('change', e=>{
+        if(e.target.checked) clauseSelections[key].add(item.id);
+        else clauseSelections[key].delete(item.id);
+        row.classList.toggle('checked', e.target.checked);
+        syncClauseTextarea(key);
+      });
+      host.appendChild(row);
+    }
+    syncClauseTextarea(key);
+  }
+}
+
+function syncClauseTextarea(key){
+  const lines = (CLAUSE_GROUPS[key] || []).filter(x=>clauseSelections[key]?.has(x.id)).map(x=>x.text);
+  const textarea = document.getElementById('f-'+key);
+  if(textarea) textarea.value = lines.join('\n');
+  const count = document.getElementById(key+'-count-label');
+  if(count) count.textContent = lines.length ? lines.length+' بند محدد' : 'لا يوجد تحديد';
+}
+
+function onDocumentTypeChange(){
+  const isQuote = document.getElementById('f-type')?.value !== 'إنجاز عمل';
+  const quote = document.getElementById('quote-terms-field');
+  const completion = document.getElementById('completion-terms-field');
+  if(quote) quote.hidden = !isQuote;
+  if(completion) completion.hidden = isQuote;
+  renderClauseSelectors();
+}
+
+function isListField(key){
+  return ['items','quoteTerms','deliveryTerms','assignmentTerms'].includes(key);
 }
 
 const TYPE_LABELS = { logo:'شعار', identity:'هوية', social:'منشورات', profile:'بروفايل', book:'كتب' };
@@ -3696,6 +3938,8 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
 (async()=>{
   await loadStateFromServer();
   loadAllItems();
+  loadClauseSettings();
+  resetClauseSelections();
   renderHome();
   renderItemsCheckboxes();
   initItemsDragSort();
