@@ -4206,11 +4206,11 @@ let pdfArabicFontsPromise = null;
 async function ensurePdfArabicFonts(pdf){
   if(!pdfArabicFontsPromise){
     const urls = {
-      regular: 'https://raw.githubusercontent.com/IBM/plex/master/packages/plex-sans-arabic/fonts/complete/ttf/IBMPlexSansArabic-Regular.ttf',
-      bold: 'https://raw.githubusercontent.com/IBM/plex/master/packages/plex-sans-arabic/fonts/complete/ttf/IBMPlexSansArabic-Bold.ttf',
+      regular: 'assets/fonts/IBMPlexSansArabic-Regular.ttf',
+      bold: 'assets/fonts/IBMPlexSansArabic-Bold.ttf',
     };
     pdfArabicFontsPromise = Promise.all(Object.values(urls).map(async url => {
-      const res = await fetch(url);
+      const res = await fetch(url, {cache:'force-cache'});
       if(!res.ok) throw new Error('تعذر تحميل خط PDF العربي');
       const bytes = new Uint8Array(await res.arrayBuffer());
       let binary = '';
@@ -4220,11 +4220,20 @@ async function ensurePdfArabicFonts(pdf){
       return btoa(binary);
     }));
   }
-  const [regular, bold] = await pdfArabicFontsPromise;
-  pdf.addFileToVFS('IBMPlexSansArabic-Regular.ttf', regular);
-  pdf.addFont('IBMPlexSansArabic-Regular.ttf', 'IBMPlexArabic', 'normal');
-  pdf.addFileToVFS('IBMPlexSansArabic-Bold.ttf', bold);
-  pdf.addFont('IBMPlexSansArabic-Bold.ttf', 'IBMPlexArabic', 'bold');
+  try{
+    const [regular, bold] = await pdfArabicFontsPromise;
+    pdf.addFileToVFS('IBMPlexSansArabic-Regular.ttf', regular);
+    pdf.addFont('IBMPlexSansArabic-Regular.ttf', 'IBMPlexArabic', 'normal');
+    pdf.addFileToVFS('IBMPlexSansArabic-Bold.ttf', bold);
+    pdf.addFont('IBMPlexSansArabic-Bold.ttf', 'IBMPlexArabic', 'bold');
+    return true;
+  }catch(err){
+    // A missing font must not block the user's PDF download. The visual PDF
+    // still exports; only the optional searchable text layer is skipped.
+    pdfArabicFontsPromise = null;
+    console.warn('PDF font unavailable; exporting visual layer only.', err);
+    return false;
+  }
 }
 
 function hexToRgb(hex){
@@ -4418,7 +4427,7 @@ async function exportInvoice(inv, templateId){
       format: 'a4',
       compress: true,
     });
-    await ensurePdfArabicFonts(pdf);
+    const hasReadableFonts = await ensurePdfArabicFonts(pdf);
     const pdfW = isLandscape ? 297 : 210;
     const pdfH = isLandscape ? 210 : 297;
 
@@ -4452,9 +4461,11 @@ async function exportInvoice(inv, templateId){
 
       if(i > 0) pdf.addPage('a4', isLandscape ? 'landscape' : 'portrait');
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', ox, oy, drawW, drawH);
-      await addReadableTextLayer(pdf, tpl, inv, {
-        renderW:p.renderW, renderH:p.renderH, drawW, drawH, ox, oy,
-      }, p.page);
+      if(hasReadableFonts){
+        await addReadableTextLayer(pdf, tpl, inv, {
+          renderW:p.renderW, renderH:p.renderH, drawW, drawH, ox, oy,
+        }, p.page);
+      }
     }
 
     const fname = `${inv.type||'invoice'}-${inv.client||''}-${inv.docNumber||''}.pdf`.replace(/[\/\\?%*:|"<>]/g,'-');
