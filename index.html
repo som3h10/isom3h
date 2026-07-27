@@ -385,17 +385,17 @@
   }
 
   .stage-wrap{
-    background:white;
+    background:linear-gradient(135deg,#f8f7f4,#efede8);
     border:1px solid var(--line);
     border-radius:var(--radius);
-    padding:16px;
+    padding:18px;
   }
 
   .stage{
     position:relative;
     margin:0 auto;
     background:white;
-    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+    box-shadow:0 12px 36px rgba(30,26,20,0.12);
     border:1px solid var(--line);
     overflow:hidden;
     user-select:none;
@@ -413,7 +413,7 @@
     position:absolute;
     border:2px solid var(--accent);
     background:rgba(45,90,61,0.1);
-    border-radius:3px;
+    border-radius:6px;
     cursor:move;
     display:flex;
     align-items:center;
@@ -427,6 +427,7 @@
     border-width:2px;
     background:rgba(26,26,26,0.08);
     z-index:5;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9),0 5px 16px rgba(0,0,0,.14);
   }
   .field-box .lbl{
     flex:1;
@@ -494,7 +495,8 @@
     background:white;
     border:1px solid var(--line);
     border-radius:var(--radius);
-    padding:16px;
+    padding:15px;
+    box-shadow:0 6px 20px rgba(30,26,20,.04);
   }
   .panel h4{
     font-size:13px;
@@ -529,7 +531,7 @@
     padding:7px 12px;
     background:var(--bg);
     border:1px solid var(--line);
-    border-radius:99px;
+    border-radius:8px;
     font-size:12px;
     font-weight:600;
     cursor:pointer;
@@ -555,6 +557,33 @@
   }
 
   .prop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .field-quick-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:10px;
+    margin-bottom:12px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:9px;
+  }
+  .field-quick-actions button{
+    padding:8px 9px;
+    border:1px solid var(--line-strong);
+    border-radius:7px;
+    background:white;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .field-quick-actions button:hover{border-color:var(--accent);color:var(--accent)}
+  .field-quick-actions button.danger{color:var(--danger)}
+  .field-page-note{
+    grid-column:1/-1;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.5;
+  }
   .prop-grid .full{grid-column:1/-1}
   .prop-grid label{
     font-size:11px;
@@ -1204,12 +1233,9 @@
     <!-- Builder mode -->
     <div id="tpl-builder" hidden>
       <div class="help">
-        <strong>كيفية الاستخدام:</strong>
-        ١) اضغط على اسم حقل من اللوحة الجانبية ←
-        ٢) انقر على المكان المطلوب فوق صورة الفاتورة لوضعه ←
-        ٣) اسحبه لتحريكه أو اسحب الزاوية لتغيير الحجم ←
-        ٤) عدّل الخصائص (الخط، الحجم، اللون) من اللوحة ←
-        ٥) اضغط <strong>حفظ النموذج</strong>
+        <strong>تصميم سريع:</strong>
+        اختر الصفحة والحقل، ثم انقر على مكانه في النموذج. اسحب الحقل لتحريكه أو اسحب زاويته لتغيير حجمه،
+        واستخدم لوحة الخصائص للتنسيق أو التكرار. عند الانتهاء اضغط <strong>حفظ النموذج</strong>.
       </div>
 
       <div class="tpl-layout">
@@ -1228,11 +1254,11 @@
           <div class="page-tabs">
             <button class="page-tab on" data-tpage="main" onclick="switchTplPage('main')">
               <strong>الصفحة 1</strong>
-              <small>الفاتورة (مع الحقول)</small>
+              <small>التصميم والحقول</small>
             </button>
             <button class="page-tab" data-tpage="terms" onclick="switchTplPage('terms')">
               <strong>الصفحة 2</strong>
-              <small>الشروط والأحكام</small>
+              <small>تصميم وحقول مستقلة</small>
             </button>
           </div>
 
@@ -1250,7 +1276,7 @@
                 </div>
                 <div class="upload-body">
                   <h3>صفحة الشروط والأحكام</h3>
-                  <p>تُضاف للـ PDF بدون تعديلات · اختياري</p>
+                  <p>ارفع الخلفية ثم أضف الحقول ونسّقها مثل الصفحة الأولى</p>
                 </div>
                 <span class="upload-btn">اختر ملف</span>
                 <input type="file" accept="application/pdf,image/*,.pdf" onchange="tplUploadTerms(event)" />
@@ -1259,26 +1285,34 @@
             <div id="terms-preview" hidden>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:12px 16px;background:var(--bg);border-radius:8px">
                 <div>
-                  <div style="font-weight:700;font-size:14px">صفحة الشروط جاهزة</div>
+                  <div style="font-weight:700;font-size:14px">الصفحة الثانية جاهزة للتعديل</div>
                   <div style="color:var(--muted);font-size:12px;margin-top:2px" id="terms-info">—</div>
                 </div>
                 <button class="btn btn-sm btn-danger" onclick="removeTplTerms()">إزالة</button>
               </div>
-              <div id="terms-img-wrap" style="text-align:center"></div>
+              <div id="terms-stage-host"></div>
             </div>
           </div>
         </div>
 
         <aside class="builder-sidebar">
           <div class="panel">
-            <h4>الحقول المتاحة <span class="count" id="fields-count">0</span></h4>
+            <h4>أضف حقلاً <span class="count" id="fields-count">0</span></h4>
             <div class="field-chips" id="chips"></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">يمكن إضافة الحقل نفسه أكثر من مرة في كل صفحة.</div>
           </div>
 
           <div class="panel" id="props-panel">
             <h4>خصائص الحقل</h4>
             <div id="props-empty" class="prop-empty">اختر حقلاً للتعديل</div>
             <div id="props-form" hidden>
+              <div class="field-quick-actions">
+                <button type="button" onclick="duplicateSelectedField()">تكرار الحقل</button>
+                <button type="button" onclick="applyFieldPreset('clean')">تنسيق بسيط</button>
+                <button type="button" onclick="applyFieldPreset('title')">تنسيق عنوان</button>
+                <button type="button" class="danger" onclick="deleteSelectedField()">حذف الحقل</button>
+                <div class="field-page-note" id="selected-field-note">—</div>
+              </div>
               <div class="prop-grid">
 
                 <div class="full">
@@ -1611,7 +1645,8 @@ let state = {
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
     displayWidth: 0, displayHeight: 0,
     termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
-    fields: [], armedKey: null, selectedFid: null,
+    termsDisplayWidth: 0, termsDisplayHeight: 0,
+    fields: [], activePage:'main', armedKey: null, selectedFid: null,
   },
   form: { editingId: null },
 };
@@ -2250,6 +2285,7 @@ async function tplUpload(ev){
     state.builder.sourceType = isPdf ? 'pdf' : 'image';
     state.builder.sourcePageCount = result.pageCount || 1;
     if(isPdf && result.pageCount > 1) toast('تم تحميل الصفحة الأولى من PDF','success');
+    else toast('تم تحميل خلفية الصفحة الأولى','success');
   }catch(err){
     console.error(err);
     toast(err.message || 'تعذر قراءة الملف','error');
@@ -2271,9 +2307,12 @@ function startBuilderWith(dataUrl, w, h, fileName){
     termsBgDataUrl: null,
     termsWidth: 0,
     termsHeight: 0,
+    termsDisplayWidth: 0,
+    termsDisplayHeight: 0,
     sourceType: 'image',
     sourcePageCount: 1,
     fields: [],
+    activePage: 'main',
     armedKey: null,
     selectedFid: null,
   };
@@ -2297,33 +2336,64 @@ function tplLoadForEdit(id){
     termsBgDataUrl: t.termsBgDataUrl || null,
     termsWidth: t.termsWidth || 0,
     termsHeight: t.termsHeight || 0,
-    fields: (t.fields||[]).map(f => ({...f, fid: uid('f')})),
+    termsDisplayWidth: t.termsDisplayWidth || 0,
+    termsDisplayHeight: t.termsDisplayHeight || 0,
+    fields: (t.fields||[]).map(f => ({...f, page:f.page || 'main', fid:uid('f')})),
+    activePage: 'main',
     armedKey: null,
     selectedFid: null,
   };
   showBuilder();
 }
 
-function buildStage(){
+function activeBuilderPage(){
+  return state.builder.activePage || 'main';
+}
+
+function fieldsForPage(page = activeBuilderPage()){
+  return state.builder.fields.filter(f => (f.page || 'main') === page);
+}
+
+function pageDisplaySize(page = activeBuilderPage()){
+  return page === 'terms'
+    ? {width:state.builder.termsDisplayWidth, height:state.builder.termsDisplayHeight}
+    : {width:state.builder.displayWidth, height:state.builder.displayHeight};
+}
+
+function getActiveBuilderStage(){
+  return document.querySelector(`.stage[data-page="${activeBuilderPage()}"]`);
+}
+
+function buildStage(page = activeBuilderPage()){
   // Compute display size - keep aspect ratio, fit a max width of ~720px
-  const stageHost = $('#stage-host');
+  const isTerms = page === 'terms';
+  const stageHost = isTerms ? $('#terms-stage-host') : $('#stage-host');
   stageHost.innerHTML = '';
   const MAX_W = 720;
-  let dw = state.builder.bgWidth, dh = state.builder.bgHeight;
+  const sourceW = isTerms ? state.builder.termsWidth : state.builder.bgWidth;
+  const sourceH = isTerms ? state.builder.termsHeight : state.builder.bgHeight;
+  const sourceUrl = isTerms ? state.builder.termsBgDataUrl : state.builder.bgDataUrl;
+  let dw = sourceW, dh = sourceH;
   if(dw > MAX_W){
     const r = MAX_W / dw;
     dw = MAX_W;
-    dh = Math.round(state.builder.bgHeight * r);
+    dh = Math.round(sourceH * r);
   }
-  state.builder.displayWidth = dw;
-  state.builder.displayHeight = dh;
+  if(isTerms){
+    state.builder.termsDisplayWidth = dw;
+    state.builder.termsDisplayHeight = dh;
+  }else{
+    state.builder.displayWidth = dw;
+    state.builder.displayHeight = dh;
+  }
 
   const stage = document.createElement('div');
   stage.className = 'stage';
-  stage.id = 'builder-stage';
+  stage.id = page === 'terms' ? 'builder-stage-terms' : 'builder-stage-main';
+  stage.dataset.page = page;
   stage.style.cssText = `width:${dw}px;height:${dh}px`;
   const img = document.createElement('img');
-  img.src = state.builder.bgDataUrl;
+  img.src = sourceUrl;
   img.style.cssText = `width:${dw}px;height:${dh}px;display:block`;
   stage.appendChild(img);
 
@@ -2334,7 +2404,7 @@ function buildStage(){
     const rect = stage.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    placeField(state.builder.armedKey, x, y);
+    placeField(state.builder.armedKey, x, y, page);
   });
 
   stageHost.appendChild(stage);
@@ -2344,26 +2414,24 @@ function buildStage(){
 function renderChips(){
   const host = $('#chips');
   host.innerHTML = '';
-  let placed = 0;
+  const pageFields = fieldsForPage();
   for(const f of FIELDS){
-    const isPlaced = state.builder.fields.some(x => x.key === f.key);
-    if(isPlaced) placed++;
+    const count = pageFields.filter(x => x.key === f.key).length;
+    const isPlaced = count > 0;
     const btn = document.createElement('button');
     btn.className = 'chip' + (isPlaced ? ' placed' : '') + (state.builder.armedKey === f.key ? ' armed' : '');
-    btn.textContent = f.label;
+    btn.textContent = `${f.label}${count ? ` (${count})` : ''} +`;
     btn.addEventListener('click', () => {
       state.builder.armedKey = (state.builder.armedKey === f.key) ? null : f.key;
       renderChips();
-      $('#builder-stage')?.classList.toggle('placing', !!state.builder.armedKey);
+      getActiveBuilderStage()?.classList.toggle('placing', !!state.builder.armedKey);
     });
     host.appendChild(btn);
   }
-  $('#fields-count').textContent = `${placed}/${FIELDS.length}`;
+  $('#fields-count').textContent = `${pageFields.length} حقل`;
 }
 
-function placeField(key, x, y){
-  // remove existing field with same key (one per template per key)
-  state.builder.fields = state.builder.fields.filter(f => f.key !== key);
+function placeField(key, x, y, page = activeBuilderPage()){
   const meta = FIELD_MAP[key];
   const isQR = meta.kind === 'qr';
   const w = isQR ? 100 : 200;
@@ -2371,6 +2439,7 @@ function placeField(key, x, y){
   const fld = {
     fid: uid('f'),
     key,
+    page,
     x: Math.max(0, x - w/2),
     y: Math.max(0, y - h/2),
     w, h,
@@ -2385,17 +2454,17 @@ function placeField(key, x, y){
   state.builder.fields.push(fld);
   state.builder.armedKey = null;
   state.builder.selectedFid = fld.fid;
-  $('#builder-stage')?.classList.remove('placing');
+  getActiveBuilderStage()?.classList.remove('placing');
   renderChips();
   renderFieldBoxes();
   renderProps();
 }
 
 function renderFieldBoxes(){
-  const stage = $('#builder-stage');
+  const stage = getActiveBuilderStage();
   if(!stage) return;
   $$('.field-box', stage).forEach(n => n.remove());
-  for(const f of state.builder.fields){
+  for(const f of fieldsForPage(stage.dataset.page || activeBuilderPage())){
     const meta = FIELD_MAP[f.key];
     const valign = f.valign || 'center';
     const alignItems = valign === 'top' ? 'flex-start' : (valign === 'bottom' ? 'flex-end' : 'center');
@@ -2408,7 +2477,9 @@ function renderFieldBoxes(){
                         `justify-content:${f.align==='center'?'center':(f.align==='left'?'flex-start':'flex-end')};` +
                         `align-items:${alignItems};`;
     div.dataset.fid = f.fid;
-    div.innerHTML = `<span class="lbl">${escapeHTML(meta?.label || f.key)}</span>
+    const sameBefore = fieldsForPage(f.page || 'main').filter(x => x.key === f.key);
+    const occurrence = sameBefore.indexOf(f) + 1;
+    div.innerHTML = `<span class="lbl">${escapeHTML(meta?.label || f.key)}${sameBefore.length > 1 ? ` · ${occurrence}` : ''}</span>
                      <span class="resize-handle"></span>
                      <span class="x-btn">×</span>`;
     div.addEventListener('mousedown', e => onFieldMouseDown(e, f.fid));
@@ -2439,7 +2510,8 @@ function onFieldMouseDown(e, fid){
   if(!fld) return;
 
   const isResize = target.classList.contains('resize-handle');
-  const stage = $('#builder-stage');
+  const stage = getActiveBuilderStage();
+  const bounds = pageDisplaySize(fld.page || activeBuilderPage());
 
   const point = e.touches ? e.touches[0] : e;
   const startX = point.clientX, startY = point.clientY;
@@ -2450,11 +2522,11 @@ function onFieldMouseDown(e, fid){
     const dx = p.clientX - startX;
     const dy = p.clientY - startY;
     if(isResize){
-      fld.w = Math.max(30, Math.min(state.builder.displayWidth - fld.x, orig.w + dx));
-      fld.h = Math.max(20, Math.min(state.builder.displayHeight - fld.y, orig.h + dy));
+      fld.w = Math.max(30, Math.min(bounds.width - fld.x, orig.w + dx));
+      fld.h = Math.max(20, Math.min(bounds.height - fld.y, orig.h + dy));
     } else {
-      fld.x = Math.max(0, Math.min(state.builder.displayWidth - fld.w, orig.x + dx));
-      fld.y = Math.max(0, Math.min(state.builder.displayHeight - fld.h, orig.y + dy));
+      fld.x = Math.max(0, Math.min(bounds.width - fld.w, orig.x + dx));
+      fld.y = Math.max(0, Math.min(bounds.height - fld.h, orig.y + dy));
     }
     renderFieldBoxes();
     renderProps();
@@ -2543,8 +2615,51 @@ function renderProps(){
   $('#p-y').value = Math.round(fld.y);
   $('#p-w').value = Math.round(fld.w);
   $('#p-h').value = Math.round(fld.h);
+  const meta = FIELD_MAP[fld.key];
+  $('#selected-field-note').textContent =
+    `${meta?.label || fld.key} · ${fld.page === 'terms' ? 'الصفحة الثانية' : 'الصفحة الأولى'}`;
 
   renderColorSwatches();
+}
+
+function deleteSelectedField(){
+  const fid = state.builder.selectedFid;
+  if(!fid) return;
+  state.builder.fields = state.builder.fields.filter(f => f.fid !== fid);
+  state.builder.selectedFid = null;
+  renderChips();
+  renderFieldBoxes();
+  renderProps();
+}
+
+function duplicateSelectedField(){
+  const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
+  if(!fld) return;
+  const bounds = pageDisplaySize(fld.page || activeBuilderPage());
+  const copy = {
+    ...fld,
+    fid:uid('f'),
+    x:Math.min(Math.max(0, bounds.width - fld.w), fld.x + 14),
+    y:Math.min(Math.max(0, bounds.height - fld.h), fld.y + 14),
+  };
+  state.builder.fields.push(copy);
+  state.builder.selectedFid = copy.fid;
+  renderChips();
+  renderFieldBoxes();
+  renderProps();
+  toast('تم تكرار الحقل','success');
+}
+
+function applyFieldPreset(kind){
+  const fld = state.builder.fields.find(f => f.fid === state.builder.selectedFid);
+  if(!fld || fld.kind === 'qr') return;
+  if(kind === 'title'){
+    Object.assign(fld, {size:32, weight:'700', lineHeight:1.15, letterSpacing:0, valign:'center'});
+  }else{
+    Object.assign(fld, {size:14, weight:'500', lineHeight:1.45, letterSpacing:0, valign:'center'});
+  }
+  renderFieldBoxes();
+  renderProps();
 }
 
 // Bind segmented controls (event delegation for buttons inside .seg)
@@ -2604,10 +2719,11 @@ document.addEventListener('input', e => {
       $('#p-color-hex').value = fld.color.toUpperCase();
       renderColorSwatches();
     }
-    const nx = Number($('#p-x').value); if(!isNaN(nx)) fld.x = Math.max(0, Math.min(state.builder.displayWidth - fld.w, nx));
-    const ny = Number($('#p-y').value); if(!isNaN(ny)) fld.y = Math.max(0, Math.min(state.builder.displayHeight - fld.h, ny));
-    const nw = Number($('#p-w').value); if(!isNaN(nw)) fld.w = Math.max(30, Math.min(state.builder.displayWidth - fld.x, nw));
-    const nh = Number($('#p-h').value); if(!isNaN(nh)) fld.h = Math.max(20, Math.min(state.builder.displayHeight - fld.y, nh));
+    const bounds = pageDisplaySize(fld.page || activeBuilderPage());
+    const nx = Number($('#p-x').value); if(!isNaN(nx)) fld.x = Math.max(0, Math.min(bounds.width - fld.w, nx));
+    const ny = Number($('#p-y').value); if(!isNaN(ny)) fld.y = Math.max(0, Math.min(bounds.height - fld.h, ny));
+    const nw = Number($('#p-w').value); if(!isNaN(nw)) fld.w = Math.max(30, Math.min(bounds.width - fld.x, nw));
+    const nh = Number($('#p-h').value); if(!isNaN(nh)) fld.h = Math.max(20, Math.min(bounds.height - fld.y, nh));
     renderFieldBoxes();
   });
 });
@@ -2618,17 +2734,24 @@ function tplResetCurrent(){
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
     displayWidth: 0, displayHeight: 0,
     termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
-    fields: [], armedKey: null, selectedFid: null,
+    termsDisplayWidth: 0, termsDisplayHeight: 0,
+    fields: [], activePage:'main', armedKey: null, selectedFid: null,
   };
   showEmpty();
 }
 
 /* ============== Builder page tabs (main / terms) ============== */
 function switchTplPage(which){
+  state.builder.activePage = which;
+  state.builder.armedKey = null;
+  state.builder.selectedFid = null;
   $$('.page-tab').forEach(b => b.classList.toggle('on', b.dataset.tpage === which));
   $('#stage-host').hidden = which !== 'main';
   $('#terms-host').hidden = which !== 'terms';
   if(which === 'terms') refreshTermsPanel();
+  else buildStage('main');
+  renderChips();
+  renderProps();
 }
 
 function refreshTermsPanel(){
@@ -2637,12 +2760,7 @@ function refreshTermsPanel(){
   $('#terms-preview').hidden = !hasTerms;
   if(hasTerms){
     $('#terms-info').textContent = `${state.builder.termsWidth}×${state.builder.termsHeight} px`;
-    const wrap = $('#terms-img-wrap');
-    wrap.innerHTML = '';
-    const img = new Image();
-    img.src = state.builder.termsBgDataUrl;
-    img.style.cssText = 'max-width:100%;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,0.06)';
-    wrap.appendChild(img);
+    buildStage('terms');
   }
 }
 
@@ -2659,6 +2777,8 @@ async function tplUploadTerms(ev){
     state.builder.termsBgDataUrl = result.dataUrl;
     state.builder.termsWidth = result.width;
     state.builder.termsHeight = result.height;
+    state.builder.termsDisplayWidth = 0;
+    state.builder.termsDisplayHeight = 0;
     refreshTermsPanel();
     toast(isPdf ? 'تم رفع الصفحة الأولى من PDF للشروط' : 'تم رفع صفحة الشروط','success');
   }catch(err){
@@ -2674,6 +2794,10 @@ function removeTplTerms(){
   state.builder.termsBgDataUrl = null;
   state.builder.termsWidth = 0;
   state.builder.termsHeight = 0;
+  state.builder.termsDisplayWidth = 0;
+  state.builder.termsDisplayHeight = 0;
+  state.builder.fields = state.builder.fields.filter(f => (f.page || 'main') !== 'terms');
+  state.builder.selectedFid = null;
   refreshTermsPanel();
 }
 
@@ -2699,8 +2823,11 @@ async function tplSaveCurrent(){
     termsBgDataUrl: state.builder.termsBgDataUrl || null,
     termsWidth: state.builder.termsWidth || 0,
     termsHeight: state.builder.termsHeight || 0,
+    termsDisplayWidth: state.builder.termsDisplayWidth || 0,
+    termsDisplayHeight: state.builder.termsDisplayHeight || 0,
     fields: state.builder.fields.map(f => ({
       key: f.key, x: f.x, y: f.y, w: f.w, h: f.h,
+      page: f.page || 'main',
       align: f.align, dir: f.dir,
       valign: f.valign || 'center',
       size: f.size, weight: f.weight, color: f.color,
@@ -2729,7 +2856,8 @@ async function tplSaveCurrent(){
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
     displayWidth: 0, displayHeight: 0,
     termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
-    fields: [], armedKey: null, selectedFid: null,
+    termsDisplayWidth: 0, termsDisplayHeight: 0,
+    fields: [], activePage:'main', armedKey: null, selectedFid: null,
   };
   showEmpty();
 }
@@ -2760,11 +2888,13 @@ function resolveFieldValue(inv, key){
 /* =====================================================================
    PDF EXPORT
    ===================================================================== */
-async function renderTemplatePageCanvas(tpl, inv, isMain){
+async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
+  const isMain = page === 'main';
   const renderW = isMain ? tpl.bgWidth : (tpl.termsWidth || tpl.bgWidth);
   const renderH = isMain ? tpl.bgHeight : (tpl.termsHeight || tpl.bgHeight);
   const bgUrl = isMain ? tpl.bgDataUrl : tpl.termsBgDataUrl;
-  const scale = renderW / (tpl.displayWidth || renderW);
+  const savedDisplayW = isMain ? tpl.displayWidth : tpl.termsDisplayWidth;
+  const scale = renderW / (savedDisplayW || renderW);
 
   const stage = document.createElement('div');
   stage.style.cssText = `position:relative;width:${renderW}px;height:${renderH}px;background:#fff;font-family:'IBM Plex Sans Arabic',sans-serif`;
@@ -2780,9 +2910,7 @@ async function renderTemplatePageCanvas(tpl, inv, isMain){
     img.onerror = rej;
   });
 
-  // Only main page gets fields - terms page is bare
-  if(isMain){
-    for(const f of (tpl.fields || [])){
+  for(const f of (tpl.fields || []).filter(f => (f.page || 'main') === page)){
       const value = resolveFieldValue(inv, f.key);
       const meta = FIELD_MAP[f.key] || {};
       const x = f.x * scale;
@@ -2871,11 +2999,10 @@ async function renderTemplatePageCanvas(tpl, inv, isMain){
         node.textContent = value;
       }
 
-      stage.appendChild(node);
-    }
+    stage.appendChild(node);
   }
 
-  return { stage, renderW, renderH };
+  return { stage, renderW, renderH, page };
 }
 
 let pdfArabicFontsPromise = null;
@@ -2909,11 +3036,12 @@ function hexToRgb(hex){
   return [n>>16 & 255, n>>8 & 255, n & 255];
 }
 
-function addReadableTextLayer(pdf, tpl, inv, metrics){
+function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
   const sx = metrics.drawW / metrics.renderW;
   const sy = metrics.drawH / metrics.renderH;
-  const fieldScale = metrics.renderW / (tpl.displayWidth || metrics.renderW);
-  for(const f of (tpl.fields || [])){
+  const savedDisplayW = page === 'terms' ? tpl.termsDisplayWidth : tpl.displayWidth;
+  const fieldScale = metrics.renderW / (savedDisplayW || metrics.renderW);
+  for(const f of (tpl.fields || []).filter(f => (f.page || 'main') === page)){
     if(f.kind === 'qr') continue;
     const raw = String(resolveFieldValue(inv, f.key) ?? '');
     if(!raw) continue;
@@ -2961,10 +3089,10 @@ async function exportInvoice(inv, templateId){
   try {
     // Build pages
     const pageDefs = [
-      await renderTemplatePageCanvas(tpl, inv, true),
+      await renderTemplatePageCanvas(tpl, inv, 'main'),
     ];
     if(tpl.termsBgDataUrl){
-      pageDefs.push(await renderTemplatePageCanvas(tpl, inv, false));
+      pageDefs.push(await renderTemplatePageCanvas(tpl, inv, 'terms'));
     }
 
     // Append all stages to host so html2canvas can capture
@@ -2990,7 +3118,7 @@ async function exportInvoice(inv, templateId){
 
     for(let i = 0; i < pageDefs.length; i++){
       const p = pageDefs[i];
-      const readableNodes = i === 0 ? Array.from(p.stage.querySelectorAll('.render-text:not(.qr-host)')) : [];
+      const readableNodes = Array.from(p.stage.querySelectorAll('.render-text:not(.qr-host)'));
       readableNodes.forEach(node => node.style.visibility = 'hidden');
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const canvas = await html2canvas(p.stage, {
@@ -3018,11 +3146,9 @@ async function exportInvoice(inv, templateId){
 
       if(i > 0) pdf.addPage('a4', isLandscape ? 'landscape' : 'portrait');
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', ox, oy, drawW, drawH);
-      if(i === 0){
-        addReadableTextLayer(pdf, tpl, inv, {
-          renderW:p.renderW, renderH:p.renderH, drawW, drawH, ox, oy,
-        });
-      }
+      addReadableTextLayer(pdf, tpl, inv, {
+        renderW:p.renderW, renderH:p.renderH, drawW, drawH, ox, oy,
+      }, p.page);
     }
 
     const fname = `${inv.type||'invoice'}-${inv.client||''}-${inv.docNumber||''}.pdf`.replace(/[\/\\?%*:|"<>]/g,'-');
@@ -3340,8 +3466,11 @@ function copyTemplateCode(){
     bgHeight: tpl.bgHeight,
     displayWidth: tpl.displayWidth,
     displayHeight: tpl.displayHeight,
+    termsDisplayWidth: tpl.termsDisplayWidth || 0,
+    termsDisplayHeight: tpl.termsDisplayHeight || 0,
     fields: tpl.fields.map(f => ({
       key: f.key,
+      page: f.page || 'main',
       x: f.x, y: f.y, w: f.w, h: f.h,
       align: f.align, dir: f.dir,
       valign: f.valign || 'center',
@@ -3410,16 +3539,26 @@ async function pasteTemplateCode(){
     }
     
     // تطبيق الحقول مع الأبعاد
-    const scaleX = (tpl.displayWidth || tpl.bgWidth) / (code.displayWidth || code.bgWidth);
-    const scaleY = (tpl.displayHeight || tpl.bgHeight) / (code.displayHeight || code.bgHeight);
-    
     tpl.fields = code.fields.map(f => ({
       ...f,
+      page: f.page || 'main',
       fid: uid('f'),
-      x: f.x * scaleX,
-      y: f.y * scaleY,
-      w: f.w * scaleX,
-      h: f.h * scaleY,
+      x: f.x * (
+        (f.page === 'terms' ? (tpl.termsDisplayWidth || tpl.termsWidth) : (tpl.displayWidth || tpl.bgWidth)) /
+        (f.page === 'terms' ? (code.termsDisplayWidth || tpl.termsWidth) : (code.displayWidth || code.bgWidth))
+      ),
+      y: f.y * (
+        (f.page === 'terms' ? (tpl.termsDisplayHeight || tpl.termsHeight) : (tpl.displayHeight || tpl.bgHeight)) /
+        (f.page === 'terms' ? (code.termsDisplayHeight || tpl.termsHeight) : (code.displayHeight || code.bgHeight))
+      ),
+      w: f.w * (
+        (f.page === 'terms' ? (tpl.termsDisplayWidth || tpl.termsWidth) : (tpl.displayWidth || tpl.bgWidth)) /
+        (f.page === 'terms' ? (code.termsDisplayWidth || tpl.termsWidth) : (code.displayWidth || code.bgWidth))
+      ),
+      h: f.h * (
+        (f.page === 'terms' ? (tpl.termsDisplayHeight || tpl.termsHeight) : (tpl.displayHeight || tpl.bgHeight)) /
+        (f.page === 'terms' ? (code.termsDisplayHeight || tpl.termsHeight) : (code.displayHeight || code.bgHeight))
+      ),
     }));
     
     await db.saveTemplate(tpl);
