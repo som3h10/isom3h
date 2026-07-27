@@ -1160,7 +1160,39 @@ html[data-theme="dark"] .topbar{background:rgba(28,28,30,.72);border-color:rgba(
 }
 .theme-switcher button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}
 .theme-switcher button.active{background:var(--surface-solid);color:var(--accent);box-shadow:0 2px 7px rgba(0,0,0,.1)}
-#sync-status{max-width:82px;overflow:hidden;text-overflow:ellipsis}
+.topbar{justify-content:flex-start}
+.topbar h1{order:1;font-size:0!important}
+.topbar h1::after{
+  content:"ISMAIL STUDIO";
+  direction:ltr;
+  font-size:13px;
+  font-weight:660;
+  letter-spacing:.045em;
+  white-space:nowrap;
+}
+.topbar h1>span{display:none}
+.nav{
+  order:2;
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+}
+#sync-status{
+  order:3;
+  margin-inline-start:auto;
+  width:10px;height:10px;flex:0 0 10px;
+  border-radius:50%;
+  background:#ff3b30;
+  box-shadow:0 0 0 3px rgba(255,59,48,.12);
+  font-size:0!important;
+  overflow:hidden;
+  transition:background .2s ease,box-shadow .2s ease;
+}
+#sync-status[data-status="ok"]{background:#34c759;box-shadow:0 0 0 3px rgba(52,199,89,.14)}
+#sync-status[data-status="syncing"]{background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.14)}
+#sync-status[data-status="error"],
+#sync-status[data-status="offline"]{background:#ff3b30;box-shadow:0 0 0 3px rgba(255,59,48,.12)}
+.theme-switcher{order:4}
 
 .container{max-width:1180px;padding:42px 14px calc(64px + env(safe-area-inset-bottom,0px))}
 .page.active{animation:page-in .32s cubic-bezier(.2,.8,.2,1)}
@@ -1415,6 +1447,36 @@ details[open]>summary::after{transform:rotate(90deg)}
 .field input[type="date"]{direction:ltr;text-align:right;padding-inline:12px}
 .field input[type="date"]::-webkit-date-and-time-value{text-align:right}
 .field input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:5px}
+.date-control{
+  position:relative;
+  width:100%;height:46px;min-height:46px;
+  display:flex;align-items:center;gap:10px;
+  padding-inline:13px;
+  border:1px solid var(--line-strong);border-radius:13px;
+  background:rgba(255,255,255,.5);color:var(--ink);
+  box-shadow:var(--control-shadow);
+  overflow:hidden;
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+html[data-theme="dark"] .date-control{background:rgba(0,0,0,.18)}
+@media (prefers-color-scheme:dark){html:not([data-theme]) .date-control{background:rgba(0,0,0,.18)}}
+.date-control:focus-within{
+  border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-light);background:var(--surface-solid);
+}
+.date-display{
+  direction:ltr;unicode-bidi:isolate;
+  flex:1;text-align:right;
+  font-size:16px;font-weight:400;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.date-display.empty{color:var(--muted)}
+.date-control-icon{width:18px;height:18px;color:var(--muted);flex:0 0 auto}
+.date-control input[type="date"]{
+  position:absolute;inset:0;
+  width:100%!important;height:100%!important;min-height:100%!important;
+  padding:0!important;margin:0;border:0!important;
+  opacity:0;cursor:pointer;
+}
 .duration-control{height:46px;min-height:46px}
 .duration-control input{height:44px!important;min-height:44px!important}
 
@@ -1505,9 +1567,10 @@ details[open]>summary::after{transform:rotate(90deg)}
 .settings-manage-row.dragging{opacity:.38;background:var(--accent-light)}
 .settings-manage-row.drag-over{border-color:var(--accent)}
 .settings-drag-handle{
-  width:30px;height:34px;display:grid;place-items:center;cursor:grab;
+  width:36px;height:40px;display:grid;place-items:center;cursor:grab;
   border:0;background:transparent;color:var(--muted);border-radius:9px;touch-action:none;
 }
+.settings-drag-handle:hover,.settings-drag-handle:focus-visible{background:var(--accent-light);color:var(--accent)}
 .settings-drag-handle:active{cursor:grabbing;background:var(--accent-light);color:var(--accent)}
 .settings-drag-handle svg{width:17px;height:17px;fill:currentColor;stroke:none}
 .settings-row-copy{min-width:0}
@@ -1563,8 +1626,9 @@ details[open]>summary::after{transform:rotate(90deg)}
   .topbar{min-height:56px;padding:7px 9px;flex-wrap:nowrap;gap:7px}
   .topbar .nav{display:none}
   .topbar h1{display:flex}
-  .theme-switcher{margin-inline-start:auto}
-  #sync-status{font-size:0!important;width:9px;height:9px;border-radius:50%;background:var(--muted);padding:0}
+  .topbar h1::after{font-size:11px;letter-spacing:.035em}
+  .theme-switcher{margin-inline-start:0}
+  #sync-status{font-size:0!important;width:9px;height:9px;flex-basis:9px;border-radius:50%;padding:0}
   .container{padding:24px 12px calc(104px + env(safe-area-inset-bottom,0px))}
   .bottom-nav{
     display:flex;
@@ -1808,7 +1872,11 @@ details[open]>summary::after{transform:rotate(90deg)}
           </div>
           <div class="field">
             <label for="f-date">تاريخ الإصدار</label>
-            <input type="date" id="f-date" />
+            <div class="date-control">
+              <span id="f-date-display" class="date-display" dir="ltr">—</span>
+              <svg class="sf-icon date-control-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"/></svg>
+              <input type="date" id="f-date" onchange="updateDateDisplay()" aria-label="تاريخ الإصدار" />
+            </div>
           </div>
           <div class="field full">
             <label for="f-firstParty">الطرف الأول</label>
@@ -2476,10 +2544,17 @@ const db = {
 function setSyncStatus(status, msg=''){
   const el = document.getElementById('sync-status');
   if(!el) return;
-  const map = { syncing:['⟳','var(--muted)'], ok:['✓','var(--accent)'], error:['⚠','#c0392b'], offline:['◌','var(--muted)'] };
-  const [icon, color] = map[status]||['',''];
-  el.textContent = icon+(msg?' '+msg:'');
-  el.style.color = color;
+  const labels = {
+    syncing:'جاري الاتصال بالسيرفر',
+    ok:'متصل بالسيرفر',
+    error:'تعذر الاتصال بالسيرفر',
+    offline:'غير متصل بالسيرفر',
+  };
+  const label = labels[status] || 'حالة الاتصال غير معروفة';
+  el.dataset.status = status || 'offline';
+  el.textContent = '';
+  el.title = msg ? `${label} — ${msg}` : label;
+  el.setAttribute('aria-label',el.title);
 }
 
 /* =====================================================================
@@ -2540,6 +2615,20 @@ function fmtDate(iso){
   return `${dd} / ${mm} / ${yy} م`;
 }
 
+function updateDateDisplay(){
+  const input = document.getElementById('f-date');
+  const display = document.getElementById('f-date-display');
+  if(!input || !display) return;
+  const parts = String(input.value || '').split('-');
+  if(parts.length===3 && parts.every(Boolean)){
+    display.textContent = `${parts[2]} / ${parts[1]} / ${parts[0]}`;
+    display.classList.remove('empty');
+  } else {
+    display.textContent = 'اختر التاريخ';
+    display.classList.add('empty');
+  }
+}
+
 function currencySymbol(c){
   if(c==='ريال') return '⃁';
   if(c==='دولار') return '$';
@@ -2581,6 +2670,7 @@ function goPage(name){
 }
 
 $$('#nav button').forEach(b => b.addEventListener('click', ()=>goPage(b.dataset.page)));
+document.querySelector('.topbar h1')?.setAttribute('aria-label','Ismail Studio');
 
 /* =====================================================================
    GIST SETTINGS
@@ -2929,6 +3019,7 @@ function prepareForm(){
     resetItemsState();
     resetClauseSelections();
   }
+  updateDateDisplay();
   onDocumentTypeChange();
 }
 
@@ -2964,6 +3055,7 @@ function fillForm(inv){
   $('#f-notes').value = inv.notes || '';
   loadItemsFromText(inv.items || '');
   loadClauseSelections(inv);
+  updateDateDisplay();
   onDocumentTypeChange();
 }
 
@@ -4432,34 +4524,98 @@ const SETTINGS_ICONS = {
 
 function attachSettingsSort(host, onCommit){
   if(!host) return;
-  host.querySelectorAll(':scope > .settings-manage-row').forEach(row=>{
+  const rows = [...host.querySelectorAll(':scope > .settings-manage-row')];
+  const commit = ()=>onCommit([...host.querySelectorAll(':scope > .settings-manage-row')].map(el=>el.dataset.id));
+  const clearDropState = ()=>host.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));
+
+  rows.forEach(row=>{
     const handle = row.querySelector('.settings-drag-handle');
     if(!handle || row.classList.contains('is-editing')) return;
+    handle.tabIndex = 0;
+    handle.title = 'اسحب لإعادة الترتيب، أو استخدم سهم أعلى وأسفل';
     let active = false;
-    handle.addEventListener('pointerdown', e=>{
-      if(e.button !== undefined && e.button !== 0) return;
-      active = true;
-      row.classList.add('dragging');
-      handle.setPointerCapture?.(e.pointerId);
-      e.preventDefault();
-    });
-    handle.addEventListener('pointermove', e=>{
-      if(!active) return;
-      const over = document.elementFromPoint(e.clientX,e.clientY)?.closest('.settings-manage-row');
+    let moved = false;
+    let startY = 0;
+
+    const moveAt = (clientX,clientY)=>{
+      const over = document.elementFromPoint(clientX,clientY)?.closest('.settings-manage-row')
+        || document.elementFromPoint(handle.getBoundingClientRect().left,clientY)?.closest('.settings-manage-row');
+      clearDropState();
       if(!over || over===row || over.parentElement!==host) return;
+      over.classList.add('drag-over');
       const box = over.getBoundingClientRect();
-      if(e.clientY < box.top + box.height/2) over.before(row);
+      if(clientY < box.top + box.height/2) over.before(row);
       else over.after(row);
-    });
-    const finish = e=>{
+      moved = true;
+    };
+
+    const beginDrag = clientY=>{
+      active = true;
+      moved = false;
+      startY = clientY;
+    };
+    const updateDrag = (clientX,clientY)=>{
+      if(!active) return;
+      if(!moved && Math.abs(clientY-startY)<5) return;
+      row.classList.add('dragging');
+      if(clientY < 90) window.scrollBy({top:-18,behavior:'auto'});
+      else if(clientY > window.innerHeight-90) window.scrollBy({top:18,behavior:'auto'});
+      moveAt(clientX,clientY);
+    };
+    const finish = ()=>{
       if(!active) return;
       active = false;
       row.classList.remove('dragging');
-      try{ handle.releasePointerCapture?.(e.pointerId); }catch(_){}
-      onCommit([...host.querySelectorAll(':scope > .settings-manage-row')].map(el=>el.dataset.id));
+      clearDropState();
+      if(moved){
+        commit();
+        toast('تم حفظ الترتيب الجديد','success');
+      }
     };
-    handle.addEventListener('pointerup', finish);
-    handle.addEventListener('pointercancel', finish);
+
+    handle.addEventListener('mousedown', e=>{
+      if(e.button!==0) return;
+      beginDrag(e.clientY);
+      const onMove = moveEvent=>{
+        updateDrag(moveEvent.clientX,moveEvent.clientY);
+        moveEvent.preventDefault();
+      };
+      const onUp = ()=>{
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+        finish();
+      };
+      document.addEventListener('mousemove',onMove,{passive:false});
+      document.addEventListener('mouseup',onUp,{once:true});
+      e.preventDefault();
+    });
+    handle.addEventListener('touchstart', e=>{
+      const touch = e.touches[0];
+      if(!touch) return;
+      beginDrag(touch.clientY);
+      e.preventDefault();
+    },{passive:false});
+    handle.addEventListener('touchmove', e=>{
+      const touch = e.touches[0];
+      if(!touch || !active) return;
+      updateDrag(touch.clientX,touch.clientY);
+      e.preventDefault();
+    },{passive:false});
+    handle.addEventListener('touchend',finish);
+    handle.addEventListener('touchcancel',finish);
+    handle.addEventListener('keydown', e=>{
+      if(!['ArrowUp','ArrowDown'].includes(e.key)) return;
+      const currentRows = [...host.querySelectorAll(':scope > .settings-manage-row')];
+      const index = currentRows.indexOf(row);
+      const target = e.key==='ArrowUp' ? currentRows[index-1] : currentRows[index+1];
+      if(!target) return;
+      e.preventDefault();
+      if(e.key==='ArrowUp') target.before(row);
+      else target.after(row);
+      commit();
+      handle.focus();
+      toast('تم حفظ الترتيب الجديد','success');
+    });
   });
 }
 
@@ -5184,6 +5340,8 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
   if(gistReady()){
     setSyncStatus('syncing');
     try{ await syncFromGist(); } catch(e){ setSyncStatus('error'); }
+  } else {
+    setSyncStatus('offline');
   }
 })();
 </script>
