@@ -18,6 +18,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
@@ -1217,7 +1218,7 @@
           </div>
           <div class="upload-body">
             <h3>ارفع نموذج الفاتورة</h3>
-            <p>PDF / JPG / PNG · تُستخدم الصفحة الأولى من ملف PDF</p>
+            <p>PDF / JPG / PNG · ملف PDF يحافظ على نصوصه الأصلية القابلة للنسخ</p>
           </div>
           <span class="upload-btn">اختر ملف</span>
           <input type="file" accept="application/pdf,image/*,.pdf" onchange="tplUpload(event)" />
@@ -1276,7 +1277,7 @@
                 </div>
                 <div class="upload-body">
                   <h3>صفحة الشروط والأحكام</h3>
-                  <p>ارفع الخلفية ثم أضف الحقول ونسّقها مثل الصفحة الأولى</p>
+                  <p>ارفع PDF للحفاظ على النص الأصلي، ثم أضف الحقول ونسّقها</p>
                 </div>
                 <span class="upload-btn">اختر ملف</span>
                 <input type="file" accept="application/pdf,image/*,.pdf" onchange="tplUploadTerms(event)" />
@@ -1644,7 +1645,8 @@ let state = {
   builder: {
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
     displayWidth: 0, displayHeight: 0,
-    termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
+    termsBgDataUrl: null, termsPdfDataUrl:null, termsWidth: 0, termsHeight: 0,
+    sourcePdfDataUrl:null,
     termsDisplayWidth: 0, termsDisplayHeight: 0,
     fields: [], activePage:'main', armedKey: null, selectedFid: null,
   },
@@ -2236,10 +2238,24 @@ async function pdfFileToImage(file){
   await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
   return {
     dataUrl: canvas.toDataURL('image/jpeg', 0.94),
+    pdfDataUrl: `data:application/pdf;base64,${uint8ToBase64(bytes)}`,
     width: canvas.width,
     height: canvas.height,
     pageCount: doc.numPages,
   };
+}
+
+function uint8ToBase64(bytes){
+  let binary = '';
+  for(let i=0; i<bytes.length; i+=0x8000){
+    binary += String.fromCharCode(...bytes.subarray(i, i+0x8000));
+  }
+  return btoa(binary);
+}
+
+function dataUrlToUint8(dataUrl){
+  const b64 = String(dataUrl || '').split(',')[1] || '';
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 }
 
 function imageFileToImage(file){
@@ -2284,6 +2300,7 @@ async function tplUpload(ev){
     startBuilderWith(result.dataUrl, result.width, result.height, file.name);
     state.builder.sourceType = isPdf ? 'pdf' : 'image';
     state.builder.sourcePageCount = result.pageCount || 1;
+    state.builder.sourcePdfDataUrl = isPdf ? result.pdfDataUrl : null;
     if(isPdf && result.pageCount > 1) toast('تم تحميل الصفحة الأولى من PDF','success');
     else toast('تم تحميل خلفية الصفحة الأولى','success');
   }catch(err){
@@ -2305,12 +2322,14 @@ function startBuilderWith(dataUrl, w, h, fileName){
     displayWidth: 0,
     displayHeight: 0,
     termsBgDataUrl: null,
+    termsPdfDataUrl: null,
     termsWidth: 0,
     termsHeight: 0,
     termsDisplayWidth: 0,
     termsDisplayHeight: 0,
     sourceType: 'image',
     sourcePageCount: 1,
+    sourcePdfDataUrl: null,
     fields: [],
     activePage: 'main',
     armedKey: null,
@@ -2331,9 +2350,11 @@ function tplLoadForEdit(id){
     bgHeight: t.bgHeight,
     sourceType: t.sourceType || 'image',
     sourcePageCount: t.sourcePageCount || 1,
+    sourcePdfDataUrl: t.sourcePdfDataUrl || null,
     displayWidth: 0,
     displayHeight: 0,
     termsBgDataUrl: t.termsBgDataUrl || null,
+    termsPdfDataUrl: t.termsPdfDataUrl || null,
     termsWidth: t.termsWidth || 0,
     termsHeight: t.termsHeight || 0,
     termsDisplayWidth: t.termsDisplayWidth || 0,
@@ -2733,7 +2754,8 @@ function tplResetCurrent(){
   state.builder = {
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
     displayWidth: 0, displayHeight: 0,
-    termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
+    termsBgDataUrl: null, termsPdfDataUrl:null, termsWidth: 0, termsHeight: 0,
+    sourcePdfDataUrl:null,
     termsDisplayWidth: 0, termsDisplayHeight: 0,
     fields: [], activePage:'main', armedKey: null, selectedFid: null,
   };
@@ -2775,6 +2797,7 @@ async function tplUploadTerms(ev){
   try{
     const result = isPdf ? await pdfFileToImage(file) : await imageFileToImage(file);
     state.builder.termsBgDataUrl = result.dataUrl;
+    state.builder.termsPdfDataUrl = isPdf ? result.pdfDataUrl : null;
     state.builder.termsWidth = result.width;
     state.builder.termsHeight = result.height;
     state.builder.termsDisplayWidth = 0;
@@ -2792,6 +2815,7 @@ async function tplUploadTerms(ev){
 function removeTplTerms(){
   if(!confirm('إزالة صفحة الشروط؟')) return;
   state.builder.termsBgDataUrl = null;
+  state.builder.termsPdfDataUrl = null;
   state.builder.termsWidth = 0;
   state.builder.termsHeight = 0;
   state.builder.termsDisplayWidth = 0;
@@ -2817,10 +2841,12 @@ async function tplSaveCurrent(){
     bgHeight: state.builder.bgHeight,
     sourceType: state.builder.sourceType || 'image',
     sourcePageCount: state.builder.sourcePageCount || 1,
+    sourcePdfDataUrl: state.builder.sourcePdfDataUrl || null,
     displayWidth: state.builder.displayWidth,
     displayHeight: state.builder.displayHeight,
     // optional second page (terms & conditions, used as-is, no fields)
     termsBgDataUrl: state.builder.termsBgDataUrl || null,
+    termsPdfDataUrl: state.builder.termsPdfDataUrl || null,
     termsWidth: state.builder.termsWidth || 0,
     termsHeight: state.builder.termsHeight || 0,
     termsDisplayWidth: state.builder.termsDisplayWidth || 0,
@@ -2855,7 +2881,8 @@ async function tplSaveCurrent(){
   state.builder = {
     id: null, name: '', bgDataUrl: null, bgWidth: 0, bgHeight: 0,
     displayWidth: 0, displayHeight: 0,
-    termsBgDataUrl: null, termsWidth: 0, termsHeight: 0,
+    termsBgDataUrl: null, termsPdfDataUrl:null, termsWidth: 0, termsHeight: 0,
+    sourcePdfDataUrl:null,
     termsDisplayWidth: 0, termsDisplayHeight: 0,
     fields: [], activePage:'main', armedKey: null, selectedFid: null,
   };
@@ -2879,7 +2906,7 @@ function resolveFieldValue(inv, key){
 
     case 'price':         return fmtMoney(inv.price);
     case 'deliveryDays':  return 'مدة التنفيذ ' + (inv.deliveryDays || 15) + ' يوم';
-    case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'• '+l).join('\n');
+    case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).join('\n');
     case 'notes':         return inv.notes || '';
     default:             return '';
   }
@@ -2978,7 +3005,20 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
             `text-align:${f.align || 'right'};` +
             `white-space:normal;word-break:break-word;` +
             `line-height:${lineHeight};`;
-          lineDiv.textContent = line;
+          if(f.key === 'items'){
+            lineDiv.style.display = 'flex';
+            lineDiv.style.flexDirection = 'row';
+            lineDiv.style.gap = `${Math.max(5, fontSize * .45)}px`;
+            const bullet = document.createElement('span');
+            bullet.textContent = '•';
+            bullet.style.flex = '0 0 auto';
+            const text = document.createElement('span');
+            text.textContent = line.replace(/^[•\-]\s*/, '');
+            text.style.flex = '1';
+            lineDiv.append(bullet, text);
+          }else{
+            lineDiv.textContent = line;
+          }
           node.appendChild(lineDiv);
         }
       } else {
@@ -3069,10 +3109,59 @@ function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     for(const line of lines){
       // jsPDF's Arabic plug-in shapes RTL text during its pre-process step.
       // Supplying the original Unicode text keeps copy/search extraction useful.
-      pdf.text(line, x, y, {align, baseline:'alphabetic'});
+      if(f.key === 'items'){
+        const cleanLine = line.replace(/^[•\-]\s*/, '');
+        const bulletGap = fontMm * .8;
+        pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
+        pdf.text(cleanLine, x - bulletGap, y, {align:'right', baseline:'alphabetic'});
+      }else{
+        pdf.text(line, x, y, {align, baseline:'alphabetic'});
+      }
       y += fontMm * lineHeight;
     }
   }
+}
+
+async function preserveOriginalPdfLayers(generatedBytes, tpl, pageDefs){
+  const hasOriginalPdf = !!tpl.sourcePdfDataUrl || !!tpl.termsPdfDataUrl;
+  if(!hasOriginalPdf || !window.PDFLib) return new Uint8Array(generatedBytes);
+
+  const { PDFDocument } = window.PDFLib;
+  const generatedDoc = await PDFDocument.load(generatedBytes);
+  const outputDoc = await PDFDocument.create();
+
+  for(let i=0; i<pageDefs.length; i++){
+    const generatedPage = generatedDoc.getPage(i);
+    const {width, height} = generatedPage.getSize();
+    const outputPage = outputDoc.addPage([width, height]);
+    const sourceDataUrl = pageDefs[i].page === 'terms'
+      ? tpl.termsPdfDataUrl
+      : tpl.sourcePdfDataUrl;
+
+    // Keep the uploaded PDF underneath the visual preview. Its original text
+    // objects remain searchable/copyable while the generated design stays exact.
+    if(sourceDataUrl){
+      const [sourceLayer] = await outputDoc.embedPdf(dataUrlToUint8(sourceDataUrl), [0]);
+      outputPage.drawPage(sourceLayer, {x:0, y:0, width, height});
+    }
+
+    const [generatedLayer] = await outputDoc.embedPdf(generatedBytes, [i]);
+    outputPage.drawPage(generatedLayer, {x:0, y:0, width, height});
+  }
+
+  return outputDoc.save({useObjectStreams:true});
+}
+
+function downloadPdfBytes(bytes, filename){
+  const blob = new Blob([bytes], {type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 async function exportInvoice(inv, templateId){
@@ -3152,7 +3241,9 @@ async function exportInvoice(inv, templateId){
     }
 
     const fname = `${inv.type||'invoice'}-${inv.client||''}-${inv.docNumber||''}.pdf`.replace(/[\/\\?%*:|"<>]/g,'-');
-    pdf.save(fname);
+    const generatedBytes = pdf.output('arraybuffer');
+    const finalBytes = await preserveOriginalPdfLayers(generatedBytes, tpl, pageDefs);
+    downloadPdfBytes(finalBytes, fname);
     toast('تم تصدير PDF','success');
   } catch(err){
     console.error(err);
