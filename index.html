@@ -1181,22 +1181,25 @@
           <div class="items-section">
             <div class="items-header"><span>اختر الشروط التي ستظهر</span><span id="quoteTerms-count-label">0 بند محدد</span></div>
             <div class="items-list" id="quoteTerms-checkboxes"></div>
+            <div class="items-custom">
+              <input type="text" id="quoteTerms-custom-input" placeholder="أضف شرطاً سريعاً لهذا العرض..." />
+              <button type="button" onclick="addQuickClause('quoteTerms')">+ إضافة</button>
+            </div>
           </div>
           <textarea id="f-quoteTerms" style="display:none"></textarea>
         </div>
 
         <div class="field full" id="completion-terms-field" hidden>
           <label>أحكام إنجاز العمل</label>
-          <div class="items-section" style="margin-bottom:10px">
-            <div class="items-header"><span>أحكام التسليم</span><span id="deliveryTerms-count-label">0 بند محدد</span></div>
-            <div class="items-list" id="deliveryTerms-checkboxes"></div>
-          </div>
           <div class="items-section">
-            <div class="items-header"><span>أحكام التنازل</span><span id="assignmentTerms-count-label">0 بند محدد</span></div>
-            <div class="items-list" id="assignmentTerms-checkboxes"></div>
+            <div class="items-header"><span>اختر الأحكام التي ستظهر</span><span id="completionTerms-count-label">0 بند محدد</span></div>
+            <div class="items-list" id="completionTerms-checkboxes"></div>
+            <div class="items-custom">
+              <input type="text" id="completionTerms-custom-input" placeholder="أضف حكماً سريعاً لهذا الإنجاز..." />
+              <button type="button" onclick="addQuickClause('completionTerms')">+ إضافة</button>
+            </div>
           </div>
-          <textarea id="f-deliveryTerms" style="display:none"></textarea>
-          <textarea id="f-assignmentTerms" style="display:none"></textarea>
+          <textarea id="f-completionTerms" style="display:none"></textarea>
         </div>
 
         <div class="field full">
@@ -1531,12 +1534,20 @@
       <p style="color:var(--muted);font-size:13px;margin:0 0 16px">بيانات الحساب البنكي التي يمكن إضافتها إلى تصميم الفاتورة.</p>
       <div class="form-grid">
         <div class="field">
+          <label>اسم البنك</label>
+          <input id="settings-bank-name" type="text" placeholder="مثال: بنك الراجحي" oninput="saveGeneralSettings()">
+        </div>
+        <div class="field">
           <label>اسم صاحب الحساب</label>
           <input id="settings-account-holder" type="text" placeholder="اسم صاحب الحساب" oninput="saveGeneralSettings()">
         </div>
         <div class="field">
-          <label>الحساب البنكي / الآيبان</label>
-          <input id="settings-bank-account" type="text" dir="ltr" placeholder="SA00 0000 0000 0000 0000 0000" oninput="saveGeneralSettings()">
+          <label>رقم الحساب البنكي</label>
+          <input id="settings-bank-account" type="text" dir="ltr" placeholder="0000000000000000" oninput="saveGeneralSettings()">
+        </div>
+        <div class="field">
+          <label>رقم الآيبان</label>
+          <input id="settings-bank-iban" type="text" dir="ltr" placeholder="SA00 0000 0000 0000 0000 0000" oninput="saveGeneralSettings()">
         </div>
       </div>
     </div>
@@ -1609,10 +1620,11 @@ const FIELDS = [
   { key:'deliveryDays',  label:'مدة التنفيذ',           size:13, dir:'rtl', weight:'500' },
   { key:'items',         label:'بنود المشروع',          size:13, dir:'rtl', weight:'400', preserve:true },
   { key:'quoteTerms',    label:'شروط وأحكام عرض السعر', size:12, dir:'rtl', weight:'400', preserve:true },
-  { key:'deliveryTerms', label:'أحكام التسليم',         size:12, dir:'rtl', weight:'400', preserve:true },
-  { key:'assignmentTerms',label:'أحكام التنازل',        size:12, dir:'rtl', weight:'400', preserve:true },
-  { key:'accountHolder', label:'اسم صاحب الحساب',       size:12, dir:'rtl', weight:'600' },
-  { key:'bankAccount',   label:'الحساب البنكي / الآيبان',size:12, dir:'ltr', weight:'500' },
+  { key:'completionTerms',label:'أحكام إنجاز العمل',    size:12, dir:'rtl', weight:'400', preserve:true },
+  { key:'bankNameBlock', label:'اسم البنك + القيمة',    size:13, dir:'rtl', weight:'400', preserve:true, bankBlock:true },
+  { key:'accountHolderBlock',label:'اسم صاحب الحساب + القيمة',size:13, dir:'rtl', weight:'400', preserve:true, bankBlock:true },
+  { key:'bankAccountBlock',label:'رقم الحساب + القيمة', size:13, dir:'rtl', weight:'400', preserve:true, bankBlock:true },
+  { key:'bankIbanBlock', label:'رقم الآيبان + القيمة',  size:13, dir:'rtl', weight:'400', preserve:true, bankBlock:true },
   { key:'notes',         label:'ملاحظات',                size:12, dir:'rtl', weight:'400', preserve:true },
 ];
 
@@ -2101,8 +2113,7 @@ function readForm(){
     currency: $('#f-currency').value,
     items: $('#f-items').value.trim(),
     quoteTerms: $('#f-quoteTerms').value.trim(),
-    deliveryTerms: $('#f-deliveryTerms').value.trim(),
-    assignmentTerms: $('#f-assignmentTerms').value.trim(),
+    completionTerms: $('#f-completionTerms').value.trim(),
     deliveryDays: Number($('#f-deliveryDays').value)||15,
     notes: $('#f-notes').value.trim(),
   };
@@ -2975,10 +2986,18 @@ function resolveFieldValue(inv, key){
     case 'deliveryDays':  return 'مدة التنفيذ ' + (inv.deliveryDays || 15) + ' يوم';
     case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).join('\n');
     case 'quoteTerms':    return inv.type === 'عرض سعر' ? (inv.quoteTerms || '') : '';
-    case 'deliveryTerms': return inv.type === 'إنجاز عمل' ? (inv.deliveryTerms || '') : '';
+    case 'completionTerms': return inv.type === 'إنجاز عمل'
+      ? (inv.completionTerms || [inv.deliveryTerms, inv.assignmentTerms].filter(Boolean).join('\n'))
+      : '';
+    // حقول قديمة للتوافق مع التصاميم المحفوظة سابقاً
+    case 'deliveryTerms': return inv.type === 'إنجاز عمل' ? (inv.deliveryTerms || inv.completionTerms || '') : '';
     case 'assignmentTerms': return inv.type === 'إنجاز عمل' ? (inv.assignmentTerms || '') : '';
     case 'accountHolder': return getGeneralSettings().accountHolder || '';
     case 'bankAccount':   return getGeneralSettings().bankAccount || '';
+    case 'bankNameBlock': return 'اسم البنك:\n' + (getGeneralSettings().bankName || '');
+    case 'accountHolderBlock': return 'اسم صاحب الحساب:\n' + (getGeneralSettings().accountHolder || '');
+    case 'bankAccountBlock': return 'رقم الحساب البنكي:\n' + (getGeneralSettings().bankAccount || '');
+    case 'bankIbanBlock': return 'رقم الآيبان:\n' + (getGeneralSettings().bankIban || '');
     case 'notes':         return inv.notes || '';
     default:             return '';
   }
@@ -3069,7 +3088,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `overflow:hidden;box-sizing:border-box;` +
           `display:flex;flex-direction:column;justify-content:flex-start;`;
         const lines = value.split('\n');
-        for(const line of lines){
+        lines.forEach((line, lineIndex)=>{
           const lineDiv = document.createElement('div');
           lineDiv.style.cssText =
             `display:block;width:100%;` +
@@ -3090,9 +3109,11 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
             lineDiv.append(bullet, text);
           }else{
             lineDiv.textContent = line;
+            if(meta.bankBlock && lineIndex === 0) lineDiv.style.fontWeight = '700';
+            if(meta.bankBlock && lineIndex === 1) lineDiv.style.direction = 'ltr';
           }
           node.appendChild(lineDiv);
-        }
+        });
       } else {
         node.className = 'render-text' + (isPreserve ? ' preserve' : '');
         node.style.cssText =
@@ -3148,6 +3169,21 @@ function hexToRgb(hex){
   return [n>>16 & 255, n>>8 & 255, n & 255];
 }
 
+function drawPdfLine(pdf, line, x, y, options={}){
+  const align = options.align || 'right';
+  const isRtl = options.dir !== 'ltr' && align === 'right';
+  const match = isRtl ? String(line).match(/^(.*?)([.،؛:!?؟]+)$/) : null;
+  if(!match || !match[1]){
+    pdf.text(String(line), x, y, {align, baseline:'alphabetic'});
+    return;
+  }
+  const body = match[1].trimEnd();
+  const punctuation = match[2];
+  pdf.text(body, x, y, {align:'right', baseline:'alphabetic'});
+  const bodyWidth = pdf.getTextWidth(body);
+  pdf.text(punctuation, x - bodyWidth - .35, y, {align:'right', baseline:'alphabetic'});
+}
+
 function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
   const sx = metrics.drawW / metrics.renderW;
   const sy = metrics.drawH / metrics.renderH;
@@ -3156,6 +3192,7 @@ function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
   for(const f of (tpl.fields || []).filter(f => (f.page || 'main') === page)){
     if(f.kind === 'qr') continue;
     const raw = String(resolveFieldValue(inv, f.key) ?? '');
+    const meta = FIELD_MAP[f.key] || {};
     if(!raw) continue;
     const xPx = f.x * fieldScale;
     const yPx = f.y * fieldScale;
@@ -3178,19 +3215,23 @@ function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     pdf.setTextColor(r,g,b);
     pdf.setFont('IBMPlexArabic', Number(f.weight) >= 600 ? 'bold' : 'normal');
     pdf.setFontSize(fontMm * 2.83465);
-    for(const line of lines){
+    lines.forEach((line, lineIndex)=>{
+      pdf.setFont('IBMPlexArabic',
+        meta.bankBlock && lineIndex === 0
+          ? 'bold'
+          : (Number(f.weight) >= 600 ? 'bold' : 'normal'));
       // jsPDF's Arabic plug-in shapes RTL text during its pre-process step.
       // Supplying the original Unicode text keeps copy/search extraction useful.
       if(isListField(f.key)){
         const cleanLine = line.replace(/^[•\-]\s*/, '');
         const bulletGap = fontMm * .8;
         pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
-        pdf.text(cleanLine, x - bulletGap, y, {align:'right', baseline:'alphabetic'});
+        drawPdfLine(pdf, cleanLine, x - bulletGap, y, {align:'right', dir:'rtl'});
       }else{
-        pdf.text(line, x, y, {align, baseline:'alphabetic'});
+        drawPdfLine(pdf, line, x, y, {align, dir:(meta.bankBlock && lineIndex === 1) ? 'ltr' : f.dir});
       }
       y += fontMm * lineHeight;
-    }
+    });
   }
 }
 
@@ -3390,11 +3431,9 @@ const DEFAULT_CLAUSE_GROUPS = {
     {id:'qt1', text:'مدة صلاحية عرض السعر 15 يوماً من تاريخ الإصدار.'},
     {id:'qt2', text:'يبدأ التنفيذ بعد اعتماد العرض واستلام الدفعة المتفق عليها.'},
   ],
-  deliveryTerms: [
+  completionTerms: [
     {id:'dt1', text:'يتم تسليم الأعمال بصيغ الملفات المتفق عليها بعد اكتمال الدفعات.'},
     {id:'dt2', text:'يُعد العمل منجزاً بعد اعتماد النسخة النهائية من الطرف الثاني.'},
-  ],
-  assignmentTerms: [
     {id:'at1', text:'تنتقل حقوق استخدام العمل النهائي للطرف الثاني بعد سداد كامل المبلغ.'},
     {id:'at2', text:'لا يشمل التنازل المقترحات غير المعتمدة أو ملفات العمل الأولية.'},
   ],
@@ -3402,9 +3441,13 @@ const DEFAULT_CLAUSE_GROUPS = {
 
 let CLAUSE_GROUPS = {};
 let clauseSelections = {};
+let clauseCustom = {};
 
 function loadClauseSettings(){
   const saved = cache.get(KEYS.clauses);
+  if(saved && !saved.completionTerms && (saved.deliveryTerms || saved.assignmentTerms)){
+    saved.completionTerms = [...(saved.deliveryTerms || []), ...(saved.assignmentTerms || [])];
+  }
   CLAUSE_GROUPS = {};
   for(const [key, defaults] of Object.entries(DEFAULT_CLAUSE_GROUPS)){
     CLAUSE_GROUPS[key] = Array.isArray(saved?.[key]) ? saved[key] : defaults.map(x=>({...x}));
@@ -3418,21 +3461,32 @@ function saveClauseSettings(){
 
 function getGeneralSettings(){
   const saved = cache.get(KEYS.generalSettings) || {};
-  return {accountHolder:saved.accountHolder || '', bankAccount:saved.bankAccount || ''};
+  return {
+    bankName:saved.bankName || '',
+    accountHolder:saved.accountHolder || '',
+    bankAccount:saved.bankAccount || '',
+    bankIban:saved.bankIban || '',
+  };
 }
 
 function loadGeneralSettingsForm(){
   const settings = getGeneralSettings();
+  const bankName = document.getElementById('settings-bank-name');
   const holder = document.getElementById('settings-account-holder');
   const account = document.getElementById('settings-bank-account');
+  const iban = document.getElementById('settings-bank-iban');
+  if(bankName) bankName.value = settings.bankName;
   if(holder) holder.value = settings.accountHolder;
   if(account) account.value = settings.bankAccount;
+  if(iban) iban.value = settings.bankIban;
 }
 
 function saveGeneralSettings(){
   cache.set(KEYS.generalSettings, {
+    bankName:(document.getElementById('settings-bank-name')?.value || '').trim(),
     accountHolder:(document.getElementById('settings-account-holder')?.value || '').trim(),
     bankAccount:(document.getElementById('settings-bank-account')?.value || '').trim(),
+    bankIban:(document.getElementById('settings-bank-iban')?.value || '').trim(),
   });
   clearTimeout(saveGeneralSettings._timer);
   saveGeneralSettings._timer = setTimeout(autoSync, 500);
@@ -3452,8 +3506,7 @@ function importSyncedSettings(data){
 
 const CLAUSE_LABELS = {
   quoteTerms:'شروط وأحكام عرض السعر',
-  deliveryTerms:'أحكام التسليم — إنجاز عمل',
-  assignmentTerms:'أحكام التنازل — إنجاز عمل',
+  completionTerms:'أحكام إنجاز العمل (التسليم والتنازل)',
 };
 
 function renderSettingsClauses(){
@@ -3496,17 +3549,24 @@ function deleteClause(key, index){
 
 function resetClauseSelections(){
   clauseSelections = {};
+  clauseCustom = {};
   for(const key of Object.keys(CLAUSE_LABELS)){
     clauseSelections[key] = new Set((CLAUSE_GROUPS[key] || []).map(x=>x.id));
+    clauseCustom[key] = [];
   }
   renderClauseSelectors();
 }
 
 function loadClauseSelections(inv){
   clauseSelections = {};
+  clauseCustom = {};
   for(const key of Object.keys(CLAUSE_LABELS)){
-    const savedLines = String(inv[key] || '').split('\n').map(x=>x.trim()).filter(Boolean);
+    const legacyCompletion = key === 'completionTerms'
+      ? [inv.deliveryTerms, inv.assignmentTerms].filter(Boolean).join('\n')
+      : '';
+    const savedLines = String(inv[key] || legacyCompletion).split('\n').map(x=>x.trim()).filter(Boolean);
     clauseSelections[key] = new Set((CLAUSE_GROUPS[key] || []).filter(x=>savedLines.includes(x.text)).map(x=>x.id));
+    clauseCustom[key] = savedLines.filter(line=>!(CLAUSE_GROUPS[key] || []).some(x=>x.text===line));
   }
   renderClauseSelectors();
 }
@@ -3530,16 +3590,41 @@ function renderClauseSelectors(){
       });
       host.appendChild(row);
     }
+    (clauseCustom[key] || []).forEach((text, index)=>{
+      const row = document.createElement('div');
+      row.className = 'item-row checked';
+      row.innerHTML = `<span class="item-text">${escapeHTML(text)}</span>
+        <button type="button" onclick="removeQuickClause('${key}',${index})" style="color:var(--danger);font-size:16px;background:none;border:0;cursor:pointer">×</button>`;
+      host.appendChild(row);
+    });
     syncClauseTextarea(key);
   }
 }
 
 function syncClauseTextarea(key){
-  const lines = (CLAUSE_GROUPS[key] || []).filter(x=>clauseSelections[key]?.has(x.id)).map(x=>x.text);
+  const lines = [
+    ...(CLAUSE_GROUPS[key] || []).filter(x=>clauseSelections[key]?.has(x.id)).map(x=>x.text),
+    ...(clauseCustom[key] || []),
+  ];
   const textarea = document.getElementById('f-'+key);
   if(textarea) textarea.value = lines.join('\n');
   const count = document.getElementById(key+'-count-label');
   if(count) count.textContent = lines.length ? lines.length+' بند محدد' : 'لا يوجد تحديد';
+}
+
+function addQuickClause(key){
+  const input = document.getElementById(key+'-custom-input');
+  const text = (input?.value || '').trim();
+  if(!text) return;
+  if(!clauseCustom[key]) clauseCustom[key] = [];
+  clauseCustom[key].push(text);
+  input.value = '';
+  renderClauseSelectors();
+}
+
+function removeQuickClause(key, index){
+  clauseCustom[key]?.splice(index,1);
+  renderClauseSelectors();
 }
 
 function onDocumentTypeChange(){
@@ -3552,7 +3637,7 @@ function onDocumentTypeChange(){
 }
 
 function isListField(key){
-  return ['items','quoteTerms','deliveryTerms','assignmentTerms'].includes(key);
+  return ['items','quoteTerms','completionTerms','deliveryTerms','assignmentTerms'].includes(key);
 }
 
 const TYPE_LABELS = { logo:'شعار', identity:'هوية', social:'منشورات', profile:'بروفايل', book:'كتب' };
@@ -3685,6 +3770,10 @@ function addCustomItem(){
 }
 document.addEventListener('keydown',e=>{
   if(e.target.id==='custom-item-input'&&e.key==='Enter'){e.preventDefault();addCustomItem();}
+  if(e.key==='Enter' && e.target.id?.endsWith('Terms-custom-input')){
+    e.preventDefault();
+    addQuickClause(e.target.id.replace('-custom-input',''));
+  }
 });
 function removeCustomItem(ci){
   itemsState.custom.splice(ci,1);
