@@ -1371,7 +1371,7 @@ html[data-theme="dark"] .prop-grid input,html[data-theme="dark"] .prop-grid sele
 .money-amount{direction:ltr}
 .money-symbol{
   direction:rtl;font-family:var(--font);line-height:1;
-  font-size:.5em;align-self:center;
+  font-size:.75em;align-self:center;
 }
 .price{text-align:right!important;font-variant-numeric:tabular-nums}
 
@@ -4258,7 +4258,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
             : (f.align || 'right') === 'left' ? 'flex-start' : 'flex-end';
           const symbol = document.createElement('span');
           symbol.textContent = currencySymbol(inv.currency);
-          symbol.style.fontSize = '.5em';
+          symbol.style.fontSize = '.75em';
           symbol.style.lineHeight = '1';
           const amount = document.createElement('span');
           amount.textContent = fmtMoney(inv.price);
@@ -4406,7 +4406,7 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     if(f.key === 'price' && inv.currency === 'ريال'){
       const amount = fmtMoney(inv.price);
       const amountWidth = pdf.getTextWidth(amount);
-      const iconH = fontMm * .52;
+      const iconH = fontMm * .76;
       const iconW = iconH * (1124.14 / 1256.39);
       const gap = Math.max(.5, fontMm * .15);
       const totalW = amountWidth + gap + iconW;
