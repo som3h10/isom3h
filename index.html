@@ -1392,6 +1392,160 @@ details[open]>summary::after{transform:rotate(90deg)}
   .topbar,.card,.stat,.items-section,.panel,.stage-wrap,.saved-tpl,.help{background:var(--surface-solid)}
 }
 
+/* Consistent native controls across Safari, iOS and desktop browsers. */
+.field input:not([type="checkbox"]):not([type="color"]),
+.field select,
+.prop-grid input:not([type="checkbox"]):not([type="color"]),
+.prop-grid select{
+  width:100%;
+  height:46px;
+  min-height:46px;
+  box-sizing:border-box;
+  padding-block:0;
+  font-size:16px;
+}
+.field select,.prop-grid select{
+  -webkit-appearance:none;
+  appearance:none;
+  padding-inline:13px 40px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%238e8e93' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:left 14px center;
+}
+.field input[type="date"]{direction:ltr;text-align:right;padding-inline:12px}
+.field input[type="date"]::-webkit-date-and-time-value{text-align:right}
+.field input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:5px}
+.duration-control{height:46px;min-height:46px}
+.duration-control input{height:44px!important;min-height:44px!important}
+
+/* One natural page scroll: lists expand in the document instead of scrolling inside boxes. */
+.items-list{
+  max-height:none;
+  overflow:visible;
+}
+.selection-disclosure{
+  overflow:visible;
+  border-radius:18px!important;
+  background:var(--surface)!important;
+}
+.selection-disclosure>.selection-summary{
+  min-height:76px;
+  padding:14px 16px;
+  cursor:pointer;
+  border-radius:18px;
+}
+.selection-disclosure[open]>.selection-summary{
+  border-bottom:1px solid var(--line);
+  border-radius:18px 18px 0 0;
+}
+.selection-summary-icon{
+  width:38px;height:38px;display:grid;place-items:center;flex:0 0 auto;
+  border-radius:12px;background:var(--accent-light);color:var(--accent);
+}
+.selection-summary-icon .sf-icon{width:20px;height:20px}
+.selection-summary-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.selection-summary-copy strong{font-size:15px;font-weight:650;line-height:1.35}
+.selection-summary-copy small{color:var(--muted);font-size:12px;font-weight:430;line-height:1.35}
+.selection-count{
+  margin-inline-start:auto;
+  padding:5px 9px;border-radius:999px;
+  background:var(--accent-light);color:var(--accent);
+  font-size:11px;font-weight:620;white-space:nowrap;
+}
+.selection-summary::after{margin-inline-start:4px}
+.selection-disclosure-body{padding:0 10px 10px}
+.selection-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 6px 7px;color:var(--muted);font-size:12px;font-weight:540;
+}
+.clause-switch-list{gap:0;padding-block:2px}
+.clause-switch-row{
+  min-height:54px;padding:10px 7px;
+  border-bottom:1px solid var(--line);border-radius:0!important;margin:0!important;
+  cursor:pointer;
+}
+.clause-switch-row:last-child{border-bottom:0}
+.clause-switch-row:hover{background:transparent}
+.clause-switch-row.checked{background:transparent;border-inline:0;border-top:0}
+.clause-switch-row .item-text{padding-inline-end:2px}
+.switch-input{
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  opacity:0;pointer-events:none;
+}
+.switch-control{
+  position:relative;width:42px;height:25px;flex:0 0 42px;
+  border-radius:999px;background:rgba(120,120,128,.28);
+  transition:background .18s ease;
+}
+.switch-control::after{
+  content:"";position:absolute;top:2px;right:2px;width:21px;height:21px;
+  border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.24);
+  transition:transform .18s ease;
+}
+.switch-input:checked+.switch-control{background:#34c759}
+.switch-input:checked+.switch-control::after{transform:translateX(-17px)}
+.switch-input:focus-visible+.switch-control{outline:3px solid rgba(0,122,255,.4);outline-offset:2px}
+
+/* Compact item and clause management in Settings. */
+.settings-manage-list{display:flex;flex-direction:column;gap:8px;overflow:visible}
+.settings-manage-section{padding:16px 0 4px;border-top:1px solid var(--line)}
+.settings-manage-section:first-child{border-top:0}
+.settings-manage-section-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;
+}
+.settings-manage-section-head strong{font-size:14px;font-weight:650}
+.settings-manage-row{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+  min-height:52px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:14px;background:var(--surface);
+  transition:border-color .16s ease,background .16s ease,opacity .16s ease;
+}
+.settings-manage-row+.settings-manage-row{margin-top:7px}
+.settings-manage-row.dragging{opacity:.38;background:var(--accent-light)}
+.settings-manage-row.drag-over{border-color:var(--accent)}
+.settings-drag-handle{
+  width:30px;height:34px;display:grid;place-items:center;cursor:grab;
+  border:0;background:transparent;color:var(--muted);border-radius:9px;touch-action:none;
+}
+.settings-drag-handle:active{cursor:grabbing;background:var(--accent-light);color:var(--accent)}
+.settings-drag-handle svg{width:17px;height:17px;fill:currentColor;stroke:none}
+.settings-row-copy{min-width:0}
+.settings-row-text{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+  color:var(--ink);font-size:13.5px;font-weight:470;line-height:1.55;
+}
+.settings-row-meta{margin-top:3px;color:var(--muted);font-size:11px;line-height:1.4}
+.settings-row-actions{display:flex;align-items:center;gap:3px}
+.settings-row-action{
+  width:34px;height:34px;display:grid;place-items:center;
+  border:0;border-radius:10px;background:transparent;color:var(--accent);cursor:pointer;
+}
+.settings-row-action:hover{background:var(--accent-light)}
+.settings-row-action.danger{color:var(--danger)}
+.settings-row-action.danger:hover{background:rgba(255,59,48,.1)}
+.settings-row-action .sf-icon{width:17px;height:17px}
+.settings-inline-editor{
+  grid-column:1/-1;
+  padding:12px;border-top:1px solid var(--line);
+  display:grid;gap:12px;background:var(--surface);border-radius:0 0 13px 13px;
+}
+.settings-inline-editor textarea{
+  width:100%;min-height:86px;padding:10px 12px;resize:vertical;
+  border:1px solid var(--line-strong);border-radius:12px;background:var(--surface-solid);
+  color:var(--ink);font:inherit;font-size:14px;line-height:1.55;outline:0;
+}
+.settings-inline-editor textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-light)}
+.settings-category-title{color:var(--muted);font-size:12px;font-weight:570}
+.settings-categories{display:flex;gap:7px;flex-wrap:wrap}
+.settings-category{
+  display:flex;align-items:center;gap:6px;padding:7px 10px;
+  border:1px solid var(--line);border-radius:10px;background:var(--surface-solid);
+  font-size:12px;cursor:pointer;
+}
+.settings-category input{width:15px;height:15px;margin:0;accent-color:var(--accent)}
+.settings-editor-actions{display:flex;justify-content:flex-end;gap:7px}
+
 @media (max-width:1024px){
   .topbar{width:calc(100% - 22px);top:calc(8px + env(safe-area-inset-top,0px));border-radius:21px}
   .topbar h1 span,.topbar h1{font-size:0}
@@ -1505,9 +1659,16 @@ details[open]>summary::after{transform:rotate(90deg)}
   .items-header>div:first-child{justify-content:space-between}
   .selection-actions{width:100%}
   .selection-actions button{flex:1}
+  .selection-summary{align-items:center}
+  .selection-summary-copy small{display:none}
+  .selection-count{margin-inline-start:auto}
+  .selection-toolbar{align-items:stretch;flex-direction:column}
   .items-custom{flex-direction:column;align-items:stretch}
   .items-custom input{width:100%}
   .items-custom button{width:100%}
+  .settings-manage-row{grid-template-columns:auto minmax(0,1fr) auto;gap:7px;padding:7px}
+  .settings-row-text{-webkit-line-clamp:3;font-size:13px}
+  .settings-inline-editor{padding:10px}
   .stage-wrap{padding:7px}
   .upload-area{padding:17px;flex-direction:column;text-align:center}
   .upload-area .upload-body{text-align:center}
@@ -1725,71 +1886,95 @@ details[open]>summary::after{transform:rotate(90deg)}
         </header>
         <div class="form-stack">
           <div class="field full">
-            <label>بنود المشروع</label>
-            <div class="items-section">
-              <div class="items-header">
-                <div><strong>اختر البنود</strong><span id="items-count-label">0 بند محدد</span></div>
-                <div class="selection-actions">
-                  <button type="button" onclick="selectAllVisibleItems()">تحديد الكل</button>
-                  <button type="button" onclick="clearVisibleItems()">إلغاء التحديد</button>
+            <details class="items-section selection-disclosure">
+              <summary class="selection-summary">
+                <span class="selection-summary-icon" aria-hidden="true">
+                  <svg class="sf-icon" viewBox="0 0 24 24"><path d="M7 6h13M7 12h13M7 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+                </span>
+                <span class="selection-summary-copy"><strong>بنود المشروع</strong><small>حدد البنود ورتّبها بالسحب</small></span>
+                <span class="selection-count" id="items-count-label">0 بند محدد</span>
+              </summary>
+              <div class="selection-disclosure-body">
+                <div class="selection-toolbar">
+                  <span>البنود المتاحة</span>
+                  <div class="selection-actions">
+                    <button type="button" onclick="selectAllVisibleItems()">تحديد الكل</button>
+                    <button type="button" onclick="clearVisibleItems()">إلغاء التحديد</button>
+                  </div>
+                </div>
+                <div class="items-list" id="items-checkboxes"></div>
+                <div class="items-preview" id="items-preview-row" hidden>
+                  محدد: <span id="items-selected-preview">—</span>
+                </div>
+                <div class="items-custom">
+                  <input type="text" id="custom-item-input" placeholder="أضف بندًا مخصصًا..." />
+                  <button type="button" onclick="addCustomItem()" aria-label="إضافة بند مخصص">
+                    <svg class="sf-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    إضافة
+                  </button>
                 </div>
               </div>
-              <div class="items-list" id="items-checkboxes"></div>
-              <div class="items-preview" id="items-preview-row" hidden>
-                محدد: <span id="items-selected-preview">—</span>
-              </div>
-              <div class="items-custom">
-                <input type="text" id="custom-item-input" placeholder="أضف بندًا مخصصًا..." />
-                <button type="button" onclick="addCustomItem()" aria-label="إضافة بند مخصص">
-                  <svg class="sf-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                  إضافة
-                </button>
-              </div>
-            </div>
+            </details>
             <textarea id="f-items" style="display:none"></textarea>
           </div>
 
           <div class="field full" id="quote-terms-field">
-            <label>شروط وأحكام عرض السعر</label>
-            <div class="items-section">
-              <div class="items-header">
-                <div><strong>اختر الشروط التي ستظهر</strong><span id="quoteTerms-count-label">0 بند محدد</span></div>
-                <div class="selection-actions">
-                  <button type="button" onclick="setAllClauses('quoteTerms',true)">تحديد الكل</button>
-                  <button type="button" onclick="setAllClauses('quoteTerms',false)">إلغاء التحديد</button>
+            <details class="items-section selection-disclosure">
+              <summary class="selection-summary">
+                <span class="selection-summary-icon" aria-hidden="true">
+                  <svg class="sf-icon" viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+                </span>
+                <span class="selection-summary-copy"><strong>شروط وأحكام عرض السعر</strong><small>اضغط لعرض الشروط واختيارها</small></span>
+                <span class="selection-count" id="quoteTerms-count-label">0 بند محدد</span>
+              </summary>
+              <div class="selection-disclosure-body">
+                <div class="selection-toolbar">
+                  <span>الشروط التي ستظهر في الوثيقة</span>
+                  <div class="selection-actions">
+                    <button type="button" onclick="setAllClauses('quoteTerms',true)">تحديد الكل</button>
+                    <button type="button" onclick="setAllClauses('quoteTerms',false)">إلغاء التحديد</button>
+                  </div>
+                </div>
+                <div class="items-list clause-switch-list" id="quoteTerms-checkboxes"></div>
+                <div class="items-custom">
+                  <input type="text" id="quoteTerms-custom-input" placeholder="أضف شرطًا لهذا العرض..." />
+                  <button type="button" onclick="addQuickClause('quoteTerms')" aria-label="إضافة شرط">
+                    <svg class="sf-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    إضافة
+                  </button>
                 </div>
               </div>
-              <div class="items-list" id="quoteTerms-checkboxes"></div>
-              <div class="items-custom">
-                <input type="text" id="quoteTerms-custom-input" placeholder="أضف شرطًا لهذا العرض..." />
-                <button type="button" onclick="addQuickClause('quoteTerms')" aria-label="إضافة شرط">
-                  <svg class="sf-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                  إضافة
-                </button>
-              </div>
-            </div>
+            </details>
             <textarea id="f-quoteTerms" style="display:none"></textarea>
           </div>
 
           <div class="field full" id="completion-terms-field" hidden>
-            <label>أحكام إنجاز العمل</label>
-            <div class="items-section">
-              <div class="items-header">
-                <div><strong>اختر الأحكام التي ستظهر</strong><span id="completionTerms-count-label">0 بند محدد</span></div>
-                <div class="selection-actions">
-                  <button type="button" onclick="setAllClauses('completionTerms',true)">تحديد الكل</button>
-                  <button type="button" onclick="setAllClauses('completionTerms',false)">إلغاء التحديد</button>
+            <details class="items-section selection-disclosure">
+              <summary class="selection-summary">
+                <span class="selection-summary-icon" aria-hidden="true">
+                  <svg class="sf-icon" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/><path d="M5 21h14"/></svg>
+                </span>
+                <span class="selection-summary-copy"><strong>أحكام إنجاز العمل</strong><small>اضغط لعرض الأحكام واختيارها</small></span>
+                <span class="selection-count" id="completionTerms-count-label">0 بند محدد</span>
+              </summary>
+              <div class="selection-disclosure-body">
+                <div class="selection-toolbar">
+                  <span>الأحكام التي ستظهر في الوثيقة</span>
+                  <div class="selection-actions">
+                    <button type="button" onclick="setAllClauses('completionTerms',true)">تحديد الكل</button>
+                    <button type="button" onclick="setAllClauses('completionTerms',false)">إلغاء التحديد</button>
+                  </div>
+                </div>
+                <div class="items-list clause-switch-list" id="completionTerms-checkboxes"></div>
+                <div class="items-custom">
+                  <input type="text" id="completionTerms-custom-input" placeholder="أضف حكمًا لهذا الإنجاز..." />
+                  <button type="button" onclick="addQuickClause('completionTerms')" aria-label="إضافة حكم">
+                    <svg class="sf-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    إضافة
+                  </button>
                 </div>
               </div>
-              <div class="items-list" id="completionTerms-checkboxes"></div>
-              <div class="items-custom">
-                <input type="text" id="completionTerms-custom-input" placeholder="أضف حكمًا لهذا الإنجاز..." />
-                <button type="button" onclick="addQuickClause('completionTerms')" aria-label="إضافة حكم">
-                  <svg class="sf-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                  إضافة
-                </button>
-              </div>
-            </div>
+            </details>
             <textarea id="f-completionTerms" style="display:none"></textarea>
           </div>
 
@@ -2111,7 +2296,7 @@ details[open]>summary::after{transform:rotate(90deg)}
       <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
         <button class="btn btn-sm btn-ghost" onclick="addSettingsItem()">+ إضافة بند</button>
       </div>
-      <div id="settings-items-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto"></div>
+      <div id="settings-items-list" class="settings-manage-list"></div>
     </details>
 
     <details class="card" style="margin-top:16px">
@@ -2122,22 +2307,27 @@ details[open]>summary::after{transform:rotate(90deg)}
 
     <div class="card" style="margin-top:16px">
       <h3 style="font-size:16px;margin:0 0 6px">إعدادات عامة</h3>
-      <p style="color:var(--muted);font-size:13px;margin:0 0 16px">بيانات الحساب البنكي التي يمكن إضافتها إلى تصميم الفاتورة.</p>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 16px">رقم الوثيقة الافتراضي وبيانات الحساب البنكي التي يمكن إضافتها إلى تصميم الفاتورة.</p>
       <div class="form-grid">
+        <div class="field full">
+          <label for="settings-doc-number">رقم الوثيقة الافتراضي</label>
+          <input id="settings-doc-number" type="text" dir="ltr" placeholder="FL-46140955" oninput="saveGeneralSettings()">
+          <div class="hint">يُستخدم تلقائيًا في الفواتير الجديدة، ولا يغيّر أرقام الفواتير المحفوظة سابقًا.</div>
+        </div>
         <div class="field">
-          <label>اسم البنك</label>
+          <label for="settings-bank-name">اسم البنك</label>
           <input id="settings-bank-name" type="text" placeholder="مثال: بنك الراجحي" oninput="saveGeneralSettings()">
         </div>
         <div class="field">
-          <label>اسم صاحب الحساب</label>
+          <label for="settings-account-holder">اسم صاحب الحساب</label>
           <input id="settings-account-holder" type="text" placeholder="اسم صاحب الحساب" oninput="saveGeneralSettings()">
         </div>
         <div class="field">
-          <label>رقم الحساب البنكي</label>
+          <label for="settings-bank-account">رقم الحساب البنكي</label>
           <input id="settings-bank-account" type="text" dir="ltr" placeholder="0000000000000000" oninput="saveGeneralSettings()">
         </div>
         <div class="field">
-          <label>رقم الآيبان</label>
+          <label for="settings-bank-iban">رقم الآيبان</label>
           <input id="settings-bank-iban" type="text" dir="ltr" placeholder="SA00 0000 0000 0000 0000 0000" oninput="saveGeneralSettings()">
         </div>
       </div>
@@ -2371,7 +2561,7 @@ function formatPriceHTML(price, currency){
 }
 
 function genDocNumber(){
-  return 'FL-46140955';
+  return getGeneralSettings().docNumber || 'FL-46140955';
 }
 
 /* =====================================================================
@@ -4184,6 +4374,7 @@ function saveClauseSettings(){
 function getGeneralSettings(){
   const saved = cache.get(KEYS.generalSettings) || {};
   return {
+    docNumber:saved.docNumber || 'FL-46140955',
     bankName:saved.bankName || '',
     accountHolder:saved.accountHolder || '',
     bankAccount:saved.bankAccount || '',
@@ -4193,10 +4384,12 @@ function getGeneralSettings(){
 
 function loadGeneralSettingsForm(){
   const settings = getGeneralSettings();
+  const docNumber = document.getElementById('settings-doc-number');
   const bankName = document.getElementById('settings-bank-name');
   const holder = document.getElementById('settings-account-holder');
   const account = document.getElementById('settings-bank-account');
   const iban = document.getElementById('settings-bank-iban');
+  if(docNumber) docNumber.value = settings.docNumber;
   if(bankName) bankName.value = settings.bankName;
   if(holder) holder.value = settings.accountHolder;
   if(account) account.value = settings.bankAccount;
@@ -4205,6 +4398,7 @@ function loadGeneralSettingsForm(){
 
 function saveGeneralSettings(){
   cache.set(KEYS.generalSettings, {
+    docNumber:(document.getElementById('settings-doc-number')?.value || '').trim() || 'FL-46140955',
     bankName:(document.getElementById('settings-bank-name')?.value || '').trim(),
     accountHolder:(document.getElementById('settings-account-holder')?.value || '').trim(),
     bankAccount:(document.getElementById('settings-bank-account')?.value || '').trim(),
@@ -4230,29 +4424,118 @@ const CLAUSE_LABELS = {
   completionTerms:'أحكام إنجاز العمل (التسليم والتنازل)',
 };
 
+const SETTINGS_ICONS = {
+  drag:`<svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="6" cy="4" r="1.25"/><circle cx="12" cy="4" r="1.25"/><circle cx="6" cy="9" r="1.25"/><circle cx="12" cy="9" r="1.25"/><circle cx="6" cy="14" r="1.25"/><circle cx="12" cy="14" r="1.25"/></svg>`,
+  edit:`<svg class="sf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5h4l10-10-4-4-10 10zM12.8 7.2l4 4"/></svg>`,
+  trash:`<svg class="sf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4.5h6V7M7 7l1 13h8l1-13M10 10.5v6M14 10.5v6"/></svg>`,
+};
+
+function attachSettingsSort(host, onCommit){
+  if(!host) return;
+  host.querySelectorAll(':scope > .settings-manage-row').forEach(row=>{
+    const handle = row.querySelector('.settings-drag-handle');
+    if(!handle || row.classList.contains('is-editing')) return;
+    let active = false;
+    handle.addEventListener('pointerdown', e=>{
+      if(e.button !== undefined && e.button !== 0) return;
+      active = true;
+      row.classList.add('dragging');
+      handle.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+    });
+    handle.addEventListener('pointermove', e=>{
+      if(!active) return;
+      const over = document.elementFromPoint(e.clientX,e.clientY)?.closest('.settings-manage-row');
+      if(!over || over===row || over.parentElement!==host) return;
+      const box = over.getBoundingClientRect();
+      if(e.clientY < box.top + box.height/2) over.before(row);
+      else over.after(row);
+    });
+    const finish = e=>{
+      if(!active) return;
+      active = false;
+      row.classList.remove('dragging');
+      try{ handle.releasePointerCapture?.(e.pointerId); }catch(_){}
+      onCommit([...host.querySelectorAll(':scope > .settings-manage-row')].map(el=>el.dataset.id));
+    };
+    handle.addEventListener('pointerup', finish);
+    handle.addEventListener('pointercancel', finish);
+  });
+}
+
+let settingsClauseEditing = null;
+
 function renderSettingsClauses(){
   const host = document.getElementById('settings-clauses-host');
   if(!host) return;
   host.innerHTML = '';
   for(const key of Object.keys(CLAUSE_LABELS)){
     const section = document.createElement('section');
-    section.style.cssText = 'padding:14px 0;border-top:1px solid var(--line)';
-    const rows = (CLAUSE_GROUPS[key] || []).map((item, index)=>`
-      <div style="display:flex;gap:8px;align-items:flex-start;margin-top:8px">
-        <textarea rows="2" style="flex:1;font-size:.82rem;resize:vertical" onchange="updateClause('${key}',${index},this.value)">${escapeHTML(item.text)}</textarea>
-        <button type="button" onclick="deleteClause('${key}',${index})" style="color:var(--danger);font-size:18px;background:none;border:0;cursor:pointer">×</button>
-      </div>`).join('');
+    section.className = 'settings-manage-section';
     section.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <strong style="font-size:14px">${CLAUSE_LABELS[key]}</strong>
-        <button class="btn btn-sm btn-ghost" onclick="addClause('${key}')">+ إضافة بند</button>
-      </div>${rows || '<p style="color:var(--muted);font-size:13px">لا توجد بنود حالياً.</p>'}`;
+      <div class="settings-manage-section-head">
+        <strong>${CLAUSE_LABELS[key]}</strong>
+        <button class="btn btn-sm btn-ghost" type="button">+ إضافة بند</button>
+      </div>
+      <div class="settings-manage-list" data-clause-list="${key}"></div>`;
+    section.querySelector('button').addEventListener('click',()=>addClause(key));
+    const list = section.querySelector('[data-clause-list]');
+    for(const item of (CLAUSE_GROUPS[key] || [])){
+      const row = document.createElement('div');
+      const editing = settingsClauseEditing?.key===key && settingsClauseEditing?.id===item.id;
+      row.className = 'settings-manage-row'+(editing?' is-editing':'');
+      row.dataset.id = item.id;
+      const appears = Object.keys(CLAUSE_LABELS)
+        .filter(group=>(CLAUSE_GROUPS[group] || []).some(x=>x.id===item.id))
+        .map(group=>group==='quoteTerms'?'عرض السعر':'إنجاز العمل').join('، ');
+      row.innerHTML = `
+        <button class="settings-drag-handle" type="button" aria-label="اسحب لإعادة الترتيب">${SETTINGS_ICONS.drag}</button>
+        <div class="settings-row-copy">
+          <div class="settings-row-text">${escapeHTML(item.text)}</div>
+          <div class="settings-row-meta">يظهر في: ${escapeHTML(appears || 'غير محدد')}</div>
+        </div>
+        <div class="settings-row-actions">
+          <button class="settings-row-action" type="button" data-action="edit" aria-label="تعديل البند">${SETTINGS_ICONS.edit}</button>
+          <button class="settings-row-action danger" type="button" data-action="delete" aria-label="حذف البند">${SETTINGS_ICONS.trash}</button>
+        </div>`;
+      row.querySelector('[data-action="edit"]').addEventListener('click',()=>{
+        settingsClauseEditing = {key,id:item.id};
+        renderSettingsClauses();
+      });
+      row.querySelector('[data-action="delete"]').addEventListener('click',()=>deleteClauseById(key,item.id));
+      if(editing){
+        const editor = document.createElement('div');
+        editor.className = 'settings-inline-editor';
+        editor.innerHTML = `
+          <textarea data-edit-text aria-label="نص البند">${escapeHTML(item.text)}</textarea>
+          <div class="settings-category-title">ظهور البند في نوع الوثيقة</div>
+          <div class="settings-categories">
+            <label class="settings-category"><input type="checkbox" data-clause-target="quoteTerms" ${(CLAUSE_GROUPS.quoteTerms||[]).some(x=>x.id===item.id)?'checked':''}> عرض السعر</label>
+            <label class="settings-category"><input type="checkbox" data-clause-target="completionTerms" ${(CLAUSE_GROUPS.completionTerms||[]).some(x=>x.id===item.id)?'checked':''}> إنجاز العمل</label>
+          </div>
+          <div class="settings-editor-actions">
+            <button class="btn btn-sm btn-ghost" type="button" data-action="cancel">إلغاء</button>
+            <button class="btn btn-sm btn-accent" type="button" data-action="save">حفظ التعديل</button>
+          </div>`;
+        editor.querySelector('[data-action="cancel"]').addEventListener('click',()=>{
+          settingsClauseEditing = null;
+          renderSettingsClauses();
+        });
+        editor.querySelector('[data-action="save"]').addEventListener('click',()=>saveClauseEdit(key,item.id,row));
+        row.appendChild(editor);
+      }
+      list.appendChild(row);
+    }
+    if(!list.children.length) list.innerHTML='<p style="color:var(--muted);font-size:13px">لا توجد بنود حالياً.</p>';
     host.appendChild(section);
+    attachSettingsSort(list, ids=>reorderClauseGroup(key,ids));
   }
 }
 
 function addClause(key){
-  CLAUSE_GROUPS[key].push({id:key+'-'+Date.now(), text:'بند جديد'});
+  const item = {id:key+'-'+Date.now(), text:'بند جديد'};
+  CLAUSE_GROUPS[key].push(item);
+  settingsClauseEditing = {key,id:item.id};
   saveClauseSettings();
   renderSettingsClauses();
 }
@@ -4262,10 +4545,41 @@ function updateClause(key, index, text){
   saveClauseSettings();
 }
 
-function deleteClause(key, index){
-  CLAUSE_GROUPS[key].splice(index,1);
+function deleteClauseById(key, id){
+  if(!confirm('هل تريد حذف هذا البند؟')) return;
+  CLAUSE_GROUPS[key] = (CLAUSE_GROUPS[key] || []).filter(item=>item.id!==id);
+  if(settingsClauseEditing?.id===id) settingsClauseEditing = null;
   saveClauseSettings();
   renderSettingsClauses();
+  renderClauseSelectors();
+}
+
+function saveClauseEdit(sourceKey, id, row){
+  const text = (row.querySelector('[data-edit-text]')?.value || '').trim();
+  const targets = [...row.querySelectorAll('[data-clause-target]:checked')].map(input=>input.dataset.clauseTarget);
+  if(!text){ toast('اكتب نص البند أولاً','error'); return; }
+  if(!targets.length){ toast('حدد نوع وثيقة واحدًا على الأقل','error'); return; }
+  const sourceIndex = (CLAUSE_GROUPS[sourceKey] || []).findIndex(item=>item.id===id);
+  for(const key of Object.keys(CLAUSE_LABELS)){
+    CLAUSE_GROUPS[key] = (CLAUSE_GROUPS[key] || []).filter(item=>item.id!==id);
+  }
+  for(const key of targets){
+    const newItem = {id,text};
+    if(key===sourceKey && sourceIndex>=0) CLAUSE_GROUPS[key].splice(Math.min(sourceIndex,CLAUSE_GROUPS[key].length),0,newItem);
+    else CLAUSE_GROUPS[key].push(newItem);
+  }
+  settingsClauseEditing = null;
+  saveClauseSettings();
+  renderSettingsClauses();
+  renderClauseSelectors();
+  toast('تم حفظ البند','success');
+}
+
+function reorderClauseGroup(key, ids){
+  const byId = new Map((CLAUSE_GROUPS[key] || []).map(item=>[item.id,item]));
+  CLAUSE_GROUPS[key] = ids.map(id=>byId.get(id)).filter(Boolean);
+  saveClauseSettings();
+  renderClauseSelectors();
 }
 
 function resetClauseSelections(){
@@ -4307,9 +4621,11 @@ function renderClauseSelectors(){
     for(const item of (CLAUSE_GROUPS[key] || [])){
       const checked = clauseSelections[key]?.has(item.id);
       const row = document.createElement('label');
-      row.className = 'item-row'+(checked?' checked':'');
+      row.className = 'item-row clause-switch-row'+(checked?' checked':'');
       row.style.cursor = 'pointer';
-      row.innerHTML = `<input type="checkbox" ${checked?'checked':''}><span class="item-text">${escapeHTML(item.text)}</span>`;
+      row.innerHTML = `<span class="item-text">${escapeHTML(item.text)}</span>
+        <input class="switch-input" type="checkbox" ${checked?'checked':''}>
+        <span class="switch-control" aria-hidden="true"></span>`;
       row.querySelector('input').addEventListener('change', e=>{
         if(e.target.checked) clauseSelections[key].add(item.id);
         else clauseSelections[key].delete(item.id);
@@ -4320,9 +4636,9 @@ function renderClauseSelectors(){
     }
     (clauseCustom[key] || []).forEach((text, index)=>{
       const row = document.createElement('div');
-      row.className = 'item-row checked';
+      row.className = 'item-row clause-switch-row checked';
       row.innerHTML = `<span class="item-text">${escapeHTML(text)}</span>
-        <button type="button" onclick="removeQuickClause('${key}',${index})" style="color:var(--danger);font-size:16px;background:none;border:0;cursor:pointer">×</button>`;
+        <button class="settings-row-action danger" type="button" onclick="removeQuickClause('${key}',${index})" aria-label="حذف الشرط المضاف">${SETTINGS_ICONS.trash}</button>`;
       host.appendChild(row);
     });
     syncClauseTextarea(key);
@@ -4370,53 +4686,96 @@ function isListField(key){
 
 const TYPE_LABELS = { logo:'شعار', identity:'هوية', social:'منشورات', profile:'بروفايل', book:'كتب' };
 
+let settingsItemEditingId = null;
+
 function renderSettingsItems(){
   const host = document.getElementById('settings-items-list');
   if(!host) return;
   host.innerHTML='';
-  ALL_ITEMS.forEach((item,idx)=>{
+  ALL_ITEMS.forEach(item=>{
     const row = document.createElement('div');
-    row.style.cssText='background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px';
-    const typeChecks = Object.entries(TYPE_LABELS).map(([k,l])=>
-      `<label style="display:flex;align-items:center;gap:4px;font-size:0.75rem;cursor:pointer;white-space:nowrap">
-        <input type="checkbox" ${item.types.includes(k)?'checked':''} onchange="toggleItemType(${idx},'${k}',this.checked)" style="width:13px;height:13px;accent-color:var(--accent);margin:0"/>
-        ${l}</label>`
-    ).join('');
+    const editing = settingsItemEditingId===item.id;
+    row.className = 'settings-manage-row'+(editing?' is-editing':'');
+    row.dataset.id = item.id;
+    const typeNames = (item.types || []).map(type=>TYPE_LABELS[type]).filter(Boolean).join('، ');
     row.innerHTML=`
-      <div style="display:flex;gap:8px;align-items:flex-start">
-        <textarea rows="2" style="flex:1;font-size:0.82rem;resize:vertical;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);line-height:1.4" onchange="updateSettingsItemText(${idx},this.value)">${item.text.replace(/</g,'&lt;')}</textarea>
-        <button type="button" onclick="deleteSettingsItem(${idx})" style="color:var(--danger);font-size:18px;line-height:1;padding:4px;background:none;border:none;cursor:pointer;flex-shrink:0">×</button>
+      <button class="settings-drag-handle" type="button" aria-label="اسحب لإعادة الترتيب">${SETTINGS_ICONS.drag}</button>
+      <div class="settings-row-copy">
+        <div class="settings-row-text">${escapeHTML(item.text)}</div>
+        <div class="settings-row-meta">التصنيفات: ${escapeHTML(typeNames || 'غير محدد')}</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">${typeChecks}</div>`;
+      <div class="settings-row-actions">
+        <button class="settings-row-action" type="button" data-action="edit" aria-label="تعديل البند">${SETTINGS_ICONS.edit}</button>
+        <button class="settings-row-action danger" type="button" data-action="delete" aria-label="حذف البند">${SETTINGS_ICONS.trash}</button>
+      </div>`;
+    row.querySelector('[data-action="edit"]').addEventListener('click',()=>{
+      settingsItemEditingId = item.id;
+      renderSettingsItems();
+    });
+    row.querySelector('[data-action="delete"]').addEventListener('click',()=>deleteSettingsItemById(item.id));
+    if(editing){
+      const editor = document.createElement('div');
+      editor.className = 'settings-inline-editor';
+      const typeChecks = Object.entries(TYPE_LABELS).map(([type,label])=>
+        `<label class="settings-category"><input type="checkbox" data-item-type="${type}" ${(item.types||[]).includes(type)?'checked':''}> ${label}</label>`
+      ).join('');
+      editor.innerHTML = `
+        <textarea data-edit-text aria-label="نص البند">${escapeHTML(item.text)}</textarea>
+        <div class="settings-category-title">يظهر البند في أنواع المشاريع التالية</div>
+        <div class="settings-categories">${typeChecks}</div>
+        <div class="settings-editor-actions">
+          <button class="btn btn-sm btn-ghost" type="button" data-action="cancel">إلغاء</button>
+          <button class="btn btn-sm btn-accent" type="button" data-action="save">حفظ التعديل</button>
+        </div>`;
+      editor.querySelector('[data-action="cancel"]').addEventListener('click',()=>{
+        settingsItemEditingId = null;
+        renderSettingsItems();
+      });
+      editor.querySelector('[data-action="save"]').addEventListener('click',()=>saveSettingsItemEdit(item.id,row));
+      row.appendChild(editor);
+    }
     host.appendChild(row);
   });
+  attachSettingsSort(host,reorderSettingsItems);
 }
 
 function addSettingsItem(){
-  ALL_ITEMS.push({ id:'c'+Date.now(), text:'بند جديد', types:['identity'] });
+  const item = { id:'c'+Date.now(), text:'بند جديد', types:['identity'] };
+  ALL_ITEMS.push(item);
+  settingsItemEditingId = item.id;
   renderSettingsItems();
   renderItemsCheckboxes();
   saveAllItems();
 }
 
-function deleteSettingsItem(idx){
-  ALL_ITEMS.splice(idx,1);
+function deleteSettingsItemById(id){
+  if(!confirm('هل تريد حذف هذا البند؟')) return;
+  ALL_ITEMS = ALL_ITEMS.filter(item=>item.id!==id);
+  if(settingsItemEditingId===id) settingsItemEditingId = null;
   renderSettingsItems();
   renderItemsCheckboxes();
   saveAllItems();
 }
 
-function updateSettingsItemText(idx, text){
-  if(ALL_ITEMS[idx]) ALL_ITEMS[idx].text = text.trim();
+function saveSettingsItemEdit(id, row){
+  const item = ALL_ITEMS.find(entry=>entry.id===id);
+  if(!item) return;
+  const text = (row.querySelector('[data-edit-text]')?.value || '').trim();
+  const types = [...row.querySelectorAll('[data-item-type]:checked')].map(input=>input.dataset.itemType);
+  if(!text){ toast('اكتب نص البند أولاً','error'); return; }
+  if(!types.length){ toast('حدد تصنيف مشروع واحدًا على الأقل','error'); return; }
+  item.text = text;
+  item.types = types;
+  settingsItemEditingId = null;
+  renderSettingsItems();
   renderItemsCheckboxes();
   saveAllItems();
+  toast('تم حفظ البند','success');
 }
 
-function toggleItemType(idx, type, checked){
-  if(!ALL_ITEMS[idx]) return;
-  const t = ALL_ITEMS[idx].types;
-  if(checked && !t.includes(type)) t.push(type);
-  if(!checked) ALL_ITEMS[idx].types = t.filter(x=>x!==type);
+function reorderSettingsItems(ids){
+  const byId = new Map(ALL_ITEMS.map(item=>[item.id,item]));
+  ALL_ITEMS = ids.map(id=>byId.get(id)).filter(Boolean);
   renderItemsCheckboxes();
   saveAllItems();
 }
