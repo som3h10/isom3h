@@ -2317,15 +2317,11 @@ html[data-theme="dark"] .date-control{background:rgba(0,0,0,.18)}
               <div class="prop-grid">
 
                 <div class="full">
-                  <label>اتجاه النص</label>
+                  <label>اتجاه النص · ثابت بالعربية</label>
                   <div class="seg" id="p-dir-seg">
                     <button type="button" data-val="rtl" title="عربي - من اليمين لليسار">
                       <span style="font-weight:800">ا ب</span>
                       <small>RTL</small>
-                    </button>
-                    <button type="button" data-val="ltr" title="إنجليزي - من اليسار لليمين">
-                      <span style="font-weight:800">A B</span>
-                      <small>LTR</small>
                     </button>
                   </div>
                 </div>
@@ -3431,6 +3427,20 @@ async function installBundledContractTemplate(){
   return true;
 }
 
+function enforceRtlTemplates(){
+  let changed = false;
+  Object.values(state.templates || {}).forEach(tpl=>{
+    (tpl.fields || []).forEach(field=>{
+      if(field.dir !== 'rtl'){
+        field.dir = 'rtl';
+        changed = true;
+      }
+    });
+  });
+  if(changed) cache.set(KEYS.templates, state.templates);
+  return changed;
+}
+
 function uint8ToBase64(bytes){
   let binary = '';
   for(let i=0; i<bytes.length; i+=0x8000){
@@ -3556,7 +3566,7 @@ function tplLoadForEdit(id){
     termsHeight: t.termsHeight || 0,
     termsDisplayWidth: t.termsDisplayWidth || 0,
     termsDisplayHeight: t.termsDisplayHeight || 0,
-    fields: (t.fields||[]).map(f => ({...f, page:f.page || 'main', fid:uid('f')})),
+    fields: (t.fields||[]).map(f => ({...f, dir:'rtl', page:f.page || 'main', fid:uid('f')})),
     activePage: 'main',
     armedKey: null,
     selectedFid: null,
@@ -3661,8 +3671,8 @@ function placeField(key, x, y, page = activeBuilderPage()){
     x: Math.max(0, x - w/2),
     y: Math.max(0, y - h/2),
     w, h,
-    align: meta.dir === 'ltr' ? 'left' : 'right',
-    dir: meta.dir,
+    align: 'right',
+    dir: 'rtl',
     size: meta.size,
     weight: meta.weight,
     color: '#1a1a1a',
@@ -3691,7 +3701,7 @@ function renderFieldBoxes(){
                     (f.kind === 'qr' ? ' is-qr' : '') +
                     (state.builder.selectedFid === f.fid ? ' selected' : '');
     div.style.cssText = `left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;` +
-                        `direction:${f.dir};text-align:${f.align};` +
+                        `direction:rtl;unicode-bidi:isolate;text-align:${f.align};` +
                         `justify-content:${f.align==='center'?'center':(f.align==='left'?'flex-start':'flex-end')};` +
                         `align-items:${alignItems};`;
     div.dataset.fid = f.fid;
@@ -3814,7 +3824,7 @@ function renderProps(){
   $('#props-form').hidden = false;
 
   // defaults for new properties
-  fld.dir = fld.dir || (FIELD_MAP[fld.key]?.dir || 'rtl');
+  fld.dir = 'rtl';
   fld.valign = fld.valign || 'center';
   fld.lineHeight = fld.lineHeight ?? 1.4;
   fld.letterSpacing = fld.letterSpacing ?? 0;
@@ -3890,10 +3900,10 @@ document.addEventListener('click', (e)=>{
   if(!fld) return;
   const val = btn.dataset.val;
   if(seg.id === 'p-dir-seg'){
-    fld.dir = val;
-    // auto-adjust default align when direction flips
+    fld.dir = 'rtl';
+    // الاتجاه الأساسي ثابت بالعربية، مع السماح بمحاذاة وسطية عند الحاجة.
     if(fld.align !== 'center'){
-      fld.align = val === 'rtl' ? 'right' : 'left';
+      fld.align = 'right';
       setSegValue('p-align-seg', fld.align);
     }
   } else if(seg.id === 'p-align-seg'){
@@ -4051,7 +4061,7 @@ async function tplSaveCurrent(){
     fields: state.builder.fields.map(f => ({
       key: f.key, x: f.x, y: f.y, w: f.w, h: f.h,
       page: f.page || 'main',
-      align: f.align, dir: f.dir,
+      align: f.align, dir: 'rtl',
       valign: f.valign || 'center',
       size: f.size, weight: f.weight, color: f.color,
       lineHeight: f.lineHeight ?? 1.4,
@@ -4199,7 +4209,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `padding-top:${paddingTop}px;` +
           `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
           `color:${f.color || '#1a1a1a'};` +
-          `direction:${f.dir || 'rtl'};` +
+          `direction:rtl;unicode-bidi:isolate;` +
           `text-align:${f.align || 'right'};` +
           `line-height:${lineHeight};` +
           `letter-spacing:${letterSpacing}px;` +
@@ -4211,7 +4221,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           const lineDiv = document.createElement('div');
           lineDiv.style.cssText =
             `display:block;width:100%;` +
-            `direction:${f.dir || 'rtl'};` +
+            `direction:rtl;unicode-bidi:isolate;` +
             `text-align:${f.align || 'right'};` +
             `white-space:normal;word-break:break-word;` +
             `line-height:${lineHeight};`;
@@ -4243,7 +4253,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `padding-top:${paddingTop}px;` +
           `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
           `color:${f.color || '#1a1a1a'};` +
-          `direction:${f.dir || 'rtl'};` +
+          `direction:rtl;unicode-bidi:isolate;` +
           `text-align:${f.align || 'right'};` +
           `line-height:${lineHeight};` +
           `letter-spacing:${letterSpacing}px;` +
@@ -4371,7 +4381,7 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     const fontPx = (f.size || 14) * fieldScale;
     const fontMm = Math.max(1.5, fontPx * sy);
     const lineHeight = f.lineHeight ?? 1.4;
-    const align = f.align || (f.dir === 'ltr' ? 'left' : 'right');
+    const align = f.align || 'right';
     let x = metrics.ox + xPx * sx;
     if(align === 'right') x += wPx * sx;
     else if(align === 'center') x += wPx * sx / 2;
@@ -4419,7 +4429,7 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
       }else{
         drawPdfLine(pdf, line.text, x, y, {
           align,
-          dir:(meta.bankBlock && line.sourceIndex === 1) ? 'ltr' : f.dir,
+          dir:(meta.bankBlock && line.sourceIndex === 1) ? 'ltr' : 'rtl',
         });
       }
       y += fontMm * lineHeight;
@@ -5357,7 +5367,7 @@ function copyTemplateCode(){
       key: f.key,
       page: f.page || 'main',
       x: f.x, y: f.y, w: f.w, h: f.h,
-      align: f.align, dir: f.dir,
+      align: f.align, dir: 'rtl',
       valign: f.valign || 'center',
       size: f.size, weight: f.weight, color: f.color,
       lineHeight: f.lineHeight ?? 1.4,
@@ -5426,6 +5436,7 @@ async function pasteTemplateCode(){
     // تطبيق الحقول مع الأبعاد
     tpl.fields = code.fields.map(f => ({
       ...f,
+      dir: 'rtl',
       page: f.page || 'main',
       fid: uid('f'),
       x: f.x * (
@@ -5555,6 +5566,7 @@ new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
     console.error('تعذر تثبيت قالب العقود الجديد', err);
     toast('تعذر تحديث قالب العقود','error');
   }
+  enforceRtlTemplates();
   renderHome();
   renderItemsCheckboxes();
 })();
