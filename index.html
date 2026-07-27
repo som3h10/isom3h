@@ -3400,6 +3400,17 @@ function dataUrlToUint8(dataUrl){
   return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 }
 
+function hasPdfHeader(bytes){
+  const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || 0);
+  const limit = Math.min(data.length, 1024);
+  for(let i=0; i<=limit-5; i++){
+    if(data[i]===0x25 && data[i+1]===0x50 && data[i+2]===0x44 && data[i+3]===0x46 && data[i+4]===0x2D){
+      return true;
+    }
+  }
+  return false;
+}
+
 function imageFileToImage(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -4353,6 +4364,7 @@ async function preserveOriginalPdfLayers(generatedBytes, tpl, pageDefs){
   if(!hasOriginalPdf || !window.PDFLib) return new Uint8Array(generatedBytes);
 
   const { PDFDocument } = window.PDFLib;
+  if(!hasPdfHeader(generatedBytes)) throw new Error('ملف PDF الناتج غير صالح');
   const generatedDoc = await PDFDocument.load(generatedBytes);
   const outputDoc = await PDFDocument.create();
 
@@ -4367,8 +4379,17 @@ async function preserveOriginalPdfLayers(generatedBytes, tpl, pageDefs){
     // Keep the uploaded PDF underneath the visual preview. Its original text
     // objects remain searchable/copyable while the generated design stays exact.
     if(sourceDataUrl){
-      const [sourceLayer] = await outputDoc.embedPdf(dataUrlToUint8(sourceDataUrl), [0]);
-      outputPage.drawPage(sourceLayer, {x:0, y:0, width, height});
+      try{
+        const sourceBytes = dataUrlToUint8(sourceDataUrl);
+        if(!hasPdfHeader(sourceBytes)) throw new Error('القالب المحفوظ لا يحتوي على ترويسة PDF');
+        const [sourceLayer] = await outputDoc.embedPdf(sourceBytes, [0]);
+        outputPage.drawPage(sourceLayer, {x:0, y:0, width, height});
+      }catch(err){
+        // Some older saved templates contain only the rendered background image
+        // even though a PDF data field exists. Keep exporting the valid visual
+        // page instead of failing the whole contract.
+        console.warn('Skipped invalid original PDF layer.', err);
+      }
     }
 
     const [generatedLayer] = await outputDoc.embedPdf(generatedBytes, [i]);
@@ -4470,7 +4491,15 @@ async function exportInvoice(inv, templateId){
 
     const fname = `${inv.type||'invoice'}-${inv.client||''}-${inv.docNumber||''}.pdf`.replace(/[\/\\?%*:|"<>]/g,'-');
     const generatedBytes = pdf.output('arraybuffer');
-    const finalBytes = await preserveOriginalPdfLayers(generatedBytes, tpl, pageDefs);
+    let finalBytes;
+    try{
+      finalBytes = await preserveOriginalPdfLayers(generatedBytes, tpl, pageDefs);
+    }catch(layerError){
+      // The generated jsPDF document is already complete. Layer preservation is
+      // an enhancement and must never prevent the user from downloading it.
+      console.warn('PDF layer preservation failed; using generated PDF.', layerError);
+      finalBytes = new Uint8Array(generatedBytes);
+    }
     downloadPdfBytes(finalBytes, fname);
     toast('تم تصدير PDF','success');
   } catch(err){
