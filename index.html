@@ -1603,6 +1603,7 @@ const KEYS = {
   lastSync:  'inv_last_sync',
   customItems: 'inv_items_v1',
   clauses: 'inv_clauses_v1',
+  clausesVersion: 'inv_clauses_version_v1',
   generalSettings: 'inv_general_settings_v1',
 };
 
@@ -1907,6 +1908,7 @@ async function writeToGist({ withTemplates=true }={}){
     invoices: state.invoices,
     customItems: ALL_ITEMS,
     clauses: CLAUSE_GROUPS,
+    clausesVersion: CLAUSE_DEFAULTS_VERSION,
     generalSettings: getGeneralSettings(),
     activeTemplateId: state.activeTemplateId,
     lastSync: new Date().toISOString()
@@ -3513,30 +3515,53 @@ function saveAllItems(){
 
 const DEFAULT_CLAUSE_GROUPS = {
   quoteTerms: [
-    {id:'qt1', text:'مدة صلاحية عرض السعر 15 يوماً من تاريخ الإصدار.'},
-    {id:'qt2', text:'يبدأ التنفيذ بعد اعتماد العرض واستلام الدفعة المتفق عليها.'},
+    {id:'qt-v2-1', text:'مدة صلاحية العرض: يسري عرض السعر لمدة ثلاثين يوماً من تاريخ إصداره، وبعد انتهاء المدة يحق للمصمم مراجعة السعر ومدة التنفيذ.'},
+    {id:'qt-v2-2', text:'الدفعات: تُدفع نسبة 50٪ مقدماً قبل بدء العمل، ويُدفع المبلغ المتبقي قبل تسليم الملفات النهائية والمصدرية.'},
+    {id:'qt-v2-3', text:'بدء ومدة التنفيذ: تبدأ مدة التنفيذ بعد استلام الدفعة المقدمة وجميع المعلومات والمحتويات المطلوبة من العميل، وتُحدد المدة بحسب نطاق كل مشروع.'},
+    {id:'qt-v2-4', text:'التعديلات: يشمل عرض السعر جولتين من التعديلات على المقترح المعتمد. وتُحتسب كل جولة إضافية بمبلغ 100 ريال، ولا تشمل التعديلات تغيير فكرة المشروع أو نطاقه بالكامل.'},
+    {id:'qt-v2-5', text:'التأخير من جهة العميل: يتوقف احتساب مدة التنفيذ عند تأخر العميل في إرسال المحتوى أو الملاحظات أو الاعتمادات المطلوبة، وتُستأنف المدة بعد استلامها.'},
+    {id:'qt-v2-6', text:'الإلغاء: لا تُسترد الدفعة المقدمة بعد بدء العمل. وفي حال إلغاء المشروع بعد تنفيذ مراحل إضافية، تُحتسب قيمة الأعمال المنجزة حتى تاريخ الإلغاء.'},
+    {id:'qt-v2-7', text:'حقوق التصميم: تبقى حقوق التصاميم والمقترحات محفوظة للمصمم حتى سداد كامل المبلغ. وبعد السداد تنتقل إلى العميل الحقوق المالية القابلة للتنازل في التصميم النهائي المعتمد فقط، وفق النطاق المتفق عليه.'},
+    {id:'qt-v2-8', text:'الخطوط والعناصر المرخّصة: لا يشمل انتقال الحقوق ملكية الخطوط أو الصور أو العناصر المرخّصة من جهات خارجية. ويتحمل العميل تكلفة تراخيصها والتزام شروط استخدامها عند الحاجة.'},
+    {id:'qt-v2-9', text:'الخصوصية: تُعامل معلومات العميل ومحتويات المشروع بسرية، ولا تُشارك مع أي طرف آخر إلا بالقدر اللازم لتنفيذ المشروع أو بعد موافقة العميل.'},
+    {id:'qt-v2-10', text:'عرض المشروع: يحق للمصمم عرض المشروع النهائي في معرض أعماله وحساباته المهنية لأغراض التعريف بخبراته، ما لم يطلب العميل خلاف ذلك كتابةً قبل النشر.'},
+    {id:'qt-v2-11', text:'اعتماد العرض: يُعد دفع الدفعة المقدمة موافقةً على عرض السعر ونطاق العمل وهذه الشروط والأحكام.'},
   ],
   completionTerms: [
-    {id:'dt1', text:'يتم تسليم الأعمال بصيغ الملفات المتفق عليها بعد اكتمال الدفعات.'},
-    {id:'dt2', text:'يُعد العمل منجزاً بعد اعتماد النسخة النهائية من الطرف الثاني.'},
-    {id:'at1', text:'تنتقل حقوق استخدام العمل النهائي للطرف الثاني بعد سداد كامل المبلغ.'},
-    {id:'at2', text:'لا يشمل التنازل المقترحات غير المعتمدة أو ملفات العمل الأولية.'},
+    {id:'ct-v2-1', text:'يقر الطرف الثاني باستلام جميع مخرجات المشروع النهائية بالصيغ المتفق عليها.'},
+    {id:'ct-v2-2', text:'يقر الطرف الثاني بأن المخرجات المسلّمة مطابقة لنطاق العمل المعتمد، وأنه اطلع عليها ووافق على نسختها النهائية.'},
+    {id:'ct-v2-3', text:'بعد سداد كامل المبلغ، يتنازل المصمم للطرف الثاني عن الحقوق المالية القابلة للتنازل في التصميم النهائي المعتمد، بما يشمل حق استخدامه وتعديله ونشره واستغلاله تجارياً وتسجيله رسمياً، ضمن الحدود النظامية.'},
+    {id:'ct-v2-4', text:'لا يشمل التنازل المقترحات غير المعتمدة أو المسودات أو الأفكار الأولية التي لم تدخل ضمن التصميم النهائي.'},
+    {id:'ct-v2-5', text:'يشمل التسليم الملفات النهائية وملفات المصدر التي نُصّ على تسليمها ضمن نطاق العمل المتفق عليه.'},
+    {id:'ct-v2-6', text:'لا يشمل التنازل ملكية الخطوط أو الصور أو القوالب أو العناصر المرخّصة من جهات خارجية، وتبقى خاضعة لشروط تراخيص أصحابها.'},
+    {id:'ct-v2-7', text:'لا يصبح التنازل نافذاً إلا بعد سداد كامل المبلغ المتفق عليه. وقبل ذلك تبقى الحقوق المالية محفوظة للمصمم.'},
+    {id:'ct-v2-8', text:'بعد الاستلام، يتحمل الطرف الثاني مسؤولية حفظ الملفات وإنشاء النسخ الاحتياطية اللازمة.'},
+    {id:'ct-v2-9', text:'أي تعديلات أو إضافات أو أعمال جديدة تُطلب بعد اعتماد التسليم النهائي تُعد طلباً منفصلاً، ويُحدد سعرها ومدة تنفيذها بشكل مستقل.'},
+    {id:'ct-v2-10', text:'يحتفظ المصمم بحق عرض العمل النهائي في معرض أعماله وحساباته المهنية، ما لم يُتفق كتابةً على خلاف ذلك.'},
+    {id:'ct-v2-11', text:'يقر الطرف الثاني بعدم وجود مطالبات متعلقة بالأعمال الداخلة في نطاق المشروع بعد اعتماد هذا الإقرار، دون الإخلال بأي التزام منصوص عليه صراحةً في الاتفاق.'},
   ],
 };
 
+const CLAUSE_DEFAULTS_VERSION = 2;
 let CLAUSE_GROUPS = {};
 let clauseSelections = {};
 let clauseCustom = {};
 
-function loadClauseSettings(){
-  const saved = cache.get(KEYS.clauses);
+function loadClauseSettings(sourceClauses=null, sourceVersion=null){
+  const saved = sourceClauses || cache.get(KEYS.clauses);
+  const version = Number(sourceVersion ?? cache.get(KEYS.clausesVersion) ?? 0);
+  const useNewDefaults = version < CLAUSE_DEFAULTS_VERSION;
   if(saved && !saved.completionTerms && (saved.deliveryTerms || saved.assignmentTerms)){
     saved.completionTerms = [...(saved.deliveryTerms || []), ...(saved.assignmentTerms || [])];
   }
   CLAUSE_GROUPS = {};
   for(const [key, defaults] of Object.entries(DEFAULT_CLAUSE_GROUPS)){
-    CLAUSE_GROUPS[key] = Array.isArray(saved?.[key]) ? saved[key] : defaults.map(x=>({...x}));
+    CLAUSE_GROUPS[key] = !useNewDefaults && Array.isArray(saved?.[key])
+      ? saved[key]
+      : defaults.map(x=>({...x}));
   }
+  cache.set(KEYS.clauses, CLAUSE_GROUPS);
+  cache.set(KEYS.clausesVersion, CLAUSE_DEFAULTS_VERSION);
 }
 
 function saveClauseSettings(){
@@ -3579,8 +3604,7 @@ function saveGeneralSettings(){
 
 function importSyncedSettings(data){
   if(data.clauses && typeof data.clauses === 'object'){
-    cache.set(KEYS.clauses, data.clauses);
-    loadClauseSettings();
+    loadClauseSettings(data.clauses, data.clausesVersion);
     renderSettingsClauses();
   }
   if(data.generalSettings && typeof data.generalSettings === 'object'){
