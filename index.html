@@ -47,7 +47,8 @@
     --danger-light:#fdf0f0;
     --success:#2d5a3d;
     --radius:10px;
-    --font:'IBM Plex Sans Arabic',system-ui,sans-serif;
+    --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif;
+    --invoice-font:'IBM Plex Sans Arabic',system-ui,sans-serif;
   }
 
   body{
@@ -1234,7 +1235,11 @@ details{border-radius:18px!important;border-color:var(--line)!important;backgrou
 summary{min-height:44px;display:flex;align-items:center}
 
 /* The editable/exportable document is intentionally always paper-white. */
-.stage,.render-stage,.render-stage .stage{background:#fff!important;color:#111;color-scheme:light}
+.stage,.render-stage,.render-stage .stage{
+  background:#fff!important;color:#111;color-scheme:light;
+  font-family:var(--invoice-font);
+}
+.stage *,.render-stage *{font-family:var(--invoice-font)}
 .render-stage{box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 
 :focus-visible{outline:3px solid rgba(0,122,255,.42);outline-offset:2px}
