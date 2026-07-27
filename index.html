@@ -1759,10 +1759,17 @@ function fmtDate(iso){
 }
 
 function currencySymbol(c){
-  if(c==='ريال') return '﷼';
+  if(c==='ريال') return '⃁';
   if(c==='دولار') return '$';
   if(c==='درهم') return 'د.إ';
   return c||'';
+}
+
+function formatPriceWithCurrency(price, currency){
+  const amount = fmtMoney(price);
+  const symbol = currencySymbol(currency);
+  if(!symbol) return amount;
+  return currency === 'ريال' ? amount + symbol : amount + ' ' + symbol;
 }
 
 function genDocNumber(){
@@ -1992,7 +1999,11 @@ async function syncTemplates(){
 function renderHome(){
   // stats
   const total = state.invoices.length;
-  const sum = state.invoices.reduce((s,i)=>s+(Number(i.price)||0), 0);
+  const quotes = state.invoices.filter(i=>i.type !== 'إنجاز عمل');
+  const completed = state.invoices.filter(i=>i.type === 'إنجاز عمل');
+  const completedSar = completed
+    .filter(i=>(i.currency || 'ريال') === 'ريال')
+    .reduce((sum,i)=>sum+(Number(i.price)||0), 0);
   const tpls = Object.keys(state.templates).length;
   const clients = new Set(state.invoices.map(i=>(i.client||'').trim()).filter(Boolean)).size;
   $('#stats').innerHTML = `
@@ -2001,8 +2012,16 @@ function renderHome(){
       <div class="val">${total}</div>
     </div>
     <div class="stat">
-      <div class="lbl">الإجمالي · ر.س</div>
-      <div class="val">${fmtMoney(sum)} <small>ر.س</small></div>
+      <div class="lbl">عروض الأسعار</div>
+      <div class="val">${quotes.length}</div>
+    </div>
+    <div class="stat">
+      <div class="lbl">الأعمال المنجزة</div>
+      <div class="val">${completed.length}</div>
+    </div>
+    <div class="stat">
+      <div class="lbl">قيمة المنجز · ريال</div>
+      <div class="val">${formatPriceWithCurrency(completedSar,'ريال')}</div>
     </div>
     <div class="stat">
       <div class="lbl">النماذج</div>
@@ -2045,13 +2064,19 @@ function renderInvoices(){
 
 function recentTable(list){
   let html = `<table><thead><tr>
-    <th>العميل</th><th>المشروع</th><th>المبلغ</th><th></th>
+    <th>العميل</th><th>المشروع</th><th>الحالة والنموذج</th><th>المبلغ</th><th></th>
   </tr></thead><tbody>`;
   for(const inv of list){
     html += `<tr class="hover-row" data-id="${inv.id}">
       <td><strong>${escapeHTML(inv.client||'—')}</strong></td>
       <td>${escapeHTML(inv.project||'')}</td>
-      <td class="price">${fmtMoney(inv.price)} <small style="color:var(--muted);font-weight:500">${escapeHTML(currencySymbol(inv.currency))}</small></td>
+      <td>
+        <select data-act="type" aria-label="حالة الوثيقة" style="min-width:105px;padding:6px 9px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:600">
+          <option value="عرض سعر" ${inv.type==='إنجاز عمل'?'':'selected'}>عرض سعر</option>
+          <option value="إنجاز عمل" ${inv.type==='إنجاز عمل'?'selected':''}>منجز</option>
+        </select>
+      </td>
+      <td class="price" dir="ltr">${escapeHTML(formatPriceWithCurrency(inv.price, inv.currency))}</td>
       <td><div class="row-actions">
         <button class="icon-btn" data-act="export" title="تصدير PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
         <button class="icon-btn" data-act="edit" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
@@ -2064,15 +2089,33 @@ function recentTable(list){
 
 function bindRowActions(rootSel){
   $$(rootSel+' tr.hover-row').forEach(tr => {
+    const typeSelect = tr.querySelector('select[data-act="type"]');
+    typeSelect?.addEventListener('click', e=>e.stopPropagation());
+    typeSelect?.addEventListener('change', e=>{
+      e.stopPropagation();
+      updateInvoiceType(tr.dataset.id, e.target.value);
+    });
     tr.addEventListener('click', e => {
       const act = e.target.closest('[data-act]')?.dataset.act;
       const id = tr.dataset.id;
+      if(act === 'type') return;
       if(act === 'edit')   editInvoice(id);
       else if(act === 'delete') deleteInvoice(id);
       else if(act === 'export') exportInvoiceById(id);
       else editInvoice(id);
     });
   });
+}
+
+async function updateInvoiceType(id, type){
+  const inv = state.invoices.find(x=>x.id===id);
+  if(!inv || !['عرض سعر','إنجاز عمل'].includes(type)) return;
+  inv.type = type;
+  await db.saveInvoice(inv);
+  autoSync();
+  renderHome();
+  if(state.page === 'invoices') renderInvoices();
+  toast(type === 'إنجاز عمل' ? 'تم تحويلها إلى منجز' : 'تم تحويلها إلى عرض سعر','success');
 }
 
 /* =====================================================================
@@ -2194,7 +2237,9 @@ async function deleteInvoice(id){
 async function exportInvoiceById(id){
   const inv = state.invoices.find(x=>x.id===id);
   if(!inv) return;
-  const tplId = state.activeTemplateId || Object.keys(state.templates)[0];
+  const tplId = Object.values(state.templates).find(t=>t.docType === inv.type)?.id
+    || state.activeTemplateId
+    || Object.keys(state.templates)[0];
   if(!tplId){
     toast('يجب تصميم نموذج أولاً','error');
     return;
@@ -2982,7 +3027,7 @@ function resolveFieldValue(inv, key){
     case 'date':          return fmtDate(inv.date);
     case 'docNumber':     return inv.docNumber || '';
 
-    case 'price':         return fmtMoney(inv.price);
+    case 'price':         return formatPriceWithCurrency(inv.price, inv.currency);
     case 'deliveryDays':  return 'مدة التنفيذ ' + (inv.deliveryDays || 15) + ' يوم';
     case 'items':         return (inv.items || '').split('\n').map(l=>l.trim()).filter(Boolean).join('\n');
     case 'quoteTerms':    return inv.type === 'عرض سعر' ? (inv.quoteTerms || '') : '';
@@ -3184,7 +3229,30 @@ function drawPdfLine(pdf, line, x, y, options={}){
   pdf.text(punctuation, x - bodyWidth - .35, y, {align:'right', baseline:'alphabetic'});
 }
 
-function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
+const RIYAL_SVG_PATHS = `
+  <path fill="CURRENT_COLOR" d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/>
+  <path fill="CURRENT_COLOR" d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/>`;
+const riyalPngCache = new Map();
+
+async function getRiyalPng(color='#1a1a1a'){
+  if(riyalPngCache.has(color)) return riyalPngCache.get(color);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1124.14 1256.39">${RIYAL_SVG_PATHS.replaceAll('CURRENT_COLOR',color)}</svg>`;
+  const url = URL.createObjectURL(new Blob([svg], {type:'image/svg+xml'}));
+  try{
+    const img = new Image();
+    await new Promise((resolve,reject)=>{ img.onload=resolve; img.onerror=reject; img.src=url; });
+    const canvas = document.createElement('canvas');
+    canvas.width = 224; canvas.height = 251;
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    const dataUrl = canvas.toDataURL('image/png');
+    riyalPngCache.set(color,dataUrl);
+    return dataUrl;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
   const sx = metrics.drawW / metrics.renderW;
   const sy = metrics.drawH / metrics.renderH;
   const savedDisplayW = page === 'terms' ? tpl.termsDisplayWidth : tpl.displayWidth;
@@ -3222,7 +3290,10 @@ function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
           : (Number(f.weight) >= 600 ? 'bold' : 'normal'));
       // jsPDF's Arabic plug-in shapes RTL text during its pre-process step.
       // Supplying the original Unicode text keeps copy/search extraction useful.
-      if(isListField(f.key)){
+      if(f.key === 'price' && inv.currency === 'ريال'){
+        // U+20C1 is newer than many PDF fonts, so draw the official vector mark
+        // as an image while keeping the numeric amount selectable.
+      }else if(isListField(f.key)){
         const cleanLine = line.replace(/^[•\-]\s*/, '');
         const bulletGap = fontMm * .8;
         pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
@@ -3232,6 +3303,20 @@ function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
       }
       y += fontMm * lineHeight;
     });
+    if(f.key === 'price' && inv.currency === 'ريال'){
+      const amount = fmtMoney(inv.price);
+      const amountWidth = pdf.getTextWidth(amount);
+      const iconH = fontMm * 1.05;
+      const iconW = iconH * (1124.14 / 1256.39);
+      const gap = Math.max(.5, fontMm * .15);
+      const totalW = amountWidth + gap + iconW;
+      let startX = x;
+      if(align === 'right') startX = x - totalW;
+      else if(align === 'center') startX = x - totalW / 2;
+      pdf.text(amount, startX, y - fontMm * lineHeight, {align:'left', baseline:'alphabetic'});
+      const symbolPng = await getRiyalPng(f.color || '#1a1a1a');
+      pdf.addImage(symbolPng, 'PNG', startX + amountWidth + gap, y - fontMm * lineHeight - iconH * .8, iconW, iconH);
+    }
   }
 }
 
@@ -3348,7 +3433,7 @@ async function exportInvoice(inv, templateId){
 
       if(i > 0) pdf.addPage('a4', isLandscape ? 'landscape' : 'portrait');
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', ox, oy, drawW, drawH);
-      addReadableTextLayer(pdf, tpl, inv, {
+      await addReadableTextLayer(pdf, tpl, inv, {
         renderW:p.renderW, renderH:p.renderH, drawW, drawH, ox, oy,
       }, p.page);
     }
