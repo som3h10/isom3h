@@ -1768,6 +1768,106 @@ html[data-theme="dark"] .date-control{background:rgba(0,0,0,.18)}
   .stats{grid-template-columns:1fr 1fr}
   .page-actions{grid-template-columns:1fr}
 }
+/* A calmer, single-column phone experience. */
+@media (max-width:600px){
+  :root{--glass-shadow:0 8px 24px rgba(28,28,30,.07),0 1px 4px rgba(28,28,30,.04)}
+  body{
+    font-size:14px;
+    background:
+      radial-gradient(circle at 92% -6%,rgba(90,200,250,.13),transparent 23rem),
+      var(--bg);
+  }
+  .topbar{
+    top:calc(6px + env(safe-area-inset-top,0px));
+    width:calc(100% - 16px);
+    min-height:52px;
+    padding:6px 8px;
+    border-radius:18px;
+  }
+  .topbar h1 img{width:32px!important;height:32px!important;border-radius:9px!important}
+  .topbar h1::after{font-size:10.5px;letter-spacing:.025em}
+  .theme-switcher{padding:2px;border-radius:11px}
+  .theme-switcher button{width:27px;height:27px;border-radius:8px}
+  .theme-switcher button svg{width:14px;height:14px}
+  #sync-status{margin-inline-start:auto}
+
+  .container{padding:18px 10px calc(92px + env(safe-area-inset-bottom,0px))}
+  .page-head{margin-bottom:16px;padding-inline:3px;gap:10px}
+  .page-head h2{font-size:1.58rem;letter-spacing:-.035em}
+  .page-head .sub{font-size:12.5px;line-height:1.5}
+  .page-actions{gap:7px}
+  .page-actions .btn{min-height:38px}
+
+  .card,.stat,.items-section,.panel,.stage-wrap,.saved-tpl,.help{
+    box-shadow:0 1px 5px rgba(28,28,30,.035);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    backdrop-filter:blur(16px) saturate(140%);
+  }
+  .card{padding:15px;border-radius:18px}
+  .card+.card{margin-top:11px}
+  .stats{gap:7px;margin-bottom:13px}
+  .stat{min-height:86px;padding:13px;border-radius:16px}
+  .stat .lbl{font-size:11px;line-height:1.35}
+  .stat .val{margin-top:6px;font-size:1.3rem}
+
+  #home-list tr.hover-row,#invoices-list tr.hover-row{
+    gap:11px 12px;padding:14px;
+  }
+  #home-list .invoice-client,#invoices-list .invoice-client{grid-column:1/-1}
+  #home-list .invoice-cell-copy strong,#invoices-list .invoice-cell-copy strong{font-size:15px}
+  #home-list .invoice-project,#invoices-list .invoice-project{grid-column:1/-1}
+  #home-list .invoice-actions-cell,#invoices-list .invoice-actions-cell{
+    padding-top:9px!important;border-top:1px solid var(--line)!important;
+  }
+  #home-list .row-actions,#invoices-list .row-actions{justify-content:flex-end}
+
+  .invoice-form-shell{gap:11px}
+  .form-step{padding:15px}
+  .form-step-head{margin-bottom:14px;padding-bottom:12px}
+  .form-step-icon{width:34px;height:34px;border-radius:10px}
+  .form-step-icon .sf-icon{width:18px;height:18px}
+  .form-step-kicker{font-size:10px}
+  .form-step-head h3{font-size:15px!important}
+  .form-step-head p{font-size:11.5px}
+  .form-grid{gap:11px}
+  .field label,.prop-grid label{margin-bottom:6px;font-size:12px}
+  .field input:not([type="checkbox"]):not([type="color"]),
+  .field select,.prop-grid input:not([type="checkbox"]):not([type="color"]),
+  .prop-grid select,.date-control,.duration-control{
+    height:44px;min-height:44px;border-radius:12px;
+  }
+  .selection-disclosure>.selection-summary{min-height:62px;padding:11px 12px}
+  .selection-summary-icon{width:34px;height:34px;border-radius:10px}
+  .selection-summary-copy strong{font-size:13.5px}
+  .item-row{padding:10px}
+  .item-row .item-text{font-size:13px}
+
+  /* Keep actions accessible without covering form content or stacking over navigation. */
+  .invoice-form-actions{
+    position:static;
+    width:100%!important;
+    margin-top:11px;
+    grid-template-columns:42px 1fr 1.15fr!important;
+    padding:5px;
+    border-radius:16px;
+    box-shadow:0 1px 5px rgba(28,28,30,.05);
+  }
+  .page[data-pg="new"].active{padding-bottom:0}
+
+  .bottom-nav{
+    right:8px;left:8px;
+    bottom:calc(6px + env(safe-area-inset-bottom,0px));
+    height:62px;padding:5px;
+    border-radius:20px;
+  }
+  .bottom-nav button{border-radius:14px;font-size:9px}
+  .bottom-nav button svg{width:19px;height:19px}
+
+  .settings-manage-row{min-height:48px}
+  .settings-drag-handle{width:31px;height:36px}
+  .settings-row-action{width:31px;height:31px}
+  .upload-area{gap:10px;padding:14px}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
