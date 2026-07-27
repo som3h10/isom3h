@@ -2774,6 +2774,34 @@ function formatPriceHTML(price, currency){
   return `<span class="money" dir="ltr">${symbol?`<span class="money-symbol">${symbol}</span>`:''}<span class="money-amount">${amount}</span></span>`;
 }
 
+function splitDirectionalRuns(text){
+  const value = String(text ?? '');
+  const englishRun = /[\[(]?[A-Za-z0-9]+(?:[A-Za-z0-9 .,&+\/_#@:%\-]*[A-Za-z0-9])?[\])]?/g;
+  const runs = [];
+  let lastIndex = 0;
+  for(const match of value.matchAll(englishRun)){
+    if(match.index > lastIndex) runs.push({text:value.slice(lastIndex, match.index), dir:'rtl'});
+    runs.push({text:match[0], dir:'ltr'});
+    lastIndex = match.index + match[0].length;
+  }
+  if(lastIndex < value.length) runs.push({text:value.slice(lastIndex), dir:'rtl'});
+  return runs.length ? runs : [{text:value, dir:'rtl'}];
+}
+
+function appendDirectionalText(host, text){
+  splitDirectionalRuns(text).forEach(run=>{
+    if(run.dir === 'ltr'){
+      const bdi = document.createElement('bdi');
+      bdi.dir = 'ltr';
+      bdi.style.unicodeBidi = 'isolate';
+      bdi.textContent = run.text;
+      host.appendChild(bdi);
+    }else{
+      host.appendChild(document.createTextNode(run.text));
+    }
+  });
+}
+
 function genDocNumber(){
   return getGeneralSettings().docNumber || 'FL-46140955';
 }
@@ -4233,13 +4261,13 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
             bullet.textContent = '•';
             bullet.style.flex = '0 0 auto';
             const text = document.createElement('span');
-            text.textContent = line.replace(/^[•\-]\s*/, '');
             text.style.flex = '1';
             text.style.minWidth = '0';
             text.style.overflowWrap = 'anywhere';
+            appendDirectionalText(text, line.replace(/^[•\-]\s*/, ''));
             lineDiv.append(bullet, text);
           }else{
-            lineDiv.textContent = line;
+            appendDirectionalText(lineDiv, line);
             if(meta.bankBlock && lineIndex === 0) lineDiv.style.fontWeight = '700';
             if(meta.bankBlock && lineIndex === 1) lineDiv.style.direction = 'ltr';
           }
@@ -4275,9 +4303,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           const amount = document.createElement('span');
           amount.textContent = fmtMoney(inv.price);
           node.append(symbol, amount);
-        }else{
-          node.textContent = value;
-        }
+        }else appendDirectionalText(node, value);
       }
 
     stage.appendChild(node);
@@ -4328,17 +4354,26 @@ function hexToRgb(hex){
 
 function drawPdfLine(pdf, line, x, y, options={}){
   const align = options.align || 'right';
-  const isRtl = options.dir !== 'ltr' && align === 'right';
-  const match = isRtl ? String(line).match(/^(.*?)([.،؛:!?؟]+)$/) : null;
-  if(!match || !match[1]){
+  const isRtl = options.dir !== 'ltr';
+  if(!isRtl){
     pdf.text(String(line), x, y, {align, baseline:'alphabetic'});
     return;
   }
-  const body = match[1].trimEnd();
-  const punctuation = match[2];
-  pdf.text(body, x, y, {align:'right', baseline:'alphabetic'});
-  const bodyWidth = pdf.getTextWidth(body);
-  pdf.text(punctuation, x - bodyWidth - .35, y, {align:'right', baseline:'alphabetic'});
+  const match = String(line).match(/^(.*?)([.،؛:!?؟]+)$/);
+  const body = match?.[1]?.trimEnd() || String(line);
+  const punctuation = match?.[2] || '';
+  const runs = splitDirectionalRuns(body).filter(run=>run.text);
+  const widths = runs.map(run=>pdf.getTextWidth(run.text));
+  const punctuationWidth = punctuation ? pdf.getTextWidth(punctuation) + .35 : 0;
+  const totalWidth = widths.reduce((sum,width)=>sum+width,0) + punctuationWidth;
+  let cursor = x;
+  if(align === 'center') cursor = x + totalWidth / 2;
+  else if(align === 'left') cursor = x + totalWidth;
+  runs.forEach((run,index)=>{
+    pdf.text(run.text, cursor, y, {align:'right', baseline:'alphabetic'});
+    cursor -= widths[index];
+  });
+  if(punctuation) pdf.text(punctuation, cursor - .35, y, {align:'right', baseline:'alphabetic'});
 }
 
 const RIYAL_SVG_PATHS = `
