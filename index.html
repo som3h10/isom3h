@@ -4225,6 +4225,8 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
             const text = document.createElement('span');
             text.textContent = line.replace(/^[•\-]\s*/, '');
             text.style.flex = '1';
+            text.style.minWidth = '0';
+            text.style.overflowWrap = 'anywhere';
             lineDiv.append(bullet, text);
           }else{
             lineDiv.textContent = line;
@@ -4369,12 +4371,6 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     const fontPx = (f.size || 14) * fieldScale;
     const fontMm = Math.max(1.5, fontPx * sy);
     const lineHeight = f.lineHeight ?? 1.4;
-    const lines = raw.split('\n');
-    const textHeight = lines.length * fontMm * lineHeight;
-    const valign = f.valign || 'center';
-    let y = metrics.oy + yPx * sy + fontMm;
-    if(valign === 'center') y += Math.max(0, (hPx * sy - textHeight) / 2);
-    else if(valign === 'bottom') y += Math.max(0, hPx * sy - textHeight);
     const align = f.align || (f.dir === 'ltr' ? 'left' : 'right');
     let x = metrics.ox + xPx * sx;
     if(align === 'right') x += wPx * sx;
@@ -4383,9 +4379,33 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     pdf.setTextColor(r,g,b);
     pdf.setFont('IBMPlexArabic', Number(f.weight) >= 600 ? 'bold' : 'normal');
     pdf.setFontSize(fontMm * 2.83465);
-    lines.forEach((line, lineIndex)=>{
+    const listField = isListField(f.key);
+    const bulletGap = fontMm * .8;
+    const fieldWidthMm = Math.max(1, wPx * sx);
+    let lines = [];
+    raw.split('\n').forEach((sourceLine, sourceIndex)=>{
+      const cleanLine = listField ? sourceLine.replace(/^[•\-]\s*/, '') : sourceLine;
+      const availableWidth = Math.max(1, fieldWidthMm - (listField ? bulletGap : 0));
+      const wrapped = pdf.splitTextToSize(cleanLine || ' ', availableWidth);
+      const parts = Array.isArray(wrapped) ? wrapped : [wrapped];
+      parts.forEach((text, partIndex)=>{
+        lines.push({
+          text:String(text),
+          sourceIndex,
+          showBullet:listField && partIndex === 0,
+        });
+      });
+    });
+    const maxLines = Math.max(1, Math.floor((hPx * sy) / (fontMm * lineHeight)));
+    lines = lines.slice(0, maxLines);
+    const textHeight = lines.length * fontMm * lineHeight;
+    const valign = f.valign || 'center';
+    let y = metrics.oy + yPx * sy + fontMm;
+    if(valign === 'center') y += Math.max(0, (hPx * sy - textHeight) / 2);
+    else if(valign === 'bottom') y += Math.max(0, hPx * sy - textHeight);
+    lines.forEach(line=>{
       pdf.setFont('IBMPlexArabic',
-        meta.bankBlock && lineIndex === 0
+        meta.bankBlock && line.sourceIndex === 0
           ? 'bold'
           : (Number(f.weight) >= 600 ? 'bold' : 'normal'));
       // jsPDF's Arabic plug-in shapes RTL text during its pre-process step.
@@ -4393,13 +4413,14 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
       if(f.key === 'price' && inv.currency === 'ريال'){
         // U+20C1 is newer than many PDF fonts, so draw the official vector mark
         // as an image while keeping the numeric amount selectable.
-      }else if(isListField(f.key)){
-        const cleanLine = line.replace(/^[•\-]\s*/, '');
-        const bulletGap = fontMm * .8;
-        pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
-        drawPdfLine(pdf, cleanLine, x - bulletGap, y, {align:'right', dir:'rtl'});
+      }else if(listField){
+        if(line.showBullet) pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
+        drawPdfLine(pdf, line.text, x - bulletGap, y, {align:'right', dir:'rtl'});
       }else{
-        drawPdfLine(pdf, line, x, y, {align, dir:(meta.bankBlock && lineIndex === 1) ? 'ltr' : f.dir});
+        drawPdfLine(pdf, line.text, x, y, {
+          align,
+          dir:(meta.bankBlock && line.sourceIndex === 1) ? 'ltr' : f.dir,
+        });
       }
       y += fontMm * lineHeight;
     });
