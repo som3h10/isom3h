@@ -31,6 +31,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
+  @font-face{
+    font-family:'Thmanyah Sans';
+    src:url('assets/fonts/thmanyah/thmanyahsans-Light.woff2') format('woff2');
+    font-style:normal;font-weight:300;font-display:swap;
+  }
+  @font-face{
+    font-family:'Thmanyah Sans';
+    src:url('assets/fonts/thmanyah/thmanyahsans-Regular.woff2') format('woff2');
+    font-style:normal;font-weight:400;font-display:swap;
+  }
+  @font-face{
+    font-family:'Thmanyah Sans';
+    src:url('assets/fonts/thmanyah/thmanyahsans-Medium.woff2') format('woff2');
+    font-style:normal;font-weight:500;font-display:swap;
+  }
+  @font-face{
+    font-family:'Thmanyah Sans';
+    src:url('assets/fonts/thmanyah/thmanyahsans-Bold.woff2') format('woff2');
+    font-style:normal;font-weight:600 700;font-display:swap;
+  }
+  @font-face{
+    font-family:'Thmanyah Sans';
+    src:url('assets/fonts/thmanyah/thmanyahsans-Black.woff2') format('woff2');
+    font-style:normal;font-weight:800 900;font-display:swap;
+  }
+
   *{box-sizing:border-box;margin:0;padding:0}
 
   :root{
@@ -49,7 +75,7 @@
     --success:#2d5a3d;
     --radius:10px;
     --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif;
-    --invoice-font:'IBM Plex Sans Arabic',system-ui,sans-serif;
+    --invoice-font:'Thmanyah Sans','IBM Plex Sans Arabic',system-ui,sans-serif;
   }
 
   body{
@@ -4144,7 +4170,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
   const scale = renderW / (savedDisplayW || renderW);
 
   const stage = document.createElement('div');
-  stage.style.cssText = `position:relative;width:${renderW}px;height:${renderH}px;background:#fff;font-family:'IBM Plex Sans Arabic',sans-serif`;
+  stage.style.cssText = `position:relative;width:${renderW}px;height:${renderH}px;background:#fff;font-family:'Thmanyah Sans','IBM Plex Sans Arabic',sans-serif`;
 
   const img = document.createElement('img');
   img.src = bgUrl;
@@ -4213,7 +4239,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `text-align:${f.align || 'right'};` +
           `line-height:${lineHeight};` +
           `letter-spacing:${letterSpacing}px;` +
-          `font-family:'IBM Plex Sans Arabic',sans-serif;` +
+          `font-family:'Thmanyah Sans','IBM Plex Sans Arabic',sans-serif;` +
           `overflow:hidden;box-sizing:border-box;` +
           `display:flex;flex-direction:column;justify-content:flex-start;`;
         const lines = value.split('\n');
@@ -4257,7 +4283,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `text-align:${f.align || 'right'};` +
           `line-height:${lineHeight};` +
           `letter-spacing:${letterSpacing}px;` +
-          `font-family:'IBM Plex Sans Arabic',sans-serif;` +
+          `font-family:'Thmanyah Sans','IBM Plex Sans Arabic',sans-serif;` +
           `overflow:hidden;box-sizing:border-box;` +
           (isPreserve ? 'white-space:pre-wrap;' : 'white-space:nowrap;');
         if(f.key === 'price' && inv.currency === 'ريال'){
@@ -4290,8 +4316,8 @@ let pdfArabicFontsPromise = null;
 async function ensurePdfArabicFonts(pdf){
   if(!pdfArabicFontsPromise){
     const urls = {
-      regular: 'assets/fonts/IBMPlexSansArabic-Regular.ttf',
-      bold: 'assets/fonts/IBMPlexSansArabic-Bold.ttf',
+      regular: 'assets/fonts/thmanyah/ThmanyahSans-Regular.ttf',
+      bold: 'assets/fonts/thmanyah/ThmanyahSans-Bold.ttf',
     };
     pdfArabicFontsPromise = Promise.all(Object.values(urls).map(async url => {
       const res = await fetch(url, {cache:'force-cache'});
@@ -4306,10 +4332,10 @@ async function ensurePdfArabicFonts(pdf){
   }
   try{
     const [regular, bold] = await pdfArabicFontsPromise;
-    pdf.addFileToVFS('IBMPlexSansArabic-Regular.ttf', regular);
-    pdf.addFont('IBMPlexSansArabic-Regular.ttf', 'IBMPlexArabic', 'normal');
-    pdf.addFileToVFS('IBMPlexSansArabic-Bold.ttf', bold);
-    pdf.addFont('IBMPlexSansArabic-Bold.ttf', 'IBMPlexArabic', 'bold');
+    pdf.addFileToVFS('ThmanyahSans-Regular.ttf', regular);
+    pdf.addFont('ThmanyahSans-Regular.ttf', 'ThmanyahSans', 'normal');
+    pdf.addFileToVFS('ThmanyahSans-Bold.ttf', bold);
+    pdf.addFont('ThmanyahSans-Bold.ttf', 'ThmanyahSans', 'bold');
     return true;
   }catch(err){
     // A missing font must not block the user's PDF download. The visual PDF
@@ -4387,7 +4413,7 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     else if(align === 'center') x += wPx * sx / 2;
     const [r,g,b] = hexToRgb(f.color);
     pdf.setTextColor(r,g,b);
-    pdf.setFont('IBMPlexArabic', Number(f.weight) >= 600 ? 'bold' : 'normal');
+    pdf.setFont('ThmanyahSans', Number(f.weight) >= 600 ? 'bold' : 'normal');
     pdf.setFontSize(fontMm * 2.83465);
     const listField = isListField(f.key);
     const bulletGap = fontMm * .8;
@@ -4414,7 +4440,7 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
     if(valign === 'center') y += Math.max(0, (hPx * sy - textHeight) / 2);
     else if(valign === 'bottom') y += Math.max(0, hPx * sy - textHeight);
     lines.forEach(line=>{
-      pdf.setFont('IBMPlexArabic',
+      pdf.setFont('ThmanyahSans',
         meta.bankBlock && line.sourceIndex === 0
           ? 'bold'
           : (Number(f.weight) >= 600 ? 'bold' : 'normal'));
