@@ -3701,7 +3701,7 @@ function renderFieldBoxes(){
                     (f.kind === 'qr' ? ' is-qr' : '') +
                     (state.builder.selectedFid === f.fid ? ' selected' : '');
     div.style.cssText = `left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;` +
-                        `direction:rtl;unicode-bidi:isolate;text-align:${f.align};` +
+                        `direction:rtl;unicode-bidi:plaintext;text-align:${f.align};` +
                         `justify-content:${f.align==='center'?'center':(f.align==='left'?'flex-start':'flex-end')};` +
                         `align-items:${alignItems};`;
     div.dataset.fid = f.fid;
@@ -4209,7 +4209,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `padding-top:${paddingTop}px;` +
           `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
           `color:${f.color || '#1a1a1a'};` +
-          `direction:rtl;unicode-bidi:isolate;` +
+          `direction:rtl;unicode-bidi:plaintext;` +
           `text-align:${f.align || 'right'};` +
           `line-height:${lineHeight};` +
           `letter-spacing:${letterSpacing}px;` +
@@ -4221,7 +4221,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           const lineDiv = document.createElement('div');
           lineDiv.style.cssText =
             `display:block;width:100%;` +
-            `direction:rtl;unicode-bidi:isolate;` +
+            `direction:rtl;unicode-bidi:plaintext;` +
             `text-align:${f.align || 'right'};` +
             `white-space:normal;word-break:break-word;` +
             `line-height:${lineHeight};`;
@@ -4253,7 +4253,7 @@ async function renderTemplatePageCanvas(tpl, inv, page = 'main'){
           `padding-top:${paddingTop}px;` +
           `font-size:${fontSize}px;font-weight:${f.weight || 500};` +
           `color:${f.color || '#1a1a1a'};` +
-          `direction:rtl;unicode-bidi:isolate;` +
+          `direction:rtl;unicode-bidi:plaintext;` +
           `text-align:${f.align || 'right'};` +
           `line-height:${lineHeight};` +
           `letter-spacing:${letterSpacing}px;` +
@@ -4328,17 +4328,22 @@ function hexToRgb(hex){
 
 function drawPdfLine(pdf, line, x, y, options={}){
   const align = options.align || 'right';
+  const textOptions = {
+    align,
+    baseline:'alphabetic',
+    ...(options.invisible ? {renderingMode:'invisible'} : {}),
+  };
   const isRtl = options.dir !== 'ltr' && align === 'right';
   const match = isRtl ? String(line).match(/^(.*?)([.،؛:!?؟]+)$/) : null;
   if(!match || !match[1]){
-    pdf.text(String(line), x, y, {align, baseline:'alphabetic'});
+    pdf.text(String(line), x, y, textOptions);
     return;
   }
   const body = match[1].trimEnd();
   const punctuation = match[2];
-  pdf.text(body, x, y, {align:'right', baseline:'alphabetic'});
+  pdf.text(body, x, y, {...textOptions, align:'right'});
   const bodyWidth = pdf.getTextWidth(body);
-  pdf.text(punctuation, x - bodyWidth - .35, y, {align:'right', baseline:'alphabetic'});
+  pdf.text(punctuation, x - bodyWidth - .35, y, {...textOptions, align:'right'});
 }
 
 const RIYAL_SVG_PATHS = `
@@ -4420,34 +4425,26 @@ async function addReadableTextLayer(pdf, tpl, inv, metrics, page = 'main'){
           : (Number(f.weight) >= 600 ? 'bold' : 'normal'));
       // jsPDF's Arabic plug-in shapes RTL text during its pre-process step.
       // Supplying the original Unicode text keeps copy/search extraction useful.
-      if(f.key === 'price' && inv.currency === 'ريال'){
-        // U+20C1 is newer than many PDF fonts, so draw the official vector mark
-        // as an image while keeping the numeric amount selectable.
-      }else if(listField){
-        if(line.showBullet) pdf.text('•', x, y, {align:'right', baseline:'alphabetic'});
-        drawPdfLine(pdf, line.text, x - bulletGap, y, {align:'right', dir:'rtl'});
+      if(listField){
+        if(line.showBullet) pdf.text('•', x, y, {
+          align:'right',
+          baseline:'alphabetic',
+          renderingMode:'invisible',
+        });
+        drawPdfLine(pdf, line.text, x - bulletGap, y, {
+          align:'right',
+          dir:'rtl',
+          invisible:true,
+        });
       }else{
         drawPdfLine(pdf, line.text, x, y, {
           align,
           dir:(meta.bankBlock && line.sourceIndex === 1) ? 'ltr' : 'rtl',
+          invisible:true,
         });
       }
       y += fontMm * lineHeight;
     });
-    if(f.key === 'price' && inv.currency === 'ريال'){
-      const amount = fmtMoney(inv.price);
-      const amountWidth = pdf.getTextWidth(amount);
-      const iconH = fontMm * .76;
-      const iconW = iconH * (1124.14 / 1256.39);
-      const gap = Math.max(.5, fontMm * .15);
-      const totalW = amountWidth + gap + iconW;
-      let startX = x;
-      if(align === 'right') startX = x - totalW;
-      else if(align === 'center') startX = x - totalW / 2;
-      const symbolPng = await getRiyalPng(f.color || '#1a1a1a');
-      pdf.addImage(symbolPng, 'PNG', startX, y - fontMm * lineHeight - iconH * .8, iconW, iconH);
-      pdf.text(amount, startX + iconW + gap, y - fontMm * lineHeight, {align:'left', baseline:'alphabetic'});
-    }
   }
 }
 
@@ -4546,8 +4543,6 @@ async function exportInvoice(inv, templateId){
 
     for(let i = 0; i < pageDefs.length; i++){
       const p = pageDefs[i];
-      const readableNodes = Array.from(p.stage.querySelectorAll('.render-text:not(.qr-host)'));
-      readableNodes.forEach(node => node.style.visibility = 'hidden');
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const canvas = await html2canvas(p.stage, {
         backgroundColor: '#ffffff',
@@ -4560,7 +4555,6 @@ async function exportInvoice(inv, templateId){
         imageTimeout: 0,
         removeContainer: true,
       });
-      readableNodes.forEach(node => node.style.visibility = '');
       const imgRatio = p.renderW / p.renderH;
       const pdfRatio = pdfW / pdfH;
       let drawW, drawH;
