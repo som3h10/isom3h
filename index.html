@@ -4355,46 +4355,34 @@ function hexToRgb(hex){
 function drawPdfLine(pdf, line, x, y, options={}){
   const align = options.align || 'right';
   const isRtl = options.dir !== 'ltr';
+  const value = String(line);
   if(!isRtl){
-    pdf.text(String(line), x, y, {align, baseline:'alphabetic'});
+    pdf.text(value, x, y, {align, baseline:'alphabetic'});
     return;
   }
-  const match = String(line).match(/^(.*?)([.،؛:!?؟]+)$/);
-  const body = match?.[1]?.trimEnd() || String(line);
-  const punctuation = match?.[2] || '';
-  const runs = splitDirectionalRuns(body).filter(run=>run.text);
-  // jsPDF moves leading/trailing whitespace when it shapes RTL strings.
-  // Measure those spaces separately so mixed Arabic, English and numbers
-  // keep their original gaps without breaking Arabic glyph connections.
-  const spaceWidth = pdf.getTextWidth(' ');
-  const layoutRuns = runs.map(run=>{
-    const leading = run.text.match(/^\s+/)?.[0].replace(/\t/g, '  ').length || 0;
-    const trailing = run.text.match(/\s+$/)?.[0].replace(/\t/g, '  ').length || 0;
-    const text = run.text.trim();
-    return {
-      text,
-      leadingWidth:leading * spaceWidth,
-      trailingWidth:trailing * spaceWidth,
-      textWidth:text ? pdf.getTextWidth(text) : 0,
-    };
-  });
-  const punctuationWidth = punctuation ? pdf.getTextWidth(punctuation) + .35 : 0;
-  const totalWidth = layoutRuns.reduce(
-    (sum,run)=>sum + run.leadingWidth + run.textWidth + run.trailingWidth,
-    punctuationWidth
-  );
-  let cursor = x;
-  if(align === 'center') cursor = x + totalWidth / 2;
-  else if(align === 'left') cursor = x + totalWidth;
-  layoutRuns.forEach(run=>{
-    cursor -= run.leadingWidth;
-    if(run.text){
-      pdf.text(run.text, cursor, y, {align:'right', baseline:'alphabetic'});
-      cursor -= run.textWidth;
-    }
-    cursor -= run.trailingWidth;
-  });
-  if(punctuation) pdf.text(punctuation, cursor - .35, y, {align:'right', baseline:'alphabetic'});
+
+  // Keep the complete mixed-language body in a single jsPDF call. This lets
+  // the Arabic shaper preserve connected letters and lets the built-in Bidi
+  // engine keep Latin phrases, numbers, parentheses and spaces intact.
+  const punctuationMatch = value.match(/^(.*?)([.،؛:!?؟]+)$/);
+  const body = punctuationMatch?.[1]?.trimEnd() || value;
+  const punctuation = punctuationMatch?.[2] || '';
+  const rtlBody = '\u061C' + body;
+  pdf.text(rtlBody, x, y, {align, baseline:'alphabetic'});
+
+  // jsPDF places neutral trailing punctuation at the RTL line's beginning.
+  // Draw it independently at the visual end (the left edge) of the line.
+  if(punctuation){
+    const bodyWidth = pdf.getTextWidth(rtlBody);
+    const leftEdge =
+      align === 'right' ? x - bodyWidth :
+      align === 'center' ? x - bodyWidth / 2 :
+      x;
+    pdf.text(punctuation, leftEdge - .35, y, {
+      align:'right',
+      baseline:'alphabetic',
+    });
+  }
 }
 
 const RIYAL_SVG_PATHS = `
